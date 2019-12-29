@@ -2,6 +2,31 @@ version: '3'
 
 services:
 
+  fira-be:
+    build: fira-be/.
+    ports:
+      - "${FIRA_BE_PUBLIC_PORT}:80"
+    networks: 
+      - backend
+    depends_on:
+      - postgres_fira
+    environment:
+      - DB_ADDR=postgres_fira
+      - DB_NAME=${FIRA_DB}
+      - DB_USER=${FIRA_DB_USER}
+      - DB_PASSWORD=${FIRA_DB_PASSWORD}
+    
+  postgres_fira:
+    image: postgres:12
+    networks: 
+      - backend
+    volumes: 
+      - postgres-fira-volume:/var/lib/postgresql/data
+    environment: 
+      - POSTGRES_DB=${FIRA_DB}
+      - POSTGRES_USER=${FIRA_DB_USER}
+      - POSTGRES_PASSWORD=${FIRA_DB_PASSWORD}
+
   keycloak:
     build: keycloak/.
     ports:
@@ -33,5 +58,7 @@ networks:
   backend:
 
 volumes:
+  postgres-fira-volume:
+    driver: local
   postgres-keycloak-volume:
     driver: local
