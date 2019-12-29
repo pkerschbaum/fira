@@ -1,0 +1,26 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "fira-be: launch",
+      "program": "${workspaceFolder}/fira-be/src/main.ts",
+      "outFiles": ["${workspaceFolder}/fira-be/dist/**/*.js"],
+      "skipFiles": [
+        "${workspaceFolder}/fira-be/node_modules/**/*.js",
+        "<node_internals>/**/*.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "fira-be: attach to process",
+      "sourceMaps": true,
+      "port": 9229
+    }
+  ]
+}
