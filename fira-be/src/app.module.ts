@@ -2,21 +2,14 @@ import { Module, HttpModule, HttpService, OnModuleInit } from '@nestjs/common';
 import { AxiosInstance } from 'axios';
 import nanoid = require('nanoid');
 
-import { AppController } from './app.controller';
-import * as imService from './identity-management/identity-management.service';
 import { LoggerModule } from './logger/app-logger.module';
 import { AppLogger } from './logger/app-logger.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [HttpModule, LoggerModule],
-  controllers: [AppController],
-  providers: [
-    {
-      provide: imService.SERVICE_TOKEN,
-      useFactory: imService.imServiceFactory,
-      inject: [HttpService, AppLogger],
-    },
-  ],
+  imports: [HttpModule, LoggerModule, AuthModule],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements OnModuleInit {
   constructor(
