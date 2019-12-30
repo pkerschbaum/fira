@@ -6,7 +6,8 @@ import * as config from '../config';
 interface KeycloakCertsResponse {
   keys?: [
     {
-      x5c?: string[];
+      n: string;
+      e: string;
     },
   ];
 }

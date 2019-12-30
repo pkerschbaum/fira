@@ -1,13 +1,24 @@
-import { Controller, Post, Body, Headers, HttpException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  HttpException,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
 
 import { IdentityManagementService } from 'src/identity-management/identity-management.service';
+import { Roles } from 'src/roles.decorator';
+import { RolesGuard } from 'src/roles.guard';
 import {
   ImportUsersRequestDto,
   ImportUsersResponseDto,
 } from './dto/create-user.dto';
 
 @Controller('user-management')
+@Roles({ category: 'realm-management', role: 'manage-users' })
+@UseGuards(RolesGuard)
 export class UserManagementController {
   constructor(private readonly imService: IdentityManagementService) {}
 

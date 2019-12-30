@@ -1,4 +1,4 @@
-import { Module, HttpModule, HttpService, OnModuleInit } from '@nestjs/common';
+import { Module, HttpModule } from '@nestjs/common';
 
 import { LoggerModule } from '../logger/app-logger.module';
 import { IdentityManagementService } from './identity-management.service';

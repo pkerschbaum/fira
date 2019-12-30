@@ -6,6 +6,7 @@ import generate = require('nanoid/generate');
 import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
+import { convertKey } from '../util/keys.util';
 
 interface Cache {
   publicKey: {
@@ -85,14 +86,14 @@ export class IdentityManagementService {
 
         const keycloakCertsResponse = await this.keycloakClient.getPublicKey();
 
-        const newKey = keycloakCertsResponse.keys?.[0]?.x5c?.[0];
+        const newKey = keycloakCertsResponse.keys?.[0];
         if (newKey) {
           this.appLogger.log(
-            `could successfully retrieve public key from keycloak, value: ${newKey}`,
+            `could successfully retrieve public key from keycloak, converting and saving key...`,
           );
-
-          this.cache.publicKey.val = newKey;
+          this.cache.publicKey.val = convertKey(newKey);
           this.cache.publicKey.lastFetchedOn = moment();
+          this.appLogger.log(`could successfully convert and save public key`);
         }
       }
     } catch (e) {
