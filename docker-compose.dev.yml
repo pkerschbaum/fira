@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+
+  postgres_fira:
+    ports:
+      - "${FIRA_DATABASE_PUBLIC_PORT}:5432"
+
+  keycloak:
+    ports:
+      - "${KEYCLOAK_PUBLIC_PORT}:8080"

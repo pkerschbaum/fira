@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import generate = require('nanoid/generate');
@@ -7,6 +8,8 @@ import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
+import { User } from './user/user.entity';
+import { Repository } from 'typeorm';
 
 interface Cache {
   publicKey: {
@@ -36,6 +39,8 @@ export class IdentityManagementService {
   constructor(
     private readonly keycloakClient: KeycloakClient,
     private readonly appLogger: AppLogger,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {
     this.appLogger.setContext(SERVICE_NAME);
     this.cache = { publicKey: {} };
@@ -66,6 +71,9 @@ export class IdentityManagementService {
 
         try {
           await this.keycloakClient.createUser(accessToken, user.id, password);
+          const dbUser = new User();
+          dbUser.id = user.id;
+          await this.userRepository.save(dbUser);
           return { id: user.id, username: user.id, password };
         } catch (e) {
           return { id: user.id, error: e.toString() };

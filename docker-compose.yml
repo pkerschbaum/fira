@@ -29,8 +29,6 @@ services:
 
   keycloak:
     build: keycloak/.
-    ports:
-      - "${KEYCLOAK_PUBLIC_PORT}:8080"
     networks: 
       - backend
     depends_on: 
@@ -40,8 +38,8 @@ services:
       - KEYCLOAK_PASSWORD=${ADMIN_PASSWORD}
       - DB_VENDOR=postgres
       - DB_ADDR=postgres_keycloak
-      - DB_USER=keycloak
-      - DB_PASSWORD=password
+      - DB_USER=${KEYCLOAK_DB_USER}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
 
   postgres_keycloak:
     image: postgres:12
@@ -51,8 +49,8 @@ services:
       - postgres-keycloak-volume:/var/lib/postgresql/data
     environment: 
       - POSTGRES_DB=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=${KEYCLOAK_DB_USER}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASSWORD}
 
 networks: 
   backend:

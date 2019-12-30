@@ -8,6 +8,16 @@ export const application = {
   },
 } as const;
 
+export const database = {
+  type: 'postgres',
+  host: process.env.DB_ADDR ?? 'localhost',
+  port: 5432,
+  username: process.env.DB_USER ?? 'fira',
+  password: process.env.DB_PASSWORD ?? 'password',
+  database: process.env.DB_NAME ?? 'fira',
+  synchronize: true,
+} as const;
+
 export const keycloak = {
   host: {
     protocol: 'http',

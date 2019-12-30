@@ -1,4 +1,5 @@
 import { Module, HttpModule, HttpService, OnModuleInit } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AxiosInstance } from 'axios';
 import nanoid = require('nanoid');
 
@@ -6,9 +7,20 @@ import { LoggerModule } from './logger/app-logger.module';
 import { AppLogger } from './logger/app-logger.service';
 import { AuthModule } from './auth/auth.module';
 import { UserManagementModule } from './user-management/user-management.module';
+import { User } from './identity-management/user/user.entity';
+import * as config from './config';
 
 @Module({
-  imports: [HttpModule, LoggerModule, AuthModule, UserManagementModule],
+  imports: [
+    HttpModule,
+    LoggerModule,
+    TypeOrmModule.forRoot({
+      ...config.database,
+      entities: [User],
+    }),
+    AuthModule,
+    UserManagementModule,
+  ],
   controllers: [],
   providers: [],
 })
