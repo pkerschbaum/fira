@@ -13,6 +13,11 @@ interface Cache {
   };
 }
 
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
 const SERVICE_NAME = 'IdentityManagementService';
 
 @Injectable()
@@ -25,6 +30,18 @@ export class IdentityManagementService {
   ) {
     this.appLogger.setContext(SERVICE_NAME);
     this.cache = { publicKey: {} };
+  }
+
+  public async login(
+    username: string,
+    password: string,
+  ): Promise<LoginResponse> {
+    const loginResponse = await this.keycloakClient.login(username, password);
+
+    return {
+      accessToken: loginResponse.access_token,
+      refreshToken: loginResponse.refresh_token,
+    };
   }
 
   public async loadPublicKey() {

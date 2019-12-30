@@ -1,16 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 
 import { IdentityManagementService } from 'src/identity-management/identity-management.service';
+import { LoginRequestDto, LoginResponseDto } from './dto/login.request.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly imService: IdentityManagementService) {}
 
-  @Get()
-  async getPublicKey(): Promise<{ publicKey: string }> {
-    const publicKey = await this.imService.loadPublicKey();
-    return {
-      publicKey,
-    };
+  @Post('v1/login')
+  @HttpCode(200)
+  async login(
+    @Body() loginRequest: LoginRequestDto,
+  ): Promise<LoginResponseDto> {
+    return this.imService.login(loginRequest.username, loginRequest.password);
   }
 }

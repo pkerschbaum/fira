@@ -10,4 +10,6 @@ export const keycloak = {
     base: 'localhost:8080',
   } as const,
   refetchInterval: moment.duration(1, 'day'),
+  clientId: 'fira-be' as const,
+  realm: 'fira' as const,
 };
