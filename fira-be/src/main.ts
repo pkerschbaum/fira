@@ -1,11 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as rateLimit from 'express-rate-limit';
 
 import { AppModule } from './app.module';
 import * as config from './config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // add rate limiting
+  app.use(rateLimit(config.application.rateLimit));
 
   // bootstrap swagger
   const options = new DocumentBuilder()
