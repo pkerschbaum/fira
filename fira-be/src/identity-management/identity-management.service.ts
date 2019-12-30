@@ -25,7 +25,7 @@ interface KeycloakCertsResponse {
 }
 
 const SERVICE_NAME = 'IdentityManagementService';
-const REFETCH_INTERVAL = moment.duration(1, 'day');
+export const SERVICE_TOKEN = Symbol(SERVICE_NAME);
 
 export function imServiceFactory(
   httpService: HttpService,
@@ -39,7 +39,7 @@ export function imServiceFactory(
         if (
           !cache.publicKey.lastFetchedOn ||
           moment()
-            .subtract(REFETCH_INTERVAL)
+            .subtract(config.keycloak.refetchInterval)
             .isAfter(cache.publicKey.lastFetchedOn)
         ) {
           appLogger.log('fetching public key from keycloak', SERVICE_NAME);
@@ -47,7 +47,7 @@ export function imServiceFactory(
           const keycloakCertsResponse = (
             await httpService
               .get<KeycloakCertsResponse>(
-                `http://${config.hosts.keycloak.base}/auth/realms/fira/protocol/openid-connect/certs`,
+                `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/realms/fira/protocol/openid-connect/certs`,
               )
               .toPromise()
           ).data;
