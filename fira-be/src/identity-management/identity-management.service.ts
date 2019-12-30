@@ -1,23 +1,16 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 
-import { AppLogger } from 'src/logger/app-logger.service';
-import * as config from 'src/config';
+import * as config from '../config';
+import { AppLogger } from '../logger/app-logger.service';
+import { KeycloakClient } from './keycloak.client';
 
 interface Cache {
   publicKey: {
     val?: string;
     lastFetchedOn?: Moment;
   };
-}
-
-interface KeycloakCertsResponse {
-  keys?: [
-    {
-      x5c?: string[];
-    },
-  ];
 }
 
 const SERVICE_NAME = 'IdentityManagementService';
@@ -27,9 +20,10 @@ export class IdentityManagementService {
   private cache: Cache;
 
   constructor(
-    private readonly httpService: HttpService,
+    private readonly keycloakClient: KeycloakClient,
     private readonly appLogger: AppLogger,
   ) {
+    this.appLogger.setContext(SERVICE_NAME);
     this.cache = { publicKey: {} };
   }
 
@@ -41,21 +35,14 @@ export class IdentityManagementService {
           .subtract(config.keycloak.refetchInterval)
           .isAfter(this.cache.publicKey.lastFetchedOn)
       ) {
-        this.appLogger.log('fetching public key from keycloak', SERVICE_NAME);
+        this.appLogger.log('fetching public key from keycloak');
 
-        const keycloakCertsResponse = (
-          await this.httpService
-            .get<KeycloakCertsResponse>(
-              `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/realms/fira/protocol/openid-connect/certs`,
-            )
-            .toPromise()
-        ).data;
+        const keycloakCertsResponse = await this.keycloakClient.getPublicKey();
 
         const newKey = keycloakCertsResponse.keys?.[0]?.x5c?.[0];
         if (newKey) {
           this.appLogger.log(
             `could successfully retrieve public key from keycloak, value: ${newKey}`,
-            SERVICE_NAME,
           );
 
           this.cache.publicKey.val = newKey;
@@ -65,7 +52,6 @@ export class IdentityManagementService {
     } catch (e) {
       this.appLogger.warn(
         `could not retrieve new key from keycloak, reason: ${e}`,
-        SERVICE_NAME,
       );
     }
 
