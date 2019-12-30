@@ -1,13 +1,10 @@
-import { Controller, Inject, Get } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
-import * as identityMgmtService from '../identity-management/identity-management.service';
+import { IdentityManagementService } from 'src/identity-management/identity-management.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    @Inject(identityMgmtService.SERVICE_TOKEN)
-    private readonly imService: identityMgmtService.IdentityManagementService,
-  ) {}
+  constructor(private readonly imService: IdentityManagementService) {}
 
   @Get()
   async getPublicKey(): Promise<{ publicKey: string }> {

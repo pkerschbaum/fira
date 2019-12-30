@@ -1,13 +1,9 @@
-import { HttpService } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 
 import { AppLogger } from 'src/logger/app-logger.service';
 import * as config from 'src/config';
-
-export interface IdentityManagementService {
-  loadPublicKey: () => Promise<string>;
-}
 
 interface Cache {
   publicKey: {
@@ -25,58 +21,60 @@ interface KeycloakCertsResponse {
 }
 
 const SERVICE_NAME = 'IdentityManagementService';
-export const SERVICE_TOKEN = Symbol(SERVICE_NAME);
 
-export function imServiceFactory(
-  httpService: HttpService,
-  appLogger: AppLogger,
-): IdentityManagementService {
-  const cache: Cache = { publicKey: {} };
+@Injectable()
+export class IdentityManagementService {
+  private cache: Cache;
 
-  return {
-    loadPublicKey: async () => {
-      try {
-        if (
-          !cache.publicKey.lastFetchedOn ||
-          moment()
-            .subtract(config.keycloak.refetchInterval)
-            .isAfter(cache.publicKey.lastFetchedOn)
-        ) {
-          appLogger.log('fetching public key from keycloak', SERVICE_NAME);
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly appLogger: AppLogger,
+  ) {
+    this.cache = { publicKey: {} };
+  }
 
-          const keycloakCertsResponse = (
-            await httpService
-              .get<KeycloakCertsResponse>(
-                `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/realms/fira/protocol/openid-connect/certs`,
-              )
-              .toPromise()
-          ).data;
+  public async loadPublicKey() {
+    try {
+      if (
+        !this.cache.publicKey.lastFetchedOn ||
+        moment()
+          .subtract(config.keycloak.refetchInterval)
+          .isAfter(this.cache.publicKey.lastFetchedOn)
+      ) {
+        this.appLogger.log('fetching public key from keycloak', SERVICE_NAME);
 
-          const newKey = keycloakCertsResponse.keys?.[0]?.x5c?.[0];
-          if (newKey) {
-            appLogger.log(
-              `could successfully retrieve public key from keycloak, value: ${newKey}`,
-              SERVICE_NAME,
-            );
+        const keycloakCertsResponse = (
+          await this.httpService
+            .get<KeycloakCertsResponse>(
+              `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/realms/fira/protocol/openid-connect/certs`,
+            )
+            .toPromise()
+        ).data;
 
-            cache.publicKey.val = newKey;
-            cache.publicKey.lastFetchedOn = moment();
-          }
+        const newKey = keycloakCertsResponse.keys?.[0]?.x5c?.[0];
+        if (newKey) {
+          this.appLogger.log(
+            `could successfully retrieve public key from keycloak, value: ${newKey}`,
+            SERVICE_NAME,
+          );
+
+          this.cache.publicKey.val = newKey;
+          this.cache.publicKey.lastFetchedOn = moment();
         }
-      } catch (e) {
-        appLogger.warn(
-          `could not retrieve new key from keycloak, reason: ${e}`,
-          SERVICE_NAME,
-        );
       }
+    } catch (e) {
+      this.appLogger.warn(
+        `could not retrieve new key from keycloak, reason: ${e}`,
+        SERVICE_NAME,
+      );
+    }
 
-      if (!cache.publicKey.val) {
-        throw new Error(
-          'could not determine public key, reason: public key is not set in cache',
-        );
-      }
+    if (!this.cache.publicKey.val) {
+      throw new Error(
+        'could not determine public key, reason: public key is not set in cache',
+      );
+    }
 
-      return cache.publicKey.val;
-    },
-  };
+    return this.cache.publicKey.val;
+  }
 }
