@@ -24,7 +24,7 @@ export class KeycloakClient {
     return (
       await this.httpService
         .get<KeycloakCertsResponse>(
-          `${getKeycloakEndpoint()}/protocol/openid-connect/certs`,
+          `${getEndpoint()}/protocol/openid-connect/certs`,
         )
         .toPromise()
     ).data;
@@ -42,7 +42,7 @@ export class KeycloakClient {
       return (
         await this.httpService
           .post<KeycloakLoginResponse>(
-            `${getKeycloakEndpoint()}/protocol/openid-connect/token`,
+            `${getEndpoint()}/protocol/openid-connect/token`,
             qs.stringify(requestBody),
             {
               headers: {
@@ -60,8 +60,49 @@ export class KeycloakClient {
       throw e;
     }
   }
+
+  public async createUser(
+    accessToken: string,
+    username: string,
+    password: string,
+  ) {
+    const requestBody = {
+      username,
+      enabled: 'true',
+      credentials: [
+        {
+          temporary: false,
+          type: 'password',
+          value: password,
+        },
+      ],
+    };
+
+    try {
+      await this.httpService
+        .post(
+          `${getAdminEndpoint()}/users`,
+          requestBody,
+          {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+        .toPromise();
+    } catch (e) {
+      if (e.response?.status === 401) {
+        throw new HttpException('credentials invalid', 401);
+      }
+      throw e;
+    }
+  }
 }
 
-function getKeycloakEndpoint(): string {
+function getEndpoint(): string {
   return `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/realms/${config.keycloak.realm}`;
+}
+
+function getAdminEndpoint(): string {
+  return `${config.keycloak.host.protocol}://${config.keycloak.host.base}/auth/admin/realms/${config.keycloak.realm}`;
 }

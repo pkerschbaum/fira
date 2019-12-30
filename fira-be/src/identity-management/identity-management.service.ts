@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as moment from 'moment';
 import { Moment } from 'moment';
+import generate = require('nanoid/generate');
 
 import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
@@ -16,6 +17,13 @@ interface Cache {
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
+}
+
+interface ImportUserResponse {
+  id: string;
+  username?: string;
+  password?: string;
+  error?: string;
 }
 
 const SERVICE_NAME = 'IdentityManagementService';
@@ -42,6 +50,27 @@ export class IdentityManagementService {
       accessToken: loginResponse.access_token,
       refreshToken: loginResponse.refresh_token,
     };
+  }
+
+  public async importUsers(
+    accessToken: string,
+    users: Array<{ id: string }>,
+  ): Promise<ImportUserResponse[]> {
+    return Promise.all(
+      users.map(async user => {
+        const password = generate(
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+          8,
+        );
+
+        try {
+          await this.keycloakClient.createUser(accessToken, user.id, password);
+          return { id: user.id, username: user.id, password };
+        } catch (e) {
+          return { id: user.id, error: e.toString() };
+        }
+      }),
+    );
   }
 
   public async loadPublicKey() {

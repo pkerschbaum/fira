@@ -5,9 +5,10 @@ import nanoid = require('nanoid');
 import { LoggerModule } from './logger/app-logger.module';
 import { AppLogger } from './logger/app-logger.service';
 import { AuthModule } from './auth/auth.module';
+import { UserManagementModule } from './user-management/user-management.module';
 
 @Module({
-  imports: [HttpModule, LoggerModule, AuthModule],
+  imports: [HttpModule, LoggerModule, AuthModule, UserManagementModule],
   controllers: [],
   providers: [],
 })
