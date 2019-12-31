@@ -1,27 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 class UserRequest {
-  @ApiProperty()
-  id!: string;
+  readonly id: string;
 }
 
 export class ImportUsersRequestDto {
-  @ApiProperty({ type: UserRequest, isArray: true })
-  users!: UserRequest[];
+  readonly users: UserRequest[];
 }
 
 class UserResponse {
-  @ApiProperty()
-  id!: string;
-  @ApiProperty({ required: false })
-  username?: string;
-  @ApiProperty({ required: false })
-  password?: string;
-  @ApiProperty({ required: false })
-  error?: string;
+  readonly id: string;
+  @IsString()
+  readonly username?: string;
+  @IsString()
+  readonly password?: string;
+  @IsString()
+  readonly error?: string;
 }
 
 export class ImportUsersResponseDto {
-  @ApiProperty({ type: UserResponse, isArray: true })
-  importedUsers!: UserResponse[];
+  readonly importedUsers: UserResponse[];
 }

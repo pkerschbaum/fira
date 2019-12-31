@@ -6,7 +6,6 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiResponse } from '@nestjs/swagger';
 
 import { IdentityManagementService } from 'src/identity-management/identity-management.service';
 import { Roles } from 'src/roles.decorator';
@@ -23,7 +22,6 @@ export class UserManagementController {
   constructor(private readonly imService: IdentityManagementService) {}
 
   @Post('v1/import')
-  @ApiResponse({ status: 201, type: ImportUsersResponseDto })
   async importUsers(
     @Body() importUsersRequest: ImportUsersRequestDto,
     @Headers('authorization') authHeader: string,
