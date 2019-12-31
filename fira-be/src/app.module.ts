@@ -6,8 +6,9 @@ import nanoid = require('nanoid');
 import { LoggerModule } from './logger/app-logger.module';
 import { AppLogger } from './logger/app-logger.service';
 import { AuthModule } from './auth/auth.module';
-import { UserManagementModule } from './user-management/user-management.module';
-import { User } from './identity-management/user/user.entity';
+import { AdminModule } from './admin/admin.module';
+import { User } from './identity-management/entity/user.entity';
+import { Document } from './admin/entity/document.entity';
 import * as config from './config';
 
 @Module({
@@ -16,10 +17,10 @@ import * as config from './config';
     LoggerModule,
     TypeOrmModule.forRoot({
       ...config.database,
-      entities: [User],
+      entities: [User, Document],
     }),
     AuthModule,
-    UserManagementModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [],
@@ -51,7 +52,9 @@ function registerOutgoingHttpInterceptor(
         }`,
       );
       if (request.data) {
-        appLogger.debug(`[REQUEST PAYLOAD] [${requestId}] ${JSON.stringify(request.data)}`);
+        appLogger.debug(
+          `[REQUEST PAYLOAD] [${requestId}] ${JSON.stringify(request.data)}`,
+        );
       }
     } catch {
       // ignore

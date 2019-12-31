@@ -26,4 +26,5 @@ export const keycloak = {
   refetchInterval: moment.duration(1, 'day'),
   clientId: 'fira-be',
   realm: 'fira',
+  adminRole: { category: 'realm-management', role: 'manage-users' },
 } as const;

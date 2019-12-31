@@ -1,5 +1,12 @@
-import { IsString, IsNotEmpty, ArrayMinSize, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  ArrayMinSize,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+
+import { ImportStatus } from '../../model/commons.model';
 
 class ImportUserRequest {
   @IsString()
@@ -18,6 +25,8 @@ class ImportUserResponse {
   @IsString()
   @IsNotEmpty()
   readonly id: string;
+  @IsNotEmpty()
+  readonly status: ImportStatus;
   @IsString()
   readonly username?: string;
   @IsString()

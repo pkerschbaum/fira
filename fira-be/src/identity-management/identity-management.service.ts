@@ -3,13 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import generate = require('nanoid/generate');
+import { Repository } from 'typeorm';
 
 import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
-import { User } from './user/user.entity';
-import { Repository } from 'typeorm';
+import { User } from './entity/user.entity';
+import { ImportStatus } from '../model/commons.model';
 
 interface Cache {
   publicKey: {
@@ -25,6 +26,7 @@ interface LoginResponse {
 
 interface ImportUserResponse {
   id: string;
+  status: ImportStatus;
   username?: string;
   password?: string;
   error?: string;
@@ -70,13 +72,30 @@ export class IdentityManagementService {
         );
 
         try {
+          if ((await this.userRepository.findByIds([user.id])).length > 0) {
+            return {
+              id: user.id,
+              status: ImportStatus.ERROR,
+              error: 'User exists with same ID',
+            };
+          }
+
           await this.keycloakClient.createUser(accessToken, user.id, password);
           const dbUser = new User();
           dbUser.id = user.id;
           await this.userRepository.save(dbUser);
-          return { id: user.id, username: user.id, password };
+          return {
+            id: user.id,
+            status: ImportStatus.SUCCESS,
+            username: user.id,
+            password,
+          };
         } catch (e) {
-          return { id: user.id, error: e.toString() };
+          return {
+            id: user.id,
+            status: ImportStatus.ERROR,
+            error: e.toString(),
+          };
         }
       }),
     );
