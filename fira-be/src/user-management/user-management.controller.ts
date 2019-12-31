@@ -6,6 +6,7 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
 import { IdentityManagementService } from 'src/identity-management/identity-management.service';
 import { Roles } from 'src/roles.decorator';
@@ -15,6 +16,7 @@ import {
   ImportUsersResponseDto,
 } from './dto/create-user.dto';
 
+@ApiTags('user-management')
 @Controller('user-management')
 @Roles({ category: 'realm-management', role: 'manage-users' })
 @UseGuards(RolesGuard)

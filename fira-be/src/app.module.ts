@@ -51,7 +51,7 @@ function registerOutgoingHttpInterceptor(
         }`,
       );
       if (request.data) {
-        appLogger.debug(`[REQUEST PAYLOAD] [${requestId}] ${request.data}`);
+        appLogger.debug(`[REQUEST PAYLOAD] [${requestId}] ${JSON.stringify(request.data)}`);
       }
     } catch {
       // ignore

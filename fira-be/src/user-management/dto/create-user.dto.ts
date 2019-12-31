@@ -1,14 +1,22 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty, ArrayMinSize, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
-class UserRequest {
+class ImportUserRequest {
+  @IsString()
+  @IsNotEmpty()
   readonly id: string;
 }
 
 export class ImportUsersRequestDto {
-  readonly users: UserRequest[];
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ImportUserRequest)
+  readonly users: ImportUserRequest[];
 }
 
-class UserResponse {
+class ImportUserResponse {
+  @IsString()
+  @IsNotEmpty()
   readonly id: string;
   @IsString()
   readonly username?: string;
@@ -19,5 +27,8 @@ class UserResponse {
 }
 
 export class ImportUsersResponseDto {
-  readonly importedUsers: UserResponse[];
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ImportUserResponse)
+  readonly importedUsers: ImportUserResponse[];
 }
