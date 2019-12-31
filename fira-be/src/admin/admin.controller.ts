@@ -20,6 +20,10 @@ import {
   ImportUsersRequestDto,
   ImportUsersResponseDto,
 } from './dto/create-user.dto';
+import {
+  ImportQueriesReqDto,
+  ImportQueriesRespDto,
+} from './dto/import-queries.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 
@@ -64,6 +68,17 @@ export class AdminController {
     return {
       importedDocuments: await this.adminService.importDocuments(
         importDocsRequest.documents,
+      ),
+    };
+  }
+
+  @Put('v1/import/queries')
+  async importQueries(
+    @Body() importQueriesReq: ImportQueriesReqDto,
+  ): Promise<ImportQueriesRespDto> {
+    return {
+      importedQueries: await this.adminService.importQueries(
+        importQueriesReq.queries,
       ),
     };
   }

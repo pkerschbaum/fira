@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { User } from './identity-management/entity/user.entity';
 import { Document } from './admin/entity/document.entity';
+import { Query } from './admin/entity/query.entity';
 import * as config from './config';
 
 @Module({
@@ -17,7 +18,7 @@ import * as config from './config';
     LoggerModule,
     TypeOrmModule.forRoot({
       ...config.database,
-      entities: [User, Document],
+      entities: [User, Document, Query],
     }),
     AuthModule,
     AdminModule,
