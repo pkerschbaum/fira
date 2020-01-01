@@ -5,11 +5,12 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { Document } from './entity/document.entity';
 import { Query } from './entity/query.entity';
+import { JudgementPair } from './entity/judgement-pair.entity';
 import { IdentityManagementModule } from '../identity-management/identity-management.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Document, Query]),
+    TypeOrmModule.forFeature([Document, Query, JudgementPair]),
     IdentityManagementModule,
   ],
   controllers: [AdminController],

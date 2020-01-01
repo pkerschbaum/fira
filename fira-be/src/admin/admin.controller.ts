@@ -24,6 +24,10 @@ import {
   ImportQueriesReqDto,
   ImportQueriesRespDto,
 } from './dto/import-queries.dto';
+import {
+  ImportJudgementPairsReqDto,
+  ImportJudgementPairsRespDto,
+} from './dto/import-judgement-pairs.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 
@@ -79,6 +83,17 @@ export class AdminController {
     return {
       importedQueries: await this.adminService.importQueries(
         importQueriesReq.queries,
+      ),
+    };
+  }
+
+  @Put('v1/import/judgement-pairs')
+  async importJudgementPairs(
+    @Body() importJudgementPairsReq: ImportJudgementPairsReqDto,
+  ): Promise<ImportJudgementPairsRespDto> {
+    return {
+      importedJudgementPairs: await this.adminService.importJudgementPairs(
+        importJudgementPairsReq.judgementPairs,
       ),
     };
   }

@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Connection } from 'typeorm';
 
 import { Document } from './entity/document.entity';
 import { Query } from './entity/query.entity';
+import { JudgementPair } from './entity/judgement-pair.entity';
 import { ImportStatus } from '../model/commons.model';
 
 interface ImportAsset {
@@ -17,9 +18,23 @@ interface ImportResult {
   readonly error?: string;
 }
 
+interface ImportJudgementPair {
+  readonly documentId: number;
+  readonly queryId: number;
+  readonly priority: number;
+}
+
+interface ImportJudgementPairResult {
+  readonly documentId: number;
+  readonly queryId: number;
+  readonly status: ImportStatus;
+  readonly error?: string;
+}
+
 @Injectable()
 export class AdminService {
   constructor(
+    private readonly connection: Connection,
     @InjectRepository(Document)
     private readonly documentRepository: Repository<Document>,
     @InjectRepository(Query)
@@ -58,5 +73,59 @@ export class AdminService {
         }
       }),
     );
+  }
+
+  public async importJudgementPairs<T>(
+    judgementPairs: ImportJudgementPair[],
+  ): Promise<ImportJudgementPairResult[]> {
+    return this.connection.transaction(async transactionalEntityManager => {
+      // delete previos pairs
+      await transactionalEntityManager
+        .createQueryBuilder()
+        .delete()
+        .from(JudgementPair)
+        .execute();
+
+      // insert the new judgement pairs
+      return Promise.all(
+        judgementPairs.map(async judgementPair => {
+          try {
+            const [document, query] = await Promise.all([
+              transactionalEntityManager.findOne(
+                Document,
+                judgementPair.documentId,
+              ),
+              transactionalEntityManager.findOne(Query, judgementPair.queryId),
+            ]);
+            if (!document || !query) {
+              return {
+                documentId: judgementPair.documentId,
+                queryId: judgementPair.queryId,
+                status: ImportStatus.ERROR,
+                error: `either the document or the query (or both) could not be found. documentFound=${!!document} queryFound=${!!query}`,
+              };
+            }
+
+            const dbEntry = new JudgementPair();
+            dbEntry.document = document;
+            dbEntry.query = query;
+            dbEntry.priority = judgementPair.priority;
+            await transactionalEntityManager.save(dbEntry);
+            return {
+              documentId: judgementPair.documentId,
+              queryId: judgementPair.queryId,
+              status: ImportStatus.SUCCESS,
+            };
+          } catch (e) {
+            return {
+              documentId: judgementPair.documentId,
+              queryId: judgementPair.queryId,
+              status: ImportStatus.ERROR,
+              error: e.toString(),
+            };
+          }
+        }),
+      );
+    });
   }
 }
