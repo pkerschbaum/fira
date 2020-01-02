@@ -8,6 +8,7 @@ export const application = {
   },
   initialAnnotationTargetPerUser: 50,
   initialAnnotationTargetPerJudgPair: 10,
+  splitRegex: /([ .\-,]+)/g,
 } as const;
 
 export const database = {

@@ -2,11 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 
-import { Document } from './entity/document.entity';
-import { Query } from './entity/query.entity';
+import {
+  Document,
+  DocumentVersion,
+  COLUMN_DOCUMENT_VERSION,
+} from './entity/document.entity';
+import {
+  Query,
+  QueryVersion,
+  COLUMN_QUERY_VERSION,
+} from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
 import { ImportStatus } from '../model/commons.model';
+import * as config from '../config';
 
 interface ImportAsset {
   readonly id: number;
@@ -41,10 +50,6 @@ interface UpdateConfig {
 export class AdminService {
   constructor(
     private readonly connection: Connection,
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
-    @InjectRepository(Query)
-    private readonly queryRepository: Repository<Query>,
     @InjectRepository(Config)
     private readonly configRepository: Repository<Config>,
   ) {}
@@ -52,33 +57,96 @@ export class AdminService {
   public async importDocuments(
     documents: ImportAsset[],
   ): Promise<ImportResult[]> {
-    return this.importAssets(documents, Document, this.documentRepository);
+    return Promise.all(
+      documents.map(async document => {
+        return this.connection.transaction(async transactionalEntityManager => {
+          try {
+            let dbDocument = await transactionalEntityManager.findOne(
+              Document,
+              document.id,
+            );
+            if (!dbDocument) {
+              dbDocument = new Document();
+              dbDocument.id = document.id;
+            }
+
+            const {
+              maxVersionNumber,
+            }: { maxVersionNumber: number } = await transactionalEntityManager
+              .createQueryBuilder(DocumentVersion, 'document_version')
+              .select(
+                `MAX(document_version.${COLUMN_DOCUMENT_VERSION})`,
+                'maxVersionNumber',
+              )
+              .where({ document: dbDocument })
+              .getRawOne();
+
+            const dbEntry = new DocumentVersion();
+            dbEntry.document = dbDocument;
+            dbEntry.text = document.text;
+            dbEntry.annotateParts = document.text.split(
+              config.application.splitRegex,
+            );
+            if (maxVersionNumber !== undefined && maxVersionNumber !== null) {
+              dbEntry.version = maxVersionNumber + 1;
+            }
+
+            await transactionalEntityManager.save(DocumentVersion, dbEntry);
+            return { id: document.id, status: ImportStatus.SUCCESS };
+          } catch (e) {
+            return {
+              id: document.id,
+              status: ImportStatus.ERROR,
+              error: e.toString(),
+            };
+          }
+        });
+      }),
+    );
   }
 
   public async importQueries(queries: ImportAsset[]): Promise<ImportResult[]> {
-    return this.importAssets(queries, Query, this.queryRepository);
-  }
-
-  private async importAssets<T>(
-    assets: ImportAsset[],
-    entityConstructor: any,
-    repository: Repository<T>,
-  ) {
     return Promise.all(
-      assets.map(async asset => {
-        try {
-          const dbEntry = new entityConstructor();
-          dbEntry.id = asset.id;
-          dbEntry.text = asset.text;
-          await repository.save(dbEntry);
-          return { id: asset.id, status: ImportStatus.SUCCESS };
-        } catch (e) {
-          return {
-            id: asset.id,
-            status: ImportStatus.ERROR,
-            error: e.toString(),
-          };
-        }
+      queries.map(async query => {
+        return this.connection.transaction(async transactionalEntityManager => {
+          try {
+            let dbQuery = await transactionalEntityManager.findOne(
+              Query,
+              query.id,
+            );
+            if (!dbQuery) {
+              dbQuery = new Query();
+              dbQuery.id = query.id;
+            }
+
+            const {
+              maxVersionNumber,
+            }: { maxVersionNumber: number } = await transactionalEntityManager
+              .createQueryBuilder(QueryVersion, 'query_version')
+              .select(
+                `MAX(query_version.${COLUMN_QUERY_VERSION})`,
+                'maxVersionNumber',
+              )
+              .where({ query: dbQuery })
+              .getRawOne();
+
+            const dbEntry = new QueryVersion();
+            dbEntry.query = dbQuery;
+            dbEntry.text = query.text;
+            if (maxVersionNumber !== undefined && maxVersionNumber !== null) {
+              dbEntry.version = maxVersionNumber + 1;
+            }
+
+            await transactionalEntityManager.save(QueryVersion, dbEntry);
+            return { id: query.id, status: ImportStatus.SUCCESS };
+          } catch (e) {
+            return {
+              id: query.id,
+              status: ImportStatus.ERROR,
+              error: e.toString(),
+            };
+          }
+        });
       }),
     );
   }
@@ -98,13 +166,15 @@ export class AdminService {
       return Promise.all(
         judgementPairs.map(async judgementPair => {
           try {
-            const [document, query] = await Promise.all([
-              transactionalEntityManager.findOne(
-                Document,
-                judgementPair.documentId,
-              ),
-              transactionalEntityManager.findOne(Query, judgementPair.queryId),
-            ]);
+            const documentPromise = transactionalEntityManager.findOne(
+              Document,
+              judgementPair.documentId,
+            );
+            const query = await transactionalEntityManager.findOne(
+              Query,
+              judgementPair.queryId,
+            );
+            const document = await documentPromise;
             if (!document || !query) {
               return {
                 documentId: judgementPair.documentId,
