@@ -1,7 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-import { Judgement, JudgementStatus } from './entity/judgement.entity';
+import {
+  Judgement,
+  JudgementStatus,
+  RelevanceLevel,
+  JudgementMode,
+} from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
 import {
   JudgementPair,
@@ -18,6 +28,7 @@ interface PreloadJudgement {
   readonly id: number;
   readonly docAnnotationParts: string[];
   readonly queryText: string;
+  readonly mode: JudgementMode;
 }
 
 interface CountResult {
@@ -25,6 +36,12 @@ interface CountResult {
   document_id: number;
   priority: number;
   query_id: number;
+}
+
+interface SaveJudgement {
+  readonly relevanceLevel: RelevanceLevel;
+  readonly relevancePositions: number[];
+  readonly durationUsedToJudgeMs: number;
 }
 
 @Injectable()
@@ -117,6 +134,72 @@ export class JudgementsService {
       return openJudgements.map(mapToResponse);
     });
   }
+
+  public async saveJudgement(
+    userId: string,
+    judgementId: number,
+    judgementData: SaveJudgement,
+  ): Promise<void> {
+    return this.connection.transaction(async transactionalEntityManager => {
+      const user = await transactionalEntityManager.findOneOrFail(User, userId);
+      const dbJudgement = await transactionalEntityManager.findOne(Judgement, {
+        where: { user, id: judgementId },
+      });
+
+      if (!dbJudgement) {
+        throw new NotFoundException(
+          `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
+        );
+      }
+
+      if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
+        if (
+          judgementData.relevancePositions.length >
+            dbJudgement.document.annotateParts.length ||
+          judgementData.relevancePositions.some(
+            position =>
+              position >= dbJudgement.document.annotateParts.length ||
+              position < 0,
+          )
+        ) {
+          throw new BadRequestException(
+            `at least one submitted relevance position is out of bound, regarding the size of the document`,
+          );
+        }
+
+        this.appLogger.log(
+          `open judgement got judged, id=${judgementId}, data=${JSON.stringify(
+            judgementData,
+          )}`,
+        );
+
+        dbJudgement.status = JudgementStatus.JUDGED;
+        dbJudgement.relevanceLevel = judgementData.relevanceLevel;
+        dbJudgement.relevancePositions = judgementData.relevancePositions;
+        dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
+
+        await transactionalEntityManager.save(Judgement, dbJudgement);
+      } else {
+        // judgement.status === JudgementStatus.JUDGED
+        // if all parameters are equal, return status OK, otherwise CONFLICT
+        if (
+          dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
+          dbJudgement.relevancePositions.length !==
+            judgementData.relevancePositions.length ||
+          dbJudgement.relevancePositions.some(
+            (position1, index) =>
+              judgementData.relevancePositions[index] !== position1,
+          ) ||
+          dbJudgement.durationUsedToJudgeMs !==
+            judgementData.durationUsedToJudgeMs
+        ) {
+          throw new ConflictException(
+            `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
+          );
+        }
+      }
+    });
+  }
 }
 
 async function computeNextJudgementPairs(
@@ -199,9 +282,7 @@ async function persistPairs(
   );
 }
 
-function mapToResponse(
-  openJudgement: Judgement,
-): { id: number; queryText: string; docAnnotationParts: string[] } {
+function mapToResponse(openJudgement: Judgement): PreloadJudgement {
   // rotate text (annotation parts), if requested to do so
   let annotationParts = openJudgement.document.annotateParts;
   if (openJudgement.rotate) {
@@ -214,5 +295,6 @@ function mapToResponse(
     id: openJudgement.id,
     queryText: openJudgement.query.text,
     docAnnotationParts: annotationParts,
+    mode: openJudgement.mode,
   };
 }

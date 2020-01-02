@@ -5,8 +5,11 @@ import {
   ValidateNested,
   IsNumber,
   IsDefined,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+import { JudgementMode } from '../entity/judgement.entity';
 
 export class PreloadJudgementsResponseDto {
   @ArrayMinSize(1)
@@ -25,4 +28,7 @@ class PreloadJudgementResponse {
   @IsNotEmpty()
   @IsString()
   readonly queryText: string;
+  @IsDefined()
+  @IsEnum(JudgementMode)
+  readonly mode: JudgementMode;
 }

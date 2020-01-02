@@ -57,6 +57,6 @@ export class Judgement {
     nullable: false,
   })
   user: User;
-  @Column({ nullable: true, type: 'interval' })
-  durationUsedToJudge: any;
+  @Column({ nullable: true, type: 'integer' })
+  durationUsedToJudgeMs: number;
 }
