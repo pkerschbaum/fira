@@ -202,9 +202,17 @@ async function persistPairs(
 function mapToResponse(
   openJudgement: Judgement,
 ): { id: number; queryText: string; docAnnotationParts: string[] } {
+  // rotate text (annotation parts), if requested to do so
+  let annotationParts = openJudgement.document.annotateParts;
+  if (openJudgement.rotate) {
+    annotationParts = annotationParts
+      .slice(annotationParts.length / 2, annotationParts.length)
+      .concat(annotationParts.slice(0, annotationParts.length / 2));
+  }
+
   return {
     id: openJudgement.id,
     queryText: openJudgement.query.text,
-    docAnnotationParts: openJudgement.document.annotateParts,
+    docAnnotationParts: annotationParts,
   };
 }
