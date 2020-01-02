@@ -11,7 +11,9 @@ import { User } from './identity-management/entity/user.entity';
 import { Document, DocumentVersion } from './admin/entity/document.entity';
 import { Query, QueryVersion } from './admin/entity/query.entity';
 import { Config } from './admin/entity/config.entity';
+import { Judgement } from './judgements/entity/judgement.entity';
 import { JudgementPair } from './admin/entity/judgement-pair.entity';
+import { JudgementsModule } from './judgements/judgements.module';
 import * as config from './config';
 
 @Module({
@@ -28,11 +30,12 @@ import * as config from './config';
         QueryVersion,
         JudgementPair,
         Config,
-        
+        Judgement,
       ],
     }),
     AuthModule,
     AdminModule,
+    JudgementsModule,
   ],
   controllers: [],
   providers: [],

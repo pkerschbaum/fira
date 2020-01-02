@@ -16,6 +16,7 @@ import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
 import { ImportStatus } from '../model/commons.model';
 import * as config from '../config';
+import { assetUtil } from './asset.util';
 
 interface ImportAsset {
   readonly id: number;
@@ -70,16 +71,10 @@ export class AdminService {
               dbDocument.id = document.id;
             }
 
-            const {
-              maxVersionNumber,
-            }: { maxVersionNumber: number } = await transactionalEntityManager
-              .createQueryBuilder(DocumentVersion, 'document_version')
-              .select(
-                `MAX(document_version.${COLUMN_DOCUMENT_VERSION})`,
-                'maxVersionNumber',
-              )
-              .where({ document: dbDocument })
-              .getRawOne();
+            const maxVersionNumber = await assetUtil.findMaxDocumentVersion(
+              dbDocument,
+              transactionalEntityManager,
+            );
 
             const dbEntry = new DocumentVersion();
             dbEntry.document = dbDocument;
@@ -119,16 +114,7 @@ export class AdminService {
               dbQuery.id = query.id;
             }
 
-            const {
-              maxVersionNumber,
-            }: { maxVersionNumber: number } = await transactionalEntityManager
-              .createQueryBuilder(QueryVersion, 'query_version')
-              .select(
-                `MAX(query_version.${COLUMN_QUERY_VERSION})`,
-                'maxVersionNumber',
-              )
-              .where({ query: dbQuery })
-              .getRawOne();
+            const maxVersionNumber = await assetUtil.findMaxQueryVersion(dbQuery, transactionalEntityManager);
 
             const dbEntry = new QueryVersion();
             dbEntry.query = dbQuery;

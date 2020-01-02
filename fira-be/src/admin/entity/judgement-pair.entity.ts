@@ -3,6 +3,8 @@ import { Entity, Column, ManyToOne } from 'typeorm';
 import { Document } from './document.entity';
 import { Query } from './query.entity';
 
+export const COLUMN_PRIORITY = 'priority';
+
 @Entity()
 export class JudgementPair {
   @ManyToOne(type => Document, {
@@ -21,6 +23,6 @@ export class JudgementPair {
     nullable: false,
   })
   query: Query;
-  @Column({ nullable: false })
+  @Column({ name: COLUMN_PRIORITY, nullable: false })
   priority: number;
 }

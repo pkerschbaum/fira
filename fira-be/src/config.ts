@@ -1,4 +1,8 @@
 import * as moment from 'moment';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import NamingStrategies = require('typeorm-naming-strategies');
+
+import { JudgementMode } from './judgements/entity/judgement.entity';
 
 export const application = {
   port: 80,
@@ -8,10 +12,12 @@ export const application = {
   },
   initialAnnotationTargetPerUser: 50,
   initialAnnotationTargetPerJudgPair: 10,
+  judgementsPreloadSize: 3,
+  judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
   splitRegex: /([ .\-,]+)/g,
 } as const;
 
-export const database = {
+export const database: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.DB_ADDR ?? 'localhost',
   port: 5432,
@@ -19,6 +25,7 @@ export const database = {
   password: process.env.DB_PASSWORD ?? 'password',
   database: process.env.DB_NAME ?? 'fira',
   synchronize: true,
+  namingStrategy: new NamingStrategies.SnakeNamingStrategy(),
 } as const;
 
 export const keycloak = {
