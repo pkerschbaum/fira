@@ -28,6 +28,7 @@ import {
   ImportJudgementPairsReqDto,
   ImportJudgementPairsRespDto,
 } from './dto/import-judgement-pairs.dto';
+import { UpdateConfigReqDto } from './dto/update-config.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 
@@ -96,5 +97,10 @@ export class AdminController {
         importJudgementPairsReq.judgementPairs,
       ),
     };
+  }
+
+  @Put('v1/config')
+  async updateConfig(@Body() updateConfigReq: UpdateConfigReqDto) {
+    await this.adminService.updateConfig(updateConfigReq);
   }
 }

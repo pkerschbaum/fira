@@ -5,6 +5,7 @@ import { Repository, Connection } from 'typeorm';
 import { Document } from './entity/document.entity';
 import { Query } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
+import { Config } from './entity/config.entity';
 import { ImportStatus } from '../model/commons.model';
 
 interface ImportAsset {
@@ -31,6 +32,11 @@ interface ImportJudgementPairResult {
   readonly error?: string;
 }
 
+interface UpdateConfig {
+  readonly annotationTargetPerUser: number;
+  readonly annotationTargetPerJudgPair: number;
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -39,6 +45,8 @@ export class AdminService {
     private readonly documentRepository: Repository<Document>,
     @InjectRepository(Query)
     private readonly queryRepository: Repository<Query>,
+    @InjectRepository(Config)
+    private readonly configRepository: Repository<Config>,
   ) {}
 
   public async importDocuments(
@@ -127,5 +135,12 @@ export class AdminService {
         }),
       );
     });
+  }
+
+  public async updateConfig<T>(config: UpdateConfig) {
+    const dbEntry = new Config();
+    dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
+    dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
+    await this.configRepository.save(dbEntry);
   }
 }

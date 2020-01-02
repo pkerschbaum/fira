@@ -10,6 +10,7 @@ import { AdminModule } from './admin/admin.module';
 import { User } from './identity-management/entity/user.entity';
 import { Document } from './admin/entity/document.entity';
 import { Query } from './admin/entity/query.entity';
+import { Config } from './admin/entity/config.entity';
 import { JudgementPair } from './admin/entity/judgement-pair.entity';
 import * as config from './config';
 
@@ -19,7 +20,7 @@ import * as config from './config';
     LoggerModule,
     TypeOrmModule.forRoot({
       ...config.database,
-      entities: [User, Document, Query, JudgementPair],
+      entities: [User, Document, Query, JudgementPair, Config],
     }),
     AuthModule,
     AdminModule,
