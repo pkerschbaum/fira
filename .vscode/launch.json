@@ -10,10 +10,7 @@
       "name": "fira-be: launch",
       "program": "${workspaceFolder}/fira-be/src/main.ts",
       "outFiles": ["${workspaceFolder}/fira-be/dist/**/*.js"],
-      "skipFiles": [
-        "${workspaceFolder}/fira-be/node_modules/**/*.js",
-        "<node_internals>/**/*.js"
-      ]
+      "skipFiles": ["${workspaceFolder}/fira-be/node_modules/**/*.js", "<node_internals>/**/*.js"]
     },
     {
       "type": "node",
@@ -21,6 +18,16 @@
       "name": "fira-be: attach to process",
       "sourceMaps": true,
       "port": 9229
+    },
+    {
+      "name": "Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/fira-web/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/fira-web/*"
+      }
     }
   ]
 }
