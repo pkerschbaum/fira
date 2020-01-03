@@ -1,4 +1,4 @@
-import { HttpService, Injectable, HttpException } from '@nestjs/common';
+import { HttpService, Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import qs = require('qs');
 
 import * as config from '../config';
@@ -12,7 +12,15 @@ interface KeycloakCertsResponse {
   ];
 }
 
-interface KeycloakLoginResponse {
+interface KeycloakLoginRequest {
+  grant_type: 'password' | 'refresh_token';
+  client_id: string;
+  username?: string;
+  password?: string;
+  refresh_token?: string;
+}
+
+interface KeycloakAuthResponse {
   access_token: string;
   refresh_token: string;
 }
@@ -24,49 +32,61 @@ export class KeycloakClient {
   public async getPublicKey() {
     return (
       await this.httpService
-        .get<KeycloakCertsResponse>(
-          `${getEndpoint()}/protocol/openid-connect/certs`,
-        )
+        .get<KeycloakCertsResponse>(`${getEndpoint()}/protocol/openid-connect/certs`)
         .toPromise()
     ).data;
   }
 
   public async login(username: string, password: string) {
-    const requestBody = {
-      grant_type: 'password',
-      client_id: config.keycloak.clientId,
-      username,
-      password,
-    };
-
     try {
-      return (
-        await this.httpService
-          .post<KeycloakLoginResponse>(
-            `${getEndpoint()}/protocol/openid-connect/token`,
-            qs.stringify(requestBody),
-            {
-              headers: {
-                'content-type':
-                  'application/x-www-form-urlencoded;charset=utf-8',
-              },
-            },
-          )
-          .toPromise()
-      ).data;
+      return this.getToken({
+        grant_type: 'password',
+        client_id: config.keycloak.clientId,
+        username,
+        password,
+      });
     } catch (e) {
       if (e.response?.status === 401) {
-        throw new HttpException('credentials invalid', 401);
+        throw new UnauthorizedException('credentials invalid');
       }
       throw e;
     }
   }
 
-  public async createUser(
-    accessToken: string,
-    username: string,
-    password: string,
-  ) {
+  public async refresh(refreshToken: string) {
+    try {
+      return this.getToken({
+        grant_type: 'refresh_token',
+        client_id: config.keycloak.clientId,
+        refresh_token: refreshToken,
+      });
+    } catch (e) {
+      if (e.response?.status === 401) {
+        throw new UnauthorizedException('credentials invalid');
+      } else if (e.response?.status === 403) {
+        throw new ForbiddenException();
+      }
+      throw e;
+    }
+  }
+
+  private async getToken(requestBody: KeycloakLoginRequest): Promise<KeycloakAuthResponse> {
+    return (
+      await this.httpService
+        .post<KeycloakAuthResponse>(
+          `${getEndpoint()}/protocol/openid-connect/token`,
+          qs.stringify(requestBody),
+          {
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+            },
+          },
+        )
+        .toPromise()
+    ).data;
+  }
+
+  public async createUser(accessToken: string, username: string, password: string) {
     const requestBody = {
       username,
       enabled: 'true',
@@ -81,19 +101,15 @@ export class KeycloakClient {
 
     try {
       await this.httpService
-        .post(
-          `${getAdminEndpoint()}/users`,
-          requestBody,
-          {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
+        .post(`${getAdminEndpoint()}/users`, requestBody, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
           },
-        )
+        })
         .toPromise();
     } catch (e) {
       if (e.response?.status === 401) {
-        throw new HttpException('credentials invalid', 401);
+        throw new UnauthorizedException('credentials invalid');
       }
       throw e;
     }

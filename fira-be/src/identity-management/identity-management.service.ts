@@ -19,7 +19,7 @@ interface Cache {
   };
 }
 
-interface LoginResponse {
+interface AuthResponse {
   accessToken: string;
   refreshToken: string;
 }
@@ -48,15 +48,21 @@ export class IdentityManagementService {
     this.cache = { publicKey: {} };
   }
 
-  public async login(
-    username: string,
-    password: string,
-  ): Promise<LoginResponse> {
+  public async login(username: string, password: string): Promise<AuthResponse> {
     const loginResponse = await this.keycloakClient.login(username, password);
 
     return {
       accessToken: loginResponse.access_token,
       refreshToken: loginResponse.refresh_token,
+    };
+  }
+
+  public async refresh(refreshToken: string): Promise<AuthResponse> {
+    const refreshResponse = await this.keycloakClient.refresh(refreshToken);
+
+    return {
+      accessToken: refreshResponse.access_token,
+      refreshToken: refreshResponse.refresh_token,
     };
   }
 
@@ -124,15 +130,11 @@ export class IdentityManagementService {
         }
       }
     } catch (e) {
-      this.appLogger.warn(
-        `could not retrieve new key from keycloak, reason: ${e}`,
-      );
+      this.appLogger.warn(`could not retrieve new key from keycloak, reason: ${e}`);
     }
 
     if (!this.cache.publicKey.val) {
-      throw new Error(
-        'could not determine public key, reason: public key is not set in cache',
-      );
+      throw new Error('could not determine public key, reason: public key is not set in cache');
     }
 
     return this.cache.publicKey.val;

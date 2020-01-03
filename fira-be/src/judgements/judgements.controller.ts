@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Headers,
-  ForbiddenException,
   UnauthorizedException,
   UseGuards,
   Put,
