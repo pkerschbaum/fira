@@ -10,10 +10,14 @@ export const browserStorage = {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
 
-  getUser: (): LocalStorageUser | undefined => {
+  clearUser: () => {
+    localStorage.removeItem(USER_KEY);
+  },
+
+  getUser: (): LocalStorageUser | null => {
     const currentlyStoredUser = localStorage.getItem(USER_KEY);
     if (!currentlyStoredUser) {
-      return;
+      return null;
     }
     return JSON.parse(currentlyStoredUser) as LocalStorageUser;
   },
