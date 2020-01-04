@@ -6,6 +6,9 @@ import './index.css';
 import App from './App';
 import { store } from './store/store';
 import * as serviceWorker from './serviceWorker';
+import { executeBootScripts } from './boot/boot';
+
+executeBootScripts();
 
 ReactDOM.render(
   <Provider store={store}>
