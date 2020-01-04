@@ -39,7 +39,7 @@ export class KeycloakClient {
 
   public async login(username: string, password: string) {
     try {
-      return this.getToken({
+      return await this.getToken({
         grant_type: 'password',
         client_id: config.keycloak.clientId,
         username,
@@ -55,7 +55,7 @@ export class KeycloakClient {
 
   public async refresh(refreshToken: string) {
     try {
-      return this.getToken({
+      return await this.getToken({
         grant_type: 'refresh_token',
         client_id: config.keycloak.clientId,
         refresh_token: refreshToken,
