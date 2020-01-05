@@ -1,27 +1,35 @@
-import {
-  IsString,
-  IsNotEmpty,
-  ArrayMinSize,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, IsNotEmpty, ArrayMinSize, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../model/commons.model';
+import { ImportStatus } from '../../typings/commons';
+import {
+  ImportUserResponse,
+  ImportUsersResponse,
+  ImportUserRequest,
+  ImportUsersRequest,
+} from '../../identity-management/identity-management.types';
 
-class ImportUserRequest {
+export class ImportUsersRequestDto implements ImportUsersRequest {
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ImportUserRequestDto)
+  readonly users: ImportUserRequestDto[];
+}
+
+class ImportUserRequestDto implements ImportUserRequest {
   @IsString()
   @IsNotEmpty()
   readonly id: string;
 }
 
-export class ImportUsersRequestDto {
+export class ImportUsersResponseDto implements ImportUsersResponse {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => ImportUserRequest)
-  readonly users: ImportUserRequest[];
+  @Type(() => ImportUserResponseDto)
+  readonly importedUsers: ImportUserResponseDto[];
 }
 
-class ImportUserResponse {
+class ImportUserResponseDto implements ImportUserResponse {
   @IsString()
   @IsNotEmpty()
   readonly id: string;
@@ -33,11 +41,4 @@ class ImportUserResponse {
   readonly password?: string;
   @IsString()
   readonly error?: string;
-}
-
-export class ImportUsersResponseDto {
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
-  @Type(() => ImportUserResponse)
-  readonly importedUsers: ImportUserResponse[];
 }

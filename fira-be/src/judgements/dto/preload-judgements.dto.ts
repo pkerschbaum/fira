@@ -9,16 +9,16 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { JudgementMode } from '../entity/judgement.entity';
+import { JudgementMode, PreloadJudgement, PreloadJudgementResponse } from '../judgements.types';
 
-export class PreloadJudgementsResponseDto {
+export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => PreloadJudgementResponse)
-  readonly judgements: PreloadJudgementResponse[];
+  @Type(() => PreloadJudgementDto)
+  readonly judgements: PreloadJudgementDto[];
 }
 
-class PreloadJudgementResponse {
+class PreloadJudgementDto implements PreloadJudgement {
   @IsNumber()
   @IsDefined()
   readonly id: number;

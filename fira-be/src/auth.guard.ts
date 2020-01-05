@@ -9,17 +9,10 @@ import * as jwt from 'jsonwebtoken';
 import * as util from 'util';
 import { Request } from 'express';
 
+import { JwtPayload } from './typings/commons';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 
 const verify = util.promisify(jwt.verify);
-
-interface JwtPayload {
-  resource_access?: {
-    'realm-management'?: {
-      roles?: Array<'manage-users'>;
-    };
-  };
-}
 
 @Injectable()
 export class AuthGuard implements CanActivate {

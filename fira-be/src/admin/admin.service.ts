@@ -3,49 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 
 import {
-  Document,
-  DocumentVersion,
-  COLUMN_DOCUMENT_VERSION,
-} from './entity/document.entity';
-import {
-  Query,
-  QueryVersion,
-  COLUMN_QUERY_VERSION,
-} from './entity/query.entity';
+  ImportAsset,
+  ImportResult,
+  ImportJudgementPair,
+  ImportJudgementPairResult,
+  UpdateConfig,
+} from './admin.types';
+import { ImportStatus } from '../typings/commons';
+import { Document, DocumentVersion } from './entity/document.entity';
+import { Query, QueryVersion } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
-import { ImportStatus } from '../model/commons.model';
 import * as config from '../config';
 import { assetUtil } from './asset.util';
-
-interface ImportAsset {
-  readonly id: number;
-  readonly text: string;
-}
-
-interface ImportResult {
-  readonly id: number;
-  readonly status: ImportStatus;
-  readonly error?: string;
-}
-
-interface ImportJudgementPair {
-  readonly documentId: number;
-  readonly queryId: number;
-  readonly priority: number;
-}
-
-interface ImportJudgementPairResult {
-  readonly documentId: number;
-  readonly queryId: number;
-  readonly status: ImportStatus;
-  readonly error?: string;
-}
-
-interface UpdateConfig {
-  readonly annotationTargetPerUser: number;
-  readonly annotationTargetPerJudgPair: number;
-}
 
 @Injectable()
 export class AdminService {
@@ -55,17 +25,12 @@ export class AdminService {
     private readonly configRepository: Repository<Config>,
   ) {}
 
-  public async importDocuments(
-    documents: ImportAsset[],
-  ): Promise<ImportResult[]> {
+  public async importDocuments(documents: ImportAsset[]): Promise<ImportResult[]> {
     return Promise.all(
       documents.map(async document => {
         return this.connection.transaction(async transactionalEntityManager => {
           try {
-            let dbDocument = await transactionalEntityManager.findOne(
-              Document,
-              document.id,
-            );
+            let dbDocument = await transactionalEntityManager.findOne(Document, document.id);
             if (!dbDocument) {
               dbDocument = new Document();
               dbDocument.id = document.id;
@@ -79,9 +44,7 @@ export class AdminService {
             const dbEntry = new DocumentVersion();
             dbEntry.document = dbDocument;
             dbEntry.text = document.text;
-            dbEntry.annotateParts = document.text.split(
-              config.application.splitRegex,
-            );
+            dbEntry.annotateParts = document.text.split(config.application.splitRegex);
             if (maxVersionNumber !== undefined && maxVersionNumber !== null) {
               dbEntry.version = maxVersionNumber + 1;
             }
@@ -105,16 +68,16 @@ export class AdminService {
       queries.map(async query => {
         return this.connection.transaction(async transactionalEntityManager => {
           try {
-            let dbQuery = await transactionalEntityManager.findOne(
-              Query,
-              query.id,
-            );
+            let dbQuery = await transactionalEntityManager.findOne(Query, query.id);
             if (!dbQuery) {
               dbQuery = new Query();
               dbQuery.id = query.id;
             }
 
-            const maxVersionNumber = await assetUtil.findMaxQueryVersion(dbQuery, transactionalEntityManager);
+            const maxVersionNumber = await assetUtil.findMaxQueryVersion(
+              dbQuery,
+              transactionalEntityManager,
+            );
 
             const dbEntry = new QueryVersion();
             dbEntry.query = dbQuery;
@@ -137,7 +100,7 @@ export class AdminService {
     );
   }
 
-  public async importJudgementPairs<T>(
+  public async importJudgementPairs(
     judgementPairs: ImportJudgementPair[],
   ): Promise<ImportJudgementPairResult[]> {
     return this.connection.transaction(async transactionalEntityManager => {
@@ -156,10 +119,7 @@ export class AdminService {
               Document,
               judgementPair.documentId,
             );
-            const query = await transactionalEntityManager.findOne(
-              Query,
-              judgementPair.queryId,
-            );
+            const query = await transactionalEntityManager.findOne(Query, judgementPair.queryId);
             const document = await documentPromise;
             if (!document || !query) {
               return {
@@ -193,7 +153,7 @@ export class AdminService {
     });
   }
 
-  public async updateConfig<T>(config: UpdateConfig) {
+  public async updateConfig(config: UpdateConfig) {
     const dbEntry = new Config();
     dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
     dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;

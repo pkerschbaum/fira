@@ -3,27 +3,27 @@ import qs = require('qs');
 
 import * as config from '../config';
 
-interface KeycloakCertsResponse {
+type KeycloakCertsResponse = {
   keys?: [
     {
       n: string;
       e: string;
     },
   ];
-}
+};
 
-interface KeycloakLoginRequest {
+type KeycloakLoginRequest = {
   grant_type: 'password' | 'refresh_token';
   client_id: string;
   username?: string;
   password?: string;
   refresh_token?: string;
-}
+};
 
-interface KeycloakAuthResponse {
+type KeycloakAuthResponse = {
   access_token: string;
   refresh_token: string;
-}
+};
 
 @Injectable()
 export class KeycloakClient {

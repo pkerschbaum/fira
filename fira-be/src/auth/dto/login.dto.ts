@@ -1,6 +1,9 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class LoginRequestDto {
+import { LoginRequest } from '../auth.types';
+import { AuthResponse } from '../../identity-management/identity-management.types';
+
+export class LoginRequestDto implements LoginRequest {
   @IsString()
   @IsNotEmpty()
   readonly username: string;
@@ -9,7 +12,7 @@ export class LoginRequestDto {
   readonly password: string;
 }
 
-export class LoginResponseDto {
+export class LoginResponseDto implements AuthResponse {
   @IsString()
   @IsNotEmpty()
   readonly accessToken: string;

@@ -1,9 +1,9 @@
 import { createLogger } from '../logger/logger';
 
-interface LocalStorageUser {
+type LocalStorageUser = {
   accessToken: string;
   refreshToken: string;
-}
+};
 
 const logger = createLogger('browser-storage');
 const USER_KEY = 'user';

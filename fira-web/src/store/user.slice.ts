@@ -1,6 +1,8 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import * as jwt from 'jsonwebtoken';
 
+import { JwtPayload } from '../typings';
+
 type UserState = null | {
   accessToken: {
     val: string;
@@ -13,19 +15,10 @@ type UserState = null | {
   role: 'annotator' | 'admin';
 };
 
-interface AuthenticatePayload {
+type AuthenticatePayload = {
   accessToken: string;
   refreshToken: string;
-}
-
-interface JwtPayload {
-  exp: number;
-  resource_access?: {
-    'realm-management'?: {
-      roles?: Array<'manage-users'>;
-    };
-  };
-}
+};
 
 const INITIAL_STATE = null as UserState;
 

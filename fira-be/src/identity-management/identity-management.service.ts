@@ -5,34 +5,22 @@ import { Moment } from 'moment';
 import generate = require('nanoid/generate');
 import { Repository } from 'typeorm';
 
+import { AuthResponse, ImportUserResponse, ImportUserRequest } from './identity-management.types';
+import { ImportStatus } from '../typings/commons';
 import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
 import { User } from './entity/user.entity';
-import { ImportStatus } from '../model/commons.model';
 
-interface Cache {
+const SERVICE_NAME = 'IdentityManagementService';
+
+export type Cache = {
   publicKey: {
     val?: string;
     lastFetchedOn?: Moment;
   };
-}
-
-interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-interface ImportUserResponse {
-  id: string;
-  status: ImportStatus;
-  username?: string;
-  password?: string;
-  error?: string;
-}
-
-const SERVICE_NAME = 'IdentityManagementService';
+};
 
 @Injectable()
 export class IdentityManagementService {
@@ -68,7 +56,7 @@ export class IdentityManagementService {
 
   public async importUsers(
     accessToken: string,
-    users: Array<{ id: string }>,
+    users: Array<ImportUserRequest>,
   ): Promise<ImportUserResponse[]> {
     return Promise.all(
       users.map(async user => {

@@ -6,17 +6,10 @@ import {
 } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-import {
-  Judgement,
-  JudgementStatus,
-  RelevanceLevel,
-  JudgementMode,
-} from './entity/judgement.entity';
+import { PreloadJudgement, JudgementStatus, SaveJudgement, CountResult } from './judgements.types';
+import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
-import {
-  JudgementPair,
-  COLUMN_PRIORITY,
-} from '../admin/entity/judgement-pair.entity';
+import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.entity';
 import { Document } from '../admin/entity/document.entity';
 import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
@@ -24,44 +17,18 @@ import { AppLogger } from '../logger/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import * as config from '../config';
 
-interface PreloadJudgement {
-  readonly id: number;
-  readonly docAnnotationParts: string[];
-  readonly queryText: string;
-  readonly mode: JudgementMode;
-}
-
-interface CountResult {
-  count: number;
-  document_id: number;
-  priority: number;
-  query_id: number;
-}
-
-interface SaveJudgement {
-  readonly relevanceLevel: RelevanceLevel;
-  readonly relevancePositions: number[];
-  readonly durationUsedToJudgeMs: number;
-}
-
 @Injectable()
 export class JudgementsService {
-  constructor(
-    private readonly connection: Connection,
-    private readonly appLogger: AppLogger,
-  ) {
+  constructor(private readonly connection: Connection, private readonly appLogger: AppLogger) {
     this.appLogger.setContext('JudgementsService');
   }
   public async preloadJudgements(userId: string): Promise<PreloadJudgement[]> {
     return this.connection.transaction(async transactionalEntityManager => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
-      const judgementsOfUser = await transactionalEntityManager.find(
-        Judgement,
-        {
-          where: { user },
-        },
-      );
+      const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
+        where: { user },
+      });
       const currentOpenJudgements = judgementsOfUser.filter(
         judgement => judgement.status === JudgementStatus.TO_JUDGE,
       );
@@ -110,10 +77,7 @@ export class JudgementsService {
           continue;
         }
 
-        const pairsToPersist = pairCandidates.slice(
-          0,
-          remainingJudgementsToPreload,
-        );
+        const pairsToPersist = pairCandidates.slice(0, remainingJudgementsToPreload);
         this.appLogger.log(
           `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(
             pairsToPersist,
@@ -154,12 +118,9 @@ export class JudgementsService {
 
       if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
         if (
-          judgementData.relevancePositions.length >
-            dbJudgement.document.annotateParts.length ||
+          judgementData.relevancePositions.length > dbJudgement.document.annotateParts.length ||
           judgementData.relevancePositions.some(
-            position =>
-              position >= dbJudgement.document.annotateParts.length ||
-              position < 0,
+            position => position >= dbJudgement.document.annotateParts.length || position < 0,
           )
         ) {
           throw new BadRequestException(
@@ -168,9 +129,7 @@ export class JudgementsService {
         }
 
         this.appLogger.log(
-          `open judgement got judged, id=${judgementId}, data=${JSON.stringify(
-            judgementData,
-          )}`,
+          `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
         );
 
         dbJudgement.status = JudgementStatus.JUDGED;
@@ -184,14 +143,11 @@ export class JudgementsService {
         // if all parameters are equal, return status OK, otherwise CONFLICT
         if (
           dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
-          dbJudgement.relevancePositions.length !==
-            judgementData.relevancePositions.length ||
+          dbJudgement.relevancePositions.length !== judgementData.relevancePositions.length ||
           dbJudgement.relevancePositions.some(
-            (position1, index) =>
-              judgementData.relevancePositions[index] !== position1,
+            (position1, index) => judgementData.relevancePositions[index] !== position1,
           ) ||
-          dbJudgement.durationUsedToJudgeMs !==
-            judgementData.durationUsedToJudgeMs
+          dbJudgement.durationUsedToJudgeMs !== judgementData.durationUsedToJudgeMs
         ) {
           throw new ConflictException(
             `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
@@ -224,9 +180,7 @@ async function computeNextJudgementPairs(
       ...pair,
       count: Number(pair.count),
     }))
-    .filter(
-      (pair: CountResult) => pair.count < dbConfig.annotationTargetPerJudgPair,
-    )
+    .filter((pair: CountResult) => pair.count < dbConfig.annotationTargetPerJudgPair)
     .sort((p1: CountResult, p2: CountResult) => p1.count - p2.count);
 }
 
@@ -246,28 +200,20 @@ async function persistPairs(
     ...elem,
     count: Number(elem.count),
   }));
-  const countRotate =
-    rotateStats.find(elem => elem.rotate === true)?.count ?? 0;
-  const countNoRotate =
-    rotateStats.find(elem => elem.rotate === false)?.count ?? 0;
+  const countRotate = rotateStats.find(elem => elem.rotate === true)?.count ?? 0;
+  const countNoRotate = rotateStats.find(elem => elem.rotate === false)?.count ?? 0;
   const rotate = countRotate < countNoRotate;
 
   // gather data and persist judgements
   await Promise.all(
     pairs.map(async pair => {
-      const dbDocument = await entityManager.findOneOrFail(
-        Document,
-        pair.document_id,
-      );
+      const dbDocument = await entityManager.findOneOrFail(Document, pair.document_id);
       const dbQuery = await entityManager.findOneOrFail(Query, pair.query_id);
       const dbDocumentVersion = await assetUtil.findCurrentDocumentVersion(
         dbDocument,
         entityManager,
       );
-      const dbQueryVersion = await assetUtil.findCurrentQueryVersion(
-        dbQuery,
-        entityManager,
-      );
+      const dbQueryVersion = await assetUtil.findCurrentQueryVersion(dbQuery, entityManager);
 
       const dbJudgement = new Judgement();
       dbJudgement.status = JudgementStatus.TO_JUDGE;

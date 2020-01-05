@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import NamingStrategies = require('typeorm-naming-strategies');
 
-import { JudgementMode } from './judgements/entity/judgement.entity';
+import { JudgementMode } from './judgements/judgements.types';
 
 export const application = {
   port: 80,

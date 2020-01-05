@@ -1,16 +1,19 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class RefreshRequestDto {
+import { RefreshRequest } from '../auth.types';
+import { AuthResponse } from '../../identity-management/identity-management.types';
+
+export class RefreshRequestDto implements RefreshRequest {
   @IsString()
   @IsNotEmpty()
   readonly refreshToken: string;
 }
 
-export class RefreshResponseDto {
+export class RefreshResponseDto implements AuthResponse {
   @IsString()
   @IsNotEmpty()
-  accessToken: string;
+  readonly accessToken: string;
   @IsString()
   @IsNotEmpty()
-  refreshToken: string;
+  readonly refreshToken: string;
 }

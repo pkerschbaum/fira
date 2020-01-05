@@ -12,14 +12,11 @@ import {
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
 
+import { JwtPayload } from '../typings/commons';
 import { JudgementsService } from './judgements.service';
 import { PreloadJudgementsResponseDto } from './dto/preload-judgements.dto';
 import { AuthGuard } from 'src/auth.guard';
 import { SaveJudgementRequestDto } from './dto/save-judgement.dto';
-
-interface JwtPayload {
-  preferred_username?: string;
-}
 
 @ApiTags('judgements')
 @Controller('judgements')

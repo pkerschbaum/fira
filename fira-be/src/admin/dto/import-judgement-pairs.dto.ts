@@ -8,16 +8,22 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../model/commons.model';
+import { ImportStatus } from '../../typings/commons';
+import {
+  ImportJudgementPairsReq,
+  ImportJudgementPair,
+  ImportJudgementPairResult,
+  ImportJudgementPairsResp,
+} from '../admin.types';
 
-export class ImportJudgementPairsReqDto {
+export class ImportJudgementPairsReqDto implements ImportJudgementPairsReq {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => ImportJudgementPair)
-  readonly judgementPairs: ImportJudgementPair[];
+  @Type(() => ImportJudgementPairDto)
+  readonly judgementPairs: ImportJudgementPairDto[];
 }
 
-class ImportJudgementPair {
+class ImportJudgementPairDto implements ImportJudgementPair {
   @IsNumber()
   @IsDefined()
   readonly documentId: number;
@@ -29,14 +35,14 @@ class ImportJudgementPair {
   readonly priority: number;
 }
 
-export class ImportJudgementPairsRespDto {
+export class ImportJudgementPairsRespDto implements ImportJudgementPairsResp {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => ImportJudgementPairResult)
-  readonly importedJudgementPairs: ImportJudgementPairResult[];
+  @Type(() => ImportJudgementPairResultDto)
+  readonly importedJudgementPairs: ImportJudgementPairResultDto[];
 }
 
-class ImportJudgementPairResult {
+class ImportJudgementPairResultDto implements ImportJudgementPairResult {
   @IsNumber()
   @IsDefined()
   readonly documentId: number;

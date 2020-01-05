@@ -3,44 +3,13 @@ import axios from 'axios';
 import { HttpException } from './http.exception';
 import { createLogger } from '../logger/logger';
 
-interface LoginRequestDto {
-  readonly username: string;
-  readonly password: string;
-}
-
-interface RefreshRequestDto {
-  readonly refreshToken: string;
-}
-
-export interface AuthResponseDto {
-  readonly accessToken: string;
-  readonly refreshToken: string;
-}
-
-interface ImportUsersRequestDto {
-  users: ImportUser[];
-}
-
-interface ImportUser {
-  id: string;
-}
-
-interface ImportUsersResponseDto {
-  importedUsers: ImportUserResponse[];
-}
-
-interface ImportUserResponse {
-  id: string;
-  status: ImportStatus;
-  username?: string;
-  password?: string;
-  error?: string;
-}
-
-export enum ImportStatus {
-  SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR',
-}
+import {
+  LoginRequest,
+  ImportUsersResponse,
+  ImportUsersRequest,
+  AuthResponse,
+  RefreshRequest,
+} from '../typings';
 
 const axiosClient = axios.create({
   timeout: 5000,
@@ -50,11 +19,11 @@ const REFRESH_RETRY_COUNT = 5;
 const REFRESH_RETRY_DELAY = 3 * 1000; // 3 seconds
 
 export const httpClient = {
-  login: async (loginRequest: LoginRequestDto): Promise<AuthResponseDto> => {
+  login: async (loginRequest: LoginRequest): Promise<AuthResponse> => {
     logger.info('executing login...', { username: loginRequest.username });
 
     try {
-      return (await axiosClient.post<AuthResponseDto>('auth/v1/login', loginRequest)).data;
+      return (await axiosClient.post<AuthResponse>('auth/v1/login', loginRequest)).data;
     } catch (e) {
       logger.error('login failed!', e);
       if (e.response?.status === 401) {
@@ -64,7 +33,7 @@ export const httpClient = {
     }
   },
 
-  refresh: async (refreshRequest: RefreshRequestDto): Promise<AuthResponseDto> => {
+  refresh: async (refreshRequest: RefreshRequest): Promise<AuthResponse> => {
     logger.info('executing refresh...', { refreshRequest });
 
     // retry refresh with same token 3 times because if the internet connection was idle,
@@ -73,7 +42,7 @@ export const httpClient = {
     let lastError;
     while (attempt <= REFRESH_RETRY_COUNT) {
       try {
-        return (await axiosClient.post<AuthResponseDto>('auth/v1/refresh', refreshRequest)).data;
+        return (await axiosClient.post<AuthResponse>('auth/v1/refresh', refreshRequest)).data;
       } catch (e) {
         logger.info(`refresh failed for attempt=${attempt}`, { error: e });
         lastError = e;
@@ -93,21 +62,17 @@ export const httpClient = {
 
   importUsers: async (
     accessToken: string,
-    importUsersRequest: ImportUsersRequestDto,
-  ): Promise<ImportUsersResponseDto> => {
+    importUsersRequest: ImportUsersRequest,
+  ): Promise<ImportUsersResponse> => {
     logger.info('executing import users...', { importUsersRequest });
 
     try {
       return (
-        await axiosClient.post<ImportUsersResponseDto>(
-          'admin/v1/import/users',
-          importUsersRequest,
-          {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
+        await axiosClient.post<ImportUsersResponse>('admin/v1/import/users', importUsersRequest, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
           },
-        )
+        })
       ).data;
     } catch (e) {
       logger.error('import users failed!', e);

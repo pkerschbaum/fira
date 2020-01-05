@@ -1,6 +1,8 @@
 import { IsDefined, IsInt } from 'class-validator';
 
-export class UpdateConfigReqDto {
+import { UpdateConfig } from '../admin.types';
+
+export class UpdateConfigReqDto implements UpdateConfig {
   @IsInt()
   @IsDefined()
   readonly annotationTargetPerUser: number;

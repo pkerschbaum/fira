@@ -2,21 +2,19 @@ import React, { useState, useRef } from 'react';
 import * as d3 from 'd3';
 
 import styles from './Admin.module.css';
+import { ImportUserResponse } from '../../typings';
 import { adminService } from '../../admin/admin.service';
-import { ImportStatus } from '../../http/http.client';
 import { isNotEmpty } from '../../util/strings';
 
-interface GeneratedUser {
-  id: string;
-  password?: string;
-  error?: string;
-  status: ImportStatus;
+export enum ImportStatus {
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
 }
 
 const COLUMN_NAME_USER_ID = 'id';
 
 const Admin: React.FC = () => {
-  const [importedUsers, setImportedUsers] = useState([] as GeneratedUser[]);
+  const [importedUsers, setImportedUsers] = useState([] as ImportUserResponse[]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function importUsers() {

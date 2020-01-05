@@ -1,14 +1,8 @@
-import {
-  IsNumber,
-  IsDefined,
-  IsEnum,
-  IsArray,
-  ArrayUnique,
-} from 'class-validator';
+import { IsNumber, IsDefined, IsEnum, IsArray, ArrayUnique } from 'class-validator';
 
-import { RelevanceLevel } from '../entity/judgement.entity';
+import { RelevanceLevel, SaveJudgement } from '../judgements.types';
 
-export class SaveJudgementRequestDto {
+export class SaveJudgementRequestDto implements SaveJudgement {
   @IsEnum(RelevanceLevel)
   @IsDefined()
   readonly relevanceLevel: RelevanceLevel;
