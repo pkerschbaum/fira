@@ -17,6 +17,31 @@ export interface AuthResponseDto {
   readonly refreshToken: string;
 }
 
+interface ImportUsersRequestDto {
+  users: ImportUser[];
+}
+
+interface ImportUser {
+  id: string;
+}
+
+interface ImportUsersResponseDto {
+  importedUsers: ImportUserResponse[];
+}
+
+interface ImportUserResponse {
+  id: string;
+  status: ImportStatus;
+  username?: string;
+  password?: string;
+  error?: string;
+}
+
+export enum ImportStatus {
+  SUCCESS = 'SUCCESS',
+  ERROR = 'ERROR',
+}
+
 const axiosClient = axios.create({
   timeout: 5000,
 });
@@ -64,6 +89,30 @@ export const httpClient = {
     }
     logger.error('refresh failed!', lastError);
     throw lastError;
+  },
+
+  importUsers: async (
+    accessToken: string,
+    importUsersRequest: ImportUsersRequestDto,
+  ): Promise<ImportUsersResponseDto> => {
+    logger.info('executing import users...', { importUsersRequest });
+
+    try {
+      return (
+        await axiosClient.post<ImportUsersResponseDto>(
+          'admin/v1/import/users',
+          importUsersRequest,
+          {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+      ).data;
+    } catch (e) {
+      logger.error('import users failed!', e);
+      throw e;
+    }
   },
 };
 
