@@ -12,6 +12,7 @@ export const authService = {
     logger.info(`executing login...`, { username });
 
     const loginResponse = await httpClient.login({ username, password });
+
     logger.info(`login succeeded!`, { loginResponse });
     store.dispatch(userActions.authenticate(loginResponse));
   },
@@ -27,6 +28,7 @@ export const authService = {
       store.dispatch(userActions.logout());
       return;
     }
+
     logger.info(`refresh succeeded!`, { refreshResponse });
     store.dispatch(userActions.authenticate(refreshResponse));
   },

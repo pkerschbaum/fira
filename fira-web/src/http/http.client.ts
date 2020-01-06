@@ -9,6 +9,12 @@ import {
   ImportUsersRequest,
   AuthResponse,
   RefreshRequest,
+  ImportDocumentsReq,
+  ImportDocumentsResp,
+  ImportQueriesReq,
+  ImportQueriesResp,
+  ImportJudgementPairsReq,
+  ImportJudgementPairsResp,
 } from '../typings';
 
 const axiosClient = axios.create({
@@ -76,6 +82,74 @@ export const httpClient = {
       ).data;
     } catch (e) {
       logger.error('import users failed!', e);
+      throw e;
+    }
+  },
+
+  importDocuments: async (
+    accessToken: string,
+    importDocumentsRequest: ImportDocumentsReq,
+  ): Promise<ImportDocumentsResp> => {
+    logger.info('executing import documents...', { importDocumentsRequest });
+
+    try {
+      return (
+        await axiosClient.put<ImportDocumentsResp>(
+          'admin/v1/import/documents',
+          importDocumentsRequest,
+          {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+      ).data;
+    } catch (e) {
+      logger.error('import documents failed!', e);
+      throw e;
+    }
+  },
+
+  importQueries: async (
+    accessToken: string,
+    importQueriesRequest: ImportQueriesReq,
+  ): Promise<ImportQueriesResp> => {
+    logger.info('executing import queries...', { importQueriesRequest });
+
+    try {
+      return (
+        await axiosClient.put<ImportQueriesResp>('admin/v1/import/queries', importQueriesRequest, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('import queries failed!', e);
+      throw e;
+    }
+  },
+
+  importJudgementPairs: async (
+    accessToken: string,
+    importJudgPairsRequest: ImportJudgementPairsReq,
+  ): Promise<ImportJudgementPairsResp> => {
+    logger.info('executing import judgement pairs...', { importJudgPairsRequest });
+
+    try {
+      return (
+        await axiosClient.put<ImportJudgementPairsResp>(
+          'admin/v1/import/judgement-pairs',
+          importJudgPairsRequest,
+          {
+            headers: {
+              authorization: `Bearer ${accessToken}`,
+            },
+          },
+        )
+      ).data;
+    } catch (e) {
+      logger.error('import judgement pairs failed!', e);
       throw e;
     }
   },
