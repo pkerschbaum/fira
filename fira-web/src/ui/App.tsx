@@ -6,6 +6,9 @@ import styles from './App.module.css';
 import Login from '../Login';
 import Admin from './admin/Admin';
 import { RootState } from '../store/store';
+import { UserRole } from '../store/user.slice';
+import { assertUnreachable } from '../util/types.util';
+import PrivateRoute from './PrivateRoute';
 
 const App: React.FC = () => {
   return (
@@ -18,12 +21,12 @@ const App: React.FC = () => {
           <Route path="/login">
             <Login />
           </Route>
-          <Route path="/admin">
+          <PrivateRoute path="/admin" requiredRole={UserRole.ADMIN}>
             <Admin />
-          </Route>
-          <Route path="/annotator">
+          </PrivateRoute>
+          <PrivateRoute path="/annotator" requiredRole={UserRole.ANNOTATOR}>
             <div>Annotator page</div>
-          </Route>
+          </PrivateRoute>
         </Switch>
       </Router>
     </div>
@@ -35,11 +38,12 @@ const RouteToPage: React.FC = () => {
 
   if (!user) {
     return <Redirect to="/login" />;
-  } else if (user.role === 'admin') {
+  } else if (user.role === UserRole.ADMIN) {
     return <Redirect to="/admin" />;
-  } else {
-    // user.role === 'annotator'
+  } else if (user.role === UserRole.ANNOTATOR) {
     return <Redirect to="/annotator" />;
+  } else {
+    assertUnreachable(user.role);
   }
 };
 

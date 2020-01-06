@@ -31,15 +31,6 @@ export const authService = {
     store.dispatch(userActions.authenticate(refreshResponse));
   },
 
-  getRole: (): 'anonym' | 'annotator' | 'admin' => {
-    const user = store.getState().user;
-    if (!user) {
-      return 'anonym';
-    }
-
-    return user.role;
-  },
-
   accessTokenExpired: (): boolean => {
     const user = store.getState().user;
 

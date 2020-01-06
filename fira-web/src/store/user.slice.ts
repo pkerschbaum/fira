@@ -12,8 +12,13 @@ type UserState = null | {
     val: string;
     expiry: number; // unix timestamp
   };
-  role: 'annotator' | 'admin';
+  role: UserRole;
 };
+
+export enum UserRole {
+  ANNOTATOR = 'ANNOTATOR',
+  ADMIN = 'ADMIN',
+}
 
 type AuthenticatePayload = {
   accessToken: string;
@@ -43,7 +48,7 @@ const reducer = createReducer(INITIAL_STATE, builder =>
           val: action.payload.refreshToken,
           expiry: refreshTokenJwtPayload.exp,
         },
-        role: isAdmin ? 'admin' : 'annotator',
+        role: isAdmin ? UserRole.ADMIN : UserRole.ANNOTATOR,
       };
     })
     .addCase(logout, () => {

@@ -15,6 +15,7 @@ import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
 import { AppLogger } from '../logger/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
+import { assertUnreachable } from 'src/util/types.util';
 import * as config from '../config';
 
 @Injectable()
@@ -138,8 +139,7 @@ export class JudgementsService {
         dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
 
         await transactionalEntityManager.save(Judgement, dbJudgement);
-      } else {
-        // judgement.status === JudgementStatus.JUDGED
+      } else if (dbJudgement.status === JudgementStatus.JUDGED) {
         // if all parameters are equal, return status OK, otherwise CONFLICT
         if (
           dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
@@ -153,6 +153,9 @@ export class JudgementsService {
             `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
           );
         }
+      } else {
+        // exhaustive check
+        assertUnreachable(dbJudgement.status);
       }
     });
   }
