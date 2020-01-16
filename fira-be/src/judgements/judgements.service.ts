@@ -68,6 +68,7 @@ export class JudgementsService {
 
         const pairCandidates = await computeNextJudgementPairs(
           priority,
+          userId,
           dbConfig,
           transactionalEntityManager,
         );
@@ -164,6 +165,7 @@ export class JudgementsService {
 
 async function computeNextJudgementPairs(
   priority: number,
+  userId: string,
   dbConfig: Config,
   entityManager: EntityManager,
 ): Promise<CountResult[]> {
@@ -176,7 +178,17 @@ async function computeNextJudgementPairs(
         'j',
         'j.document_document = jp.document_id AND j.query_query = jp.query_id',
       )
-      .where(`jp.priority = ${priority}`)
+      .where(qb => {
+        return `jp.priority = ${priority} AND NOT EXISTS ${qb
+          .subQuery()
+          .select(`1`)
+          .from(Judgement, 'j2')
+          .where(
+            `j2.document_document = j.document_document AND j2.query_query = j.query_query AND j2.user_id = :userid`,
+          )
+          .getQuery()}`;
+      })
+      .setParameter('userid', userId)
       .groupBy('jp.document_id, jp.query_id')
       .execute()
   )
