@@ -137,6 +137,7 @@ export class JudgementsService {
         dbJudgement.relevanceLevel = judgementData.relevanceLevel;
         dbJudgement.relevancePositions = judgementData.relevancePositions;
         dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
+        dbJudgement.judgedAt = new Date();
 
         await transactionalEntityManager.save(Judgement, dbJudgement);
       } else if (dbJudgement.status === JudgementStatus.JUDGED) {

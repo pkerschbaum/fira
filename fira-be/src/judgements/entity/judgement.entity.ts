@@ -49,6 +49,8 @@ export class Judgement {
   user: User;
   @Column({ nullable: true, type: 'integer' })
   durationUsedToJudgeMs: number;
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  judgedAt: Date;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
