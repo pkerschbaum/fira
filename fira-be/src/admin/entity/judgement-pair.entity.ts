@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne } from 'typeorm';
+import { Entity, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 import { Document } from './document.entity';
 import { Query } from './query.entity';
@@ -25,4 +25,8 @@ export class JudgementPair {
   query: Query;
   @Column({ name: COLUMN_PRIORITY, nullable: false })
   priority: number;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

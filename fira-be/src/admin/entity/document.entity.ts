@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const DEFAULT_VERSION = 1;
 export const COLUMN_DOCUMENT_VERSION = 'document_version';
@@ -7,6 +14,8 @@ export const COLUMN_DOCUMENT_VERSION = 'document_version';
 export class Document {
   @PrimaryColumn({ nullable: false })
   id: number;
+  @CreateDateColumn()
+  createdAt: Date;
 }
 
 @Entity()
@@ -30,4 +39,8 @@ export class DocumentVersion {
   text: string;
   @Column({ nullable: false, type: 'text', array: true })
   annotateParts: string[];
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, Column, Check } from 'typeorm';
+import { Entity, PrimaryColumn, Column, Check, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 const nameOfUniqueColumn = 'id';
 const uniqueValue = 1;
@@ -18,4 +18,8 @@ export class Config {
   annotationTargetPerUser: number;
   @Column({ type: 'integer', nullable: false })
   annotationTargetPerJudgPair: number;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

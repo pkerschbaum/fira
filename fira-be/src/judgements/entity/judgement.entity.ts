@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from 'typeorm';
 
 import { JudgementStatus, RelevanceLevel, JudgementMode } from '../judgements.types';
 import { DocumentVersion } from '../../admin/entity/document.entity';
@@ -42,4 +49,8 @@ export class Judgement {
   user: User;
   @Column({ nullable: true, type: 'integer' })
   durationUsedToJudgeMs: number;
+  @CreateDateColumn()
+  createdAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
