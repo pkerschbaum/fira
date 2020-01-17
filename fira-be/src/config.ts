@@ -37,4 +37,8 @@ export const keycloak = {
   clientId: 'fira-be',
   realm: 'fira',
   adminRole: { category: 'realm-management', role: 'manage-users' },
+  adminCredentials: {
+    username: process.env.KEYCLOAK_ADMIN_USER ?? 'admin',
+    password: process.env.KEYCLOAK_ADMIN_PASSWORD ?? 'admin',
+  },
 } as const;

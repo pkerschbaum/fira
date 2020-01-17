@@ -25,7 +25,7 @@ export class AdminService {
     private readonly configRepository: Repository<Config>,
   ) {}
 
-  public async importDocuments(documents: ImportAsset[]): Promise<ImportResult[]> {
+  public importDocuments: (documents: ImportAsset[]) => Promise<ImportResult[]> = documents => {
     return Promise.all(
       documents.map(async document => {
         return this.connection.transaction(async transactionalEntityManager => {
@@ -61,9 +61,9 @@ export class AdminService {
         });
       }),
     );
-  }
+  };
 
-  public async importQueries(queries: ImportAsset[]): Promise<ImportResult[]> {
+  public importQueries: (queries: ImportAsset[]) => Promise<ImportResult[]> = queries => {
     return Promise.all(
       queries.map(async query => {
         return this.connection.transaction(async transactionalEntityManager => {
@@ -98,11 +98,11 @@ export class AdminService {
         });
       }),
     );
-  }
+  };
 
-  public async importJudgementPairs(
+  public importJudgementPairs: (
     judgementPairs: ImportJudgementPair[],
-  ): Promise<ImportJudgementPairResult[]> {
+  ) => Promise<ImportJudgementPairResult[]> = judgementPairs => {
     return this.connection.transaction(async transactionalEntityManager => {
       // delete previos pairs
       await transactionalEntityManager
@@ -151,12 +151,24 @@ export class AdminService {
         }),
       );
     });
-  }
+  };
 
-  public async updateConfig(config: UpdateConfig) {
+  public getCountOfDocuments: () => Promise<number> = () => {
+    return this.connection.getRepository(Document).count();
+  };
+
+  public getCountOfQueries: () => Promise<number> = () => {
+    return this.connection.getRepository(Query).count();
+  };
+
+  public getCountOfJudgPairs: () => Promise<number> = () => {
+    return this.connection.getRepository(JudgementPair).count();
+  };
+
+  public updateConfig: (config: UpdateConfig) => void = async config => {
     const dbEntry = new Config();
     dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
     dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
     await this.configRepository.save(dbEntry);
-  }
+  };
 }

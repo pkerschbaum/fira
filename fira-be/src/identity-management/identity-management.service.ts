@@ -127,4 +127,8 @@ export class IdentityManagementService {
 
     return this.cache.publicKey.val;
   }
+
+  public getCountOfUsers: () => Promise<number> = () => {
+    return this.userRepository.count();
+  };
 }

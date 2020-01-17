@@ -8,18 +8,23 @@ import { AppModule } from './app.module';
 import * as config from './config';
 import { Config } from './admin/entity/config.entity';
 import { AppLogger } from './logger/app-logger.service';
+import { importInitialData } from './boot/import-initial-data';
+import { IdentityManagementService } from './identity-management/identity-management.service';
+import { AdminService } from './admin/admin.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const appLogger = await app.resolve(AppLogger);
   appLogger.setContext('Main-Bootstrap');
 
+  await importInitialData({
+    logger: appLogger,
+    imService: app.get(IdentityManagementService),
+    adminService: app.get(AdminService),
+  });
+
   const rateLimit = config.application.rateLimit;
-  appLogger.log(
-    `installing rate-limiting middleware, rate limit: ${JSON.stringify(
-      rateLimit,
-    )}`,
-  );
+  appLogger.log(`installing rate-limiting middleware, rate limit: ${JSON.stringify(rateLimit)}`);
   app.use(rateLimitMiddleware(rateLimit));
 
   appLogger.log('setting up swagger module...');
@@ -46,8 +51,7 @@ async function bootstrap() {
     );
   } else {
     const initialConfig = new Config();
-    initialConfig.annotationTargetPerUser =
-      config.application.initialAnnotationTargetPerUser;
+    initialConfig.annotationTargetPerUser = config.application.initialAnnotationTargetPerUser;
     initialConfig.annotationTargetPerJudgPair =
       config.application.initialAnnotationTargetPerJudgPair;
     appLogger.log(

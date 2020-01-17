@@ -1,2 +1,5 @@
 node_modules
 npm-debug.log
+
+# Ignore folder for initial import of assets (that folder will get mounted later in docker-compose via bind mounts)
+data
