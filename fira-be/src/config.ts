@@ -10,7 +10,7 @@ export const application = {
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 200, // limit each IP to 200 requests per windowMs
   },
-  initialAnnotationTargetPerUser: 50,
+  initialAnnotationTargetPerUser: 30,
   initialAnnotationTargetPerJudgPair: 10,
   judgementsPreloadSize: 3,
   judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,

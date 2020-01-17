@@ -6,7 +6,13 @@ import {
 } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-import { PreloadJudgement, JudgementStatus, SaveJudgement, CountResult } from './judgements.types';
+import {
+  PreloadJudgement,
+  JudgementStatus,
+  SaveJudgement,
+  CountResult,
+  PreloadJudgementResponse,
+} from './judgements.types';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
 import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.entity';
@@ -23,7 +29,7 @@ export class JudgementsService {
   constructor(private readonly connection: Connection, private readonly appLogger: AppLogger) {
     this.appLogger.setContext('JudgementsService');
   }
-  public async preloadJudgements(userId: string): Promise<PreloadJudgement[]> {
+  public async preloadJudgements(userId: string): Promise<PreloadJudgementResponse> {
     return this.connection.transaction(async transactionalEntityManager => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
@@ -33,22 +39,31 @@ export class JudgementsService {
       const currentOpenJudgements = judgementsOfUser.filter(
         judgement => judgement.status === JudgementStatus.TO_JUDGE,
       );
-
-      const remainingAnnotationsForUser =
-        dbConfig.annotationTargetPerUser - judgementsOfUser.length;
-      let remainingJudgementsToPreload =
-        config.application.judgementsPreloadSize - currentOpenJudgements.length;
-
-      this.appLogger.log(
-        `judgements stats for user: sum=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, remainingUntilTargetMet=${remainingAnnotationsForUser}, remainingToPreload=${remainingJudgementsToPreload}`,
+      const currentFinishedJudgements = judgementsOfUser.filter(
+        judgement => judgement.status === JudgementStatus.JUDGED,
       );
 
-      if (remainingAnnotationsForUser < 1 || remainingJudgementsToPreload < 1) {
+      const remainingToFinish = dbConfig.annotationTargetPerUser - currentFinishedJudgements.length;
+      const remainingUntilTargetMet = dbConfig.annotationTargetPerUser - judgementsOfUser.length;
+      let remainingJudgementsToPreload =
+        remainingUntilTargetMet < 1
+          ? 0
+          : config.application.judgementsPreloadSize - currentOpenJudgements.length;
+
+      this.appLogger.log(
+        `judgements stats for user: sum=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
+          `finished=${currentFinishedJudgements.length}, remainingUntilTargetMet=${remainingUntilTargetMet}, remainingToPreload=${remainingJudgementsToPreload}`,
+      );
+
+      if (remainingJudgementsToPreload < 1) {
         // either the user has already completed all annotations,
         // or there are enough open judgements for him to satisfy his annotation target,
         // or the preload limit of judgements is met
         // --> do not preload more judgements
-        return currentOpenJudgements.map(mapToResponse);
+        return {
+          judgements: currentOpenJudgements.map(mapToResponse),
+          remainingToFinish,
+        };
       }
 
       const result: Array<{
@@ -60,44 +75,33 @@ export class JudgementsService {
 
       const priorities = result.map(obj => obj.priority).sort((a, b) => b - a); // sort priority descending
 
-      for (const priority of priorities) {
-        if (remainingJudgementsToPreload < 1) {
-          // enough open judgements generated
-          break;
-        }
-
-        const pairCandidates = await computeNextJudgementPairs(
-          priority,
+      let targetFactor = 1;
+      while (remainingJudgementsToPreload > 0) {
+        remainingJudgementsToPreload = await this.preloadNextJudgements({
+          priorities,
+          targetFactor,
           userId,
+          user,
+          remainingJudgementsToPreload,
           dbConfig,
           transactionalEntityManager,
-        );
+        });
 
-        if (pairCandidates.length === 0) {
-          // all judgement-pairs with the given priority already satisfy the
-          // annotation target per judgement-pair --> try next priority
-          continue;
-        }
-
-        const pairsToPersist = pairCandidates.slice(0, remainingJudgementsToPreload);
         this.appLogger.log(
-          `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(
-            pairsToPersist,
-          )}`,
+          `round of preload complete, annotation target factor was: ${targetFactor}, ` +
+            `remaining judgements to preload: ${remainingJudgementsToPreload}`,
         );
-        await persistPairs(pairsToPersist, user, transactionalEntityManager);
-        remainingJudgementsToPreload -= pairsToPersist.length;
+        targetFactor++;
       }
-
-      this.appLogger.log(
-        `preload complete, remaining judgements to preload: ${remainingJudgementsToPreload}`,
-      );
 
       const openJudgements = await transactionalEntityManager.find(Judgement, {
         where: { user, status: JudgementStatus.TO_JUDGE },
       });
 
-      return openJudgements.map(mapToResponse);
+      return {
+        judgements: openJudgements.map(mapToResponse),
+        remainingToFinish,
+      };
     });
   }
 
@@ -161,10 +165,60 @@ export class JudgementsService {
       }
     });
   }
+
+  private async preloadNextJudgements({
+    priorities,
+    targetFactor,
+    userId,
+    user,
+    remainingJudgementsToPreload,
+    dbConfig,
+    transactionalEntityManager,
+  }: {
+    priorities: number[];
+    targetFactor: number;
+    userId: string;
+    user: User;
+    remainingJudgementsToPreload: number;
+    dbConfig: Config;
+    transactionalEntityManager: EntityManager;
+  }): Promise<number> {
+    for (const priority of priorities) {
+      if (remainingJudgementsToPreload < 1) {
+        // enough open judgements generated
+        break;
+      }
+
+      const pairCandidates = await getCandidatesByPriority(
+        priority,
+        targetFactor,
+        userId,
+        dbConfig,
+        transactionalEntityManager,
+      );
+
+      if (pairCandidates.length === 0) {
+        // all judgement-pairs with the given priority already satisfy the annotation target per
+        // judgement-pair, or the user already judged all the pairs with the given priority
+        // --> try next priority
+        continue;
+      }
+
+      const pairsToPersist = pairCandidates.slice(0, remainingJudgementsToPreload);
+      this.appLogger.log(
+        `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(pairsToPersist)}`,
+      );
+      await persistPairs(pairsToPersist, user, transactionalEntityManager);
+      remainingJudgementsToPreload -= pairsToPersist.length;
+    }
+
+    return remainingJudgementsToPreload;
+  }
 }
 
-async function computeNextJudgementPairs(
+async function getCandidatesByPriority(
   priority: number,
+  targetFactor: number,
   userId: string,
   dbConfig: Config,
   entityManager: EntityManager,
@@ -196,7 +250,7 @@ async function computeNextJudgementPairs(
       ...pair,
       count: Number(pair.count),
     }))
-    .filter((pair: CountResult) => pair.count < dbConfig.annotationTargetPerJudgPair)
+    .filter((pair: CountResult) => pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor)
     .sort((p1: CountResult, p2: CountResult) => p1.count - p2.count);
 }
 

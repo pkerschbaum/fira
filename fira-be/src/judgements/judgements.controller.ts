@@ -35,11 +35,7 @@ export class JudgementsController {
     const jwtPayload = extractJwtPayload(authHeader);
 
     // preload judgements
-    return {
-      judgements: await this.judgementsService.preloadJudgements(
-        jwtPayload.preferred_username,
-      ),
-    };
+    return await this.judgementsService.preloadJudgements(jwtPayload.preferred_username);
   }
 
   @Put('v1/:id')
@@ -65,9 +61,7 @@ export class JudgementsController {
   }
 }
 
-function extractJwtPayload(
-  authHeader: string,
-): JwtPayload & { preferred_username: string } {
+function extractJwtPayload(authHeader: string): JwtPayload & { preferred_username: string } {
   const accessToken = /Bearer (.+)/.exec(authHeader)?.[1]!; // AuthGuard ensures that the token is present
 
   // extract jwt data

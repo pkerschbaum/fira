@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsDefined,
   IsEnum,
+  IsInt,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -16,6 +17,9 @@ export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ValidateNested({ each: true })
   @Type(() => PreloadJudgementDto)
   readonly judgements: PreloadJudgementDto[];
+  @IsInt()
+  @IsDefined()
+  readonly remainingToFinish: number;
 }
 
 class PreloadJudgementDto implements PreloadJudgement {

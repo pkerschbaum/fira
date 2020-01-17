@@ -1,5 +1,6 @@
 export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];
+  readonly remainingToFinish: number;
 };
 
 export type PreloadJudgement = {
