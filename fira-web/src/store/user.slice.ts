@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import * as jwt from 'jsonwebtoken';
 
-import { JwtPayload } from '../typings';
+import { JwtPayload } from '../typings/typings';
 
 type UserState = null | {
   readonly accessToken: {
