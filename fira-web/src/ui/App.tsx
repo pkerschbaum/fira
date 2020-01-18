@@ -5,10 +5,11 @@ import { useSelector } from 'react-redux';
 import styles from './App.module.css';
 import Login from '../Login';
 import Admin from './admin/Admin';
+import Annotation from './annotation/Annotation';
+import PrivateRoute from './PrivateRoute';
 import { RootState } from '../store/store';
 import { UserRole } from '../store/user.slice';
 import { assertUnreachable } from '../util/types.util';
-import PrivateRoute from './PrivateRoute';
 
 const App: React.FC = () => {
   return (
@@ -25,7 +26,7 @@ const App: React.FC = () => {
             <Admin />
           </PrivateRoute>
           <PrivateRoute path="/annotator" requiredRole={UserRole.ANNOTATOR}>
-            <div>Annotator page</div>
+            <Annotation />
           </PrivateRoute>
         </Switch>
       </Router>

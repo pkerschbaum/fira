@@ -3,10 +3,12 @@ import { configureStore, combineReducers, getDefaultMiddleware } from '@reduxjs/
 import { setupSubscriptions } from './store-subscriptions';
 import loggerMiddleware from './middleware/logger';
 
-import reducer from './user.slice';
+import userReducer from './user.slice';
+import annotationReducer from './annotation.slice';
 
 const rootReducer = combineReducers({
-  user: reducer,
+  user: userReducer,
+  annotation: annotationReducer,
 });
 
 export const store = configureStore({

@@ -4,15 +4,15 @@ import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from '../typings';
 
 type UserState = null | {
-  accessToken: {
-    val: string;
-    expiry: number; // unix timestamp
+  readonly accessToken: {
+    readonly val: string;
+    readonly expiry: number; // unix timestamp
   };
-  refreshToken: {
-    val: string;
-    expiry: number; // unix timestamp
+  readonly refreshToken: {
+    readonly val: string;
+    readonly expiry: number; // unix timestamp
   };
-  role: UserRole;
+  readonly role: UserRole;
 };
 
 export enum UserRole {
