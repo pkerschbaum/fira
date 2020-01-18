@@ -43,7 +43,9 @@ export async function importInitialData({
         config.keycloak.adminCredentials.password,
       );
 
-      return await imService.importUsers(accessToken, assetsParsed);
+      const importedUsers = await imService.importUsers(accessToken, assetsParsed);
+      await writeFileToDisk('users', d3.tsvFormat(importedUsers));
+      return importedUsers;
     },
   });
 
@@ -138,6 +140,14 @@ async function importAsset<T>({
 
 async function readFileFromDisk(fileName: string) {
   return await fs.promises.readFile(path.resolve(__dirname, '../../data', `${fileName}.tsv`), {
+    encoding: 'utf8',
+  });
+}
+
+async function writeFileToDisk(fileName: string, content: string) {
+  const writePath = path.resolve(__dirname, '../../data/out');
+  await fs.promises.mkdir(writePath, { recursive: true });
+  return await fs.promises.writeFile(path.resolve(writePath, `${fileName}.tsv`), content, {
     encoding: 'utf8',
   });
 }

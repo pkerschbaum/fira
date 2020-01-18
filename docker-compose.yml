@@ -9,7 +9,7 @@ services:
     networks: 
       - backend
     depends_on:
-      - postgres_fira
+      - keycloak
     environment:
       - DB_ADDR=postgres_fira
       - DB_NAME=${FIRA_DB}
