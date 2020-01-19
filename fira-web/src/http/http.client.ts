@@ -16,6 +16,7 @@ import {
   ImportJudgementPairsReq,
   ImportJudgementPairsResp,
   PreloadJudgementResponse,
+  SaveJudgement,
 } from '../typings/typings';
 
 const axiosClient = axios.create({
@@ -168,6 +169,27 @@ export const httpClient = {
       ).data;
     } catch (e) {
       logger.error('preload judgements failed!', e);
+      throw e;
+    }
+  },
+
+  submitJudgement: async (
+    accessToken: string,
+    judgementId: number,
+    submitJudgementRequest: SaveJudgement,
+  ): Promise<void> => {
+    logger.info('executing submit judgement...', { submitJudgementRequest });
+
+    try {
+      return (
+        await axiosClient.put(`judgements/v1/${judgementId}`, submitJudgementRequest, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('submit judgement failed!', e);
       throw e;
     }
   },
