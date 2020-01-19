@@ -1,6 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { PreloadJudgement } from '../typings/typings';
-import { RelevanceLevel } from '../typings/enums';
+import { PreloadJudgement } from '../../typings/typings';
+import { RelevanceLevel } from '../../typings/enums';
 
 type JudgementPair = PreloadJudgement & {
   readonly relevanceLevel?: RelevanceLevel;

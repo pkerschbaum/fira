@@ -1,6 +1,6 @@
 import { browserStorage } from '../browser-storage/browser-storage';
 import { store } from '../store/store';
-import { actions as userActions } from '../store/user.slice';
+import { actions as userActions } from '../store/user/user.slice';
 import { createLogger } from '../logger/logger';
 
 const logger = createLogger('load-stored-user');

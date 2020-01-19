@@ -3,7 +3,7 @@ import { RouteProps, Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { RootState } from '../store/store';
-import { UserRole } from '../store/user.slice';
+import { UserRole } from '../store/user/user.slice';
 
 type PrivateRouteProps = RouteProps & {
   requiredRole: UserRole;

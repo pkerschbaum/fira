@@ -3,7 +3,7 @@ import moment from 'moment';
 import { httpClient } from '../http/http.client';
 import { store } from '../store/store';
 import { createLogger } from '../logger/logger';
-import { actions as userActions } from '../store/user.slice';
+import { actions as userActions } from '../store/user/user.slice';
 
 const logger = createLogger('auth.service');
 

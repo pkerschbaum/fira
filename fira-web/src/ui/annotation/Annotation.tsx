@@ -2,24 +2,13 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styles from './Annotation.module.css';
-import { judgementsService } from '../../judgements/judgements.service';
 import { RootState, AppDispatch } from '../../store/store';
-import { actions as annotationActions } from '../../store/annotation.slice';
+import { actions as annotationActions } from '../../store/annotation/annotation.slice';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 
 const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
   const dispatch = useDispatch<AppDispatch>();
-
-  useEffect(() => {
-    if (
-      annotationState.remainingToFinish === undefined ||
-      (annotationState.judgementPairs.length < 2 &&
-        annotationState.remainingToFinish > annotationState.judgementPairs.length)
-    ) {
-      judgementsService.preloadJudgements();
-    }
-  }, [annotationState.judgementPairs.length, annotationState.remainingToFinish]);
 
   const createRatingFn = (relevanceLevel: RelevanceLevel) => () => {
     dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));

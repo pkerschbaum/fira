@@ -8,7 +8,7 @@ import Admin from './admin/Admin';
 import Annotation from './annotation/Annotation';
 import PrivateRoute from './PrivateRoute';
 import { RootState } from '../store/store';
-import { UserRole } from '../store/user.slice';
+import { UserRole } from '../store/user/user.slice';
 import { assertUnreachable } from '../util/types.util';
 
 const App: React.FC = () => {

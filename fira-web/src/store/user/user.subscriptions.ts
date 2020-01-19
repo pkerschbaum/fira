@@ -1,11 +1,11 @@
 import moment from 'moment';
 
-import { browserStorage } from '../browser-storage/browser-storage';
-import { authService } from '../auth/auth.service';
-import { createLogger } from '../logger/logger';
-import { RootStore } from './store';
+import { browserStorage } from '../../browser-storage/browser-storage';
+import { authService } from '../../auth/auth.service';
+import { createLogger } from '../../logger/logger';
+import { RootStore } from '../store';
 
-const logger = createLogger('store-subscriptions');
+const logger = createLogger('user.subscriptions');
 
 export const setupSubscriptions = (store: RootStore) => {
   // listen for changes on user state and synchronize with browser storage

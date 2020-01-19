@@ -1,7 +1,7 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
-import { actions as annotationActions } from '../store/annotation.slice';
+import { actions as annotationActions } from '../store/annotation/annotation.slice';
 
 const logger = createLogger('judgements.service');
 

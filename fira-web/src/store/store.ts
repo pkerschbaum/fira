@@ -1,10 +1,11 @@
 import { configureStore, combineReducers, getDefaultMiddleware } from '@reduxjs/toolkit';
 
-import { setupSubscriptions } from './store-subscriptions';
+import { setupSubscriptions as setupUserSubscriptions } from './user/user.subscriptions';
+import { setupSubscriptions as setupAnnotationSubscriptions } from './annotation/annotation.subscriptions';
 import loggerMiddleware from './middleware/logger';
 
-import userReducer from './user.slice';
-import annotationReducer from './annotation.slice';
+import userReducer from './user/user.slice';
+import annotationReducer from './annotation/annotation.slice';
 
 const rootReducer = combineReducers({
   user: userReducer,
@@ -16,7 +17,8 @@ export const store = configureStore({
   middleware: [loggerMiddleware, ...getDefaultMiddleware()],
 });
 
-setupSubscriptions(store);
+const subscriptions = [setupUserSubscriptions, setupAnnotationSubscriptions];
+subscriptions.forEach(subscription => subscription(store));
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
