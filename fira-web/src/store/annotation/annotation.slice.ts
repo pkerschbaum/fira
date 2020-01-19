@@ -4,6 +4,7 @@ import { RelevanceLevel } from '../../typings/enums';
 
 type JudgementPair = PreloadJudgement & {
   readonly relevanceLevel?: RelevanceLevel;
+  readonly currentAnnotationStart?: number;
   readonly annotatedRanges: Array<{ start: number; end: number }>;
 };
 
@@ -11,7 +12,6 @@ type AnnotationState = {
   readonly judgementPairs: JudgementPair[];
   readonly remainingToFinish?: number;
   readonly currentJudgementPairId?: PreloadJudgement['id'];
-  readonly currentAnnotationStart?: number;
 };
 
 type PreloadJudgementsPayload = {
@@ -36,13 +36,44 @@ const selectRangeStartEnd = createAction<SelectRangeStartEndPayload>('RANGE_STAR
 const reducer = createReducer(INITIAL_STATE, builder =>
   builder
     .addCase(preloadJudgements, (state, action) => {
-      state.judgementPairs = action.payload.judgements.map(judgement => ({
-        ...judgement,
-        annotatedRanges: [],
-      }));
       state.remainingToFinish = action.payload.remainingToFinish;
-      state.currentJudgementPairId =
-        state.judgementPairs.length < 1 ? undefined : state.judgementPairs[0].id;
+
+      const judgementPairsReceived = action.payload.judgements;
+
+      if (
+        !judgementPairsReceived.some(judgement => judgement.id === state.currentJudgementPairId)
+      ) {
+        state.currentJudgementPairId = undefined;
+      }
+
+      const currentJudgementPair = state.judgementPairs.find(
+        pair => pair.id === state.currentJudgementPairId,
+      );
+      state.judgementPairs = judgementPairsReceived.map(judgement => {
+        if (
+          currentJudgementPair &&
+          currentJudgementPair.id === judgement.id &&
+          areJudgementPairsEqual(currentJudgementPair, judgement)
+        ) {
+          // keep already annotated ranges for the currently selected judgement pair
+          return {
+            ...judgement,
+            ...currentJudgementPair,
+          };
+        } else {
+          // either this judgement pair received from server is not the currently selected one, or
+          // the currently selected one changed significantly
+          // --> set no annotated ranges (and thus, possibly discard already annotated ranges)
+          return {
+            ...judgement,
+            annotatedRanges: [],
+          };
+        }
+      });
+
+      if (state.currentJudgementPairId === undefined) {
+        state.currentJudgementPairId = state.judgementPairs[0].id;
+      }
     })
     .addCase(rateJudgementPair, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
@@ -51,25 +82,33 @@ const reducer = createReducer(INITIAL_STATE, builder =>
       currentJudgementPair!.relevanceLevel = action.payload.relevanceLevel;
     })
     .addCase(selectRangeStartEnd, (state, action) => {
-      if (state.currentAnnotationStart === undefined) {
-        state.currentAnnotationStart = action.payload.annotationPartIndex;
+      const currentJudgementPair = state.judgementPairs.find(
+        pair => pair.id === state.currentJudgementPairId,
+      );
+      if (currentJudgementPair!.currentAnnotationStart === undefined) {
+        currentJudgementPair!.currentAnnotationStart = action.payload.annotationPartIndex;
       } else {
-        const start = state.currentAnnotationStart;
+        const start = currentJudgementPair!.currentAnnotationStart;
         const end = action.payload.annotationPartIndex;
         const actualStart = start < end ? start : end;
         const actualEnd = end > start ? end : start;
 
-        const currentJudgementPair = state.judgementPairs.find(
-          pair => pair.id === state.currentJudgementPairId,
-        );
         currentJudgementPair!.annotatedRanges.push({
           start: actualStart,
           end: actualEnd,
         });
-        state.currentAnnotationStart = undefined;
+        currentJudgementPair!.currentAnnotationStart = undefined;
       }
     }),
 );
+
+function areJudgementPairsEqual(jp1: PreloadJudgement, jp2: PreloadJudgement) {
+  return (
+    jp1.queryText === jp2.queryText &&
+    jp1.docAnnotationParts.length === jp2.docAnnotationParts.length &&
+    !jp1.docAnnotationParts.some((part, index) => jp2.docAnnotationParts[index] !== part)
+  );
+}
 
 export const actions = { preloadJudgements, rateJudgementPair, selectRangeStartEnd };
 export default reducer;

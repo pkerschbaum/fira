@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styles from './Annotation.module.css';
@@ -42,7 +42,7 @@ const Annotation: React.FC = () => {
 
           // set css class if part is start of the current selected range
           const currentRangeStartStyle =
-            annotationState.currentAnnotationStart === i ? styles.rangeStart : '';
+            currentJudgementPair.currentAnnotationStart === i ? styles.rangeStart : '';
 
           // set css class if part is in one of the selected ranges
           const isInRangeStyle = currentJudgementPair.annotatedRanges.some(
