@@ -3,8 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { authService } from './auth/auth.service';
-import { RootState } from './store/store';
+import { authService } from '../auth/auth.service';
+import { RootState } from '../store/store';
 
 const Login = () => {
   const user = useSelector((state: RootState) => state.user);

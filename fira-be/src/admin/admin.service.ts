@@ -44,7 +44,9 @@ export class AdminService {
             const dbEntry = new DocumentVersion();
             dbEntry.document = dbDocument;
             dbEntry.text = document.text;
-            dbEntry.annotateParts = document.text.split(config.application.splitRegex);
+            dbEntry.annotateParts = document.text
+              .split(config.application.splitRegex)
+              .filter(part => part !== '');
             if (maxVersionNumber !== undefined && maxVersionNumber !== null) {
               dbEntry.version = maxVersionNumber + 1;
             }

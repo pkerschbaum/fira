@@ -1,0 +1,23 @@
+.annotatePart {
+  display: inline-block;
+}
+
+.selectable {
+  --border-style: 1px solid black;
+  border-left: var(--border-style);
+  border-top: var(--border-style);
+  border-bottom: var(--border-style);
+  padding: 0 2px;
+}
+
+.selectable:last-of-type {
+  border-right: var(--border-style);
+}
+
+.isInRange {
+  background-color: darkgreen;
+}
+
+.rangeStart {
+  background-color: lightcoral;
+}

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 import { useSelector } from 'react-redux';
 
 import styles from './App.module.css';
-import Login from '../Login';
+import Login from './Login';
 import Admin from './admin/Admin';
 import Annotation from './annotation/Annotation';
 import PrivateRoute from './PrivateRoute';
