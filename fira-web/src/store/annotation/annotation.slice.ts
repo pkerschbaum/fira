@@ -1,6 +1,6 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import { PreloadJudgement } from '../../typings/typings';
-import { RelevanceLevel } from '../../typings/enums';
+import { RelevanceLevel, RateLevels } from '../../typings/enums';
 
 type JudgementPair = PreloadJudgement & {
   readonly relevanceLevel?: RelevanceLevel;
@@ -80,6 +80,15 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         pair => pair.id === state.currentJudgementPairId,
       );
       currentJudgementPair!.relevanceLevel = action.payload.relevanceLevel;
+      const currentRateLevel = RateLevels.find(
+        rateLevel => rateLevel.relevanceLevel === currentJudgementPair!.relevanceLevel,
+      );
+
+      // clear annotated ranges if rating is changed to a level which
+      // does not require annotation of ranges
+      if (!currentRateLevel!.annotationRequired) {
+        currentJudgementPair!.annotatedRanges = [];
+      }
     })
     .addCase(selectRangeStartEnd, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(

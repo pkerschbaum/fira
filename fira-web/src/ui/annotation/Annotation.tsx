@@ -6,6 +6,7 @@ import { RootState, AppDispatch } from '../../store/store';
 import { actions as annotationActions } from '../../store/annotation/annotation.slice';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 import { judgementsService } from '../../judgements/judgements.service';
+import { noop } from '../../util/functions';
 
 const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
@@ -65,7 +66,7 @@ const Annotation: React.FC = () => {
           return (
             <span
               key={i}
-              onClick={createAnnotatePartFn(i)}
+              onClick={!canAnnotate ? noop : createAnnotatePartFn(i)}
               className={`${styles.annotatePart} ${currentRangeStartStyle} ${isInRangeStyle} ${selectableStyle}`}
             >
               {textToShow}
