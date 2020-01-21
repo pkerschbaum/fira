@@ -3,7 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import styles from './Annotation.module.css';
 import { RootState, AppDispatch } from '../../store/store';
-import { actions as annotationActions } from '../../store/annotation/annotation.slice';
+import {
+  actions as annotationActions,
+  JudgementPairStatus,
+} from '../../store/annotation/annotation.slice';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 import { judgementsService } from '../../judgements/judgements.service';
 import { noop } from '../../util/functions';
@@ -11,6 +14,24 @@ import { noop } from '../../util/functions';
 const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
   const dispatch = useDispatch<AppDispatch>();
+
+  const pairsSuccessfullySent = annotationState.judgementPairs.filter(
+    pair => pair.status === JudgementPairStatus.SEND_SUCCESS,
+  );
+  const remainingToFinish = annotationState.remainingToFinish;
+  if (
+    remainingToFinish !== undefined &&
+    (remainingToFinish <= 0 || pairsSuccessfullySent.length >= remainingToFinish)
+  ) {
+    return <div>Finished!</div>;
+  }
+
+  const currentJudgementPair = annotationState.judgementPairs.find(
+    pair => pair.id === annotationState.currentJudgementPairId,
+  );
+  if (!currentJudgementPair) {
+    return <div>Loading...</div>;
+  }
 
   const createRatingFn = (relevanceLevel: RelevanceLevel) => () => {
     dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));
@@ -23,13 +44,6 @@ const Annotation: React.FC = () => {
   const submitAnnotation = () => {
     judgementsService.submitCurrentJudgement();
   };
-
-  const currentJudgementPair = annotationState.judgementPairs.find(
-    pair => pair.id === annotationState.currentJudgementPairId,
-  );
-  if (!currentJudgementPair) {
-    return <div>Loading...</div>;
-  }
 
   const currentRateLevel = RateLevels.find(
     rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,

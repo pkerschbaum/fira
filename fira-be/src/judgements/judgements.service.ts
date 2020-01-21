@@ -30,7 +30,7 @@ export class JudgementsService {
     this.appLogger.setContext('JudgementsService');
   }
   public async preloadJudgements(userId: string): Promise<PreloadJudgementResponse> {
-    return this.connection.transaction(async transactionalEntityManager => {
+    return this.connection.transaction('SERIALIZABLE', async transactionalEntityManager => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
       const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
@@ -44,11 +44,14 @@ export class JudgementsService {
       );
 
       const remainingToFinish = dbConfig.annotationTargetPerUser - currentFinishedJudgements.length;
-      const remainingUntilTargetMet = dbConfig.annotationTargetPerUser - judgementsOfUser.length;
-      let remainingJudgementsToPreload =
-        remainingUntilTargetMet < 1
+      const remainingUntilTargetMet =
+        dbConfig.annotationTargetPerUser - judgementsOfUser.length <= 0
           ? 0
-          : config.application.judgementsPreloadSize - currentOpenJudgements.length;
+          : dbConfig.annotationTargetPerUser - judgementsOfUser.length;
+      const maximumToPreload =
+        config.application.judgementsPreloadSize - currentOpenJudgements.length;
+      let remainingJudgementsToPreload =
+        remainingUntilTargetMet > maximumToPreload ? maximumToPreload : remainingUntilTargetMet;
 
       this.appLogger.log(
         `judgements stats for user: sum=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
