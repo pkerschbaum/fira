@@ -1,7 +1,10 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
-import { actions as annotationActions } from '../store/annotation/annotation.slice';
+import {
+  actions as annotationActions,
+  JudgementPairStatus,
+} from '../store/annotation/annotation.slice';
 
 const logger = createLogger('judgements.service');
 
@@ -32,16 +35,40 @@ export const judgementsService = {
 
     const durationUsedToJudgeMs = 0; // TODO implement
 
-    await httpClient.submitJudgement(
-      store.getState().user!.accessToken.val,
-      currentJudgementPair.id,
-      {
-        relevanceLevel: currentJudgementPair.relevanceLevel!,
-        relevancePositions,
-        durationUsedToJudgeMs,
-      },
+    store.dispatch(
+      annotationActions.setJudgementStatus({
+        id: currentJudgementPair.id,
+        status: JudgementPairStatus.SEND_PENDING,
+      }),
     );
-    // TODO dispatch success
+
+    try {
+      await httpClient.submitJudgement(
+        store.getState().user!.accessToken.val,
+        currentJudgementPair.id,
+        {
+          relevanceLevel: currentJudgementPair.relevanceLevel!,
+          relevancePositions,
+          durationUsedToJudgeMs,
+        },
+      );
+    } catch (error) {
+      logger.error(`submit current judgement failed!`, { id: currentJudgementPair.id, error });
+      store.dispatch(
+        annotationActions.setJudgementStatus({
+          id: currentJudgementPair.id,
+          status: JudgementPairStatus.SEND_FAILED,
+        }),
+      );
+      throw error;
+    }
+
+    store.dispatch(
+      annotationActions.setJudgementStatus({
+        id: currentJudgementPair.id,
+        status: JudgementPairStatus.SEND_SUCCESS,
+      }),
+    );
 
     logger.info(`submit current judgement succeeded!`);
   },

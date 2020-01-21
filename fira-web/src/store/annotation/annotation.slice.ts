@@ -2,10 +2,18 @@ import { createAction, createReducer } from '@reduxjs/toolkit';
 import { PreloadJudgement } from '../../typings/typings';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 
+export enum JudgementPairStatus {
+  TO_JUDGE = 'TO_JUDGE',
+  SEND_PENDING = 'SEND_PENDING',
+  SEND_SUCCESS = 'SEND_SUCCESS',
+  SEND_FAILED = 'SEND_FAILED',
+}
+
 type JudgementPair = PreloadJudgement & {
   readonly relevanceLevel?: RelevanceLevel;
   readonly currentAnnotationStart?: number;
   readonly annotatedRanges: Array<{ start: number; end: number }>;
+  readonly status: JudgementPairStatus;
 };
 
 type AnnotationState = {
@@ -27,11 +35,18 @@ type SelectRangeStartEndPayload = {
   readonly annotationPartIndex: number;
 };
 
+type SetJudgementStatusPayload = {
+  readonly id: PreloadJudgement['id'];
+  readonly status: JudgementPairStatus;
+};
+
 const INITIAL_STATE = { judgementPairs: [] } as AnnotationState;
 
 const preloadJudgements = createAction<PreloadJudgementsPayload>('JUDGEMENTS_PRELOADED');
 const rateJudgementPair = createAction<RateJudgementPairPayload>('JUDGEMENT_PAIR_RATED');
 const selectRangeStartEnd = createAction<SelectRangeStartEndPayload>('RANGE_STARTOREND_SELECTED');
+const setJudgementStatus = createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET');
+const selectJudgementPair = createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED');
 
 const reducer = createReducer(INITIAL_STATE, builder =>
   builder
@@ -40,40 +55,25 @@ const reducer = createReducer(INITIAL_STATE, builder =>
 
       const judgementPairsReceived = action.payload.judgements;
 
-      if (
-        !judgementPairsReceived.some(judgement => judgement.id === state.currentJudgementPairId)
-      ) {
-        state.currentJudgementPairId = undefined;
-      }
-
-      const currentJudgementPair = state.judgementPairs.find(
-        pair => pair.id === state.currentJudgementPairId,
-      );
       state.judgementPairs = judgementPairsReceived.map(judgement => {
-        if (
-          currentJudgementPair &&
-          currentJudgementPair.id === judgement.id &&
-          areJudgementPairsEqual(currentJudgementPair, judgement)
-        ) {
-          // keep already annotated ranges for the currently selected judgement pair
+        const localEquivalentPair = state.judgementPairs.find(pair => pair.id === judgement.id);
+        if (localEquivalentPair && areJudgementPairsEqual(localEquivalentPair, judgement)) {
+          // keep local data of judgement pair
           return {
             ...judgement,
-            ...currentJudgementPair,
+            ...localEquivalentPair,
           };
         } else {
-          // either this judgement pair received from server is not the currently selected one, or
-          // the currently selected one changed significantly
-          // --> set no annotated ranges (and thus, possibly discard already annotated ranges)
+          // either there is no local data for this judgement pair received from server, or
+          // the data of the pair changed significantly
+          // --> do not keep local data for this pair
           return {
             ...judgement,
             annotatedRanges: [],
+            status: JudgementPairStatus.TO_JUDGE,
           };
         }
       });
-
-      if (state.currentJudgementPairId === undefined) {
-        state.currentJudgementPairId = state.judgementPairs[0].id;
-      }
     })
     .addCase(rateJudgementPair, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
@@ -108,6 +108,13 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         });
         currentJudgementPair!.currentAnnotationStart = undefined;
       }
+    })
+    .addCase(setJudgementStatus, (state, action) => {
+      const judgementPair = state.judgementPairs.find(pair => pair.id === action.payload.id);
+      judgementPair!.status = action.payload.status;
+    })
+    .addCase(selectJudgementPair, (state, action) => {
+      state.currentJudgementPairId = action.payload?.id;
     }),
 );
 
@@ -119,5 +126,11 @@ function areJudgementPairsEqual(jp1: PreloadJudgement, jp2: PreloadJudgement) {
   );
 }
 
-export const actions = { preloadJudgements, rateJudgementPair, selectRangeStartEnd };
+export const actions = {
+  preloadJudgements,
+  rateJudgementPair,
+  selectRangeStartEnd,
+  setJudgementStatus,
+  selectJudgementPair,
+};
 export default reducer;
