@@ -20,6 +20,7 @@ type AnnotationState = {
   readonly judgementPairs: JudgementPair[];
   readonly remainingToFinish?: number;
   readonly currentJudgementPairId?: PreloadJudgement['id'];
+  readonly currentJudgementPairSelectedOnMs?: number; // unix timestamp
 };
 
 type PreloadJudgementsPayload = {
@@ -114,7 +115,10 @@ const reducer = createReducer(INITIAL_STATE, builder =>
       judgementPair!.status = action.payload.status;
     })
     .addCase(selectJudgementPair, (state, action) => {
-      state.currentJudgementPairId = action.payload?.id;
+      if (state.currentJudgementPairId !== action.payload?.id) {
+        state.currentJudgementPairId = action.payload?.id;
+        state.currentJudgementPairSelectedOnMs = new Date().getTime();
+      }
     }),
 );
 

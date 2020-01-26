@@ -33,7 +33,8 @@ export const judgementsService = {
       }
     }
 
-    const durationUsedToJudgeMs = 0; // TODO implement
+    const now = new Date().getTime();
+    const durationUsedToJudgeMs = now - annotationState.currentJudgementPairSelectedOnMs!;
 
     store.dispatch(
       annotationActions.setJudgementStatus({
