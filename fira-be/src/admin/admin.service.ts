@@ -155,6 +155,13 @@ export class AdminService {
     });
   };
 
+  public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
+    const dbEntry = new Config();
+    dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
+    dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
+    await this.configRepository.save(dbEntry);
+  };
+
   public getCountOfDocuments: () => Promise<number> = () => {
     return this.connection.getRepository(Document).count();
   };
@@ -169,12 +176,5 @@ export class AdminService {
 
   public getCountOfConfig: () => Promise<number> = () => {
     return this.connection.getRepository(Config).count();
-  };
-
-  public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
-    const dbEntry = new Config();
-    dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
-    dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
-    await this.configRepository.save(dbEntry);
   };
 }

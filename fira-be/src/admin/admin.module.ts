@@ -8,6 +8,7 @@ import { Query, QueryVersion } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
 import { IdentityManagementModule } from '../identity-management/identity-management.module';
+import { JudgementsModule } from 'src/judgements/judgements.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { IdentityManagementModule } from '../identity-management/identity-manage
       Config,
     ]),
     IdentityManagementModule,
+    JudgementsModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

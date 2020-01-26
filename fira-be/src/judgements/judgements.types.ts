@@ -11,16 +11,33 @@ export type PreloadJudgement = {
 };
 
 export type CountResult = {
-  count: number;
-  document_id: number;
-  priority: number;
-  query_id: number;
+  readonly count: number;
+  readonly document_id: number;
+  readonly priority: number;
+  readonly query_id: number;
 };
 
 export type SaveJudgement = {
   readonly relevanceLevel: RelevanceLevel;
   readonly relevancePositions: number[];
   readonly durationUsedToJudgeMs: number;
+};
+
+export type ExportJudgementsResponse = {
+  readonly judgements: ExportJudgement[];
+};
+
+export type ExportJudgement = {
+  readonly id: number;
+  readonly relevanceLevel: RelevanceLevel;
+  readonly relevanceCharacterRanges: Array<{ startChar: number; endChar: number }>;
+  readonly rotate: boolean;
+  readonly mode: JudgementMode;
+  readonly durationUsedToJudgeMs: number;
+  readonly judgedAtUnixTS: number;
+  readonly documentId: number;
+  readonly queryId: number;
+  readonly userId: string;
 };
 
 export enum JudgementStatus {

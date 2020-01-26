@@ -6,24 +6,16 @@ import {
   Headers,
   Post,
   HttpException,
+  Get,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 
 import * as config from '../config';
 import { AdminService } from './admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import {
-  ImportDocumentsReqDto,
-  ImportDocumentsRespDto,
-} from './dto/import-documents.dto';
-import {
-  ImportUsersRequestDto,
-  ImportUsersResponseDto,
-} from './dto/create-user.dto';
-import {
-  ImportQueriesReqDto,
-  ImportQueriesRespDto,
-} from './dto/import-queries.dto';
+import { ImportDocumentsReqDto, ImportDocumentsRespDto } from './dto/import-documents.dto';
+import { ImportUsersRequestDto, ImportUsersResponseDto } from './dto/create-user.dto';
+import { ImportQueriesReqDto, ImportQueriesRespDto } from './dto/import-queries.dto';
 import {
   ImportJudgementPairsReqDto,
   ImportJudgementPairsRespDto,
@@ -31,6 +23,8 @@ import {
 import { UpdateConfigReqDto } from './dto/update-config.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
+import { JudgementsService } from '../judgements/judgements.service';
+import { ExportJudgementsResponseDto } from './dto/export-judgements.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -44,6 +38,7 @@ export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly imService: IdentityManagementService,
+    private readonly judgementsService: JudgementsService,
   ) {}
 
   @Post('v1/import/users')
@@ -59,10 +54,7 @@ export class AdminController {
       throw new HttpException('access token required in header', 401);
     }
     return {
-      importedUsers: await this.imService.importUsers(
-        accessToken,
-        importUsersRequest.users,
-      ),
+      importedUsers: await this.imService.importUsers(accessToken, importUsersRequest.users),
     };
   }
 
@@ -71,9 +63,7 @@ export class AdminController {
     @Body() importDocsRequest: ImportDocumentsReqDto,
   ): Promise<ImportDocumentsRespDto> {
     return {
-      importedDocuments: await this.adminService.importDocuments(
-        importDocsRequest.documents,
-      ),
+      importedDocuments: await this.adminService.importDocuments(importDocsRequest.documents),
     };
   }
 
@@ -82,9 +72,7 @@ export class AdminController {
     @Body() importQueriesReq: ImportQueriesReqDto,
   ): Promise<ImportQueriesRespDto> {
     return {
-      importedQueries: await this.adminService.importQueries(
-        importQueriesReq.queries,
-      ),
+      importedQueries: await this.adminService.importQueries(importQueriesReq.queries),
     };
   }
 
@@ -102,5 +90,10 @@ export class AdminController {
   @Put('v1/config')
   async updateConfig(@Body() updateConfigReq: UpdateConfigReqDto) {
     await this.adminService.updateConfig(updateConfigReq);
+  }
+
+  @Get('v1/judgements/export')
+  async exportJudgements(): Promise<ExportJudgementsResponseDto> {
+    return { judgements: await this.judgementsService.exportJudgements() };
   }
 }

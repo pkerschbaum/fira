@@ -12,6 +12,7 @@ import {
   SaveJudgement,
   CountResult,
   PreloadJudgementResponse,
+  ExportJudgement,
 } from './judgements.types';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
@@ -29,6 +30,7 @@ export class JudgementsService {
   constructor(private readonly connection: Connection, private readonly appLogger: AppLogger) {
     this.appLogger.setContext('JudgementsService');
   }
+
   public async preloadJudgements(userId: string): Promise<PreloadJudgementResponse> {
     return this.connection.transaction('SERIALIZABLE', async transactionalEntityManager => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
@@ -168,6 +170,34 @@ export class JudgementsService {
       }
     });
   }
+
+  public exportJudgements: () => Promise<ExportJudgement[]> = async () => {
+    const allJudgements = await this.connection
+      .getRepository(Judgement)
+      .find({ where: { status: JudgementStatus.JUDGED } });
+
+    return allJudgements.map(judgement => {
+      const partsAvailable = judgement.document.annotateParts;
+      const partsAnnotated = judgement.relevancePositions;
+
+      const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
+
+      return {
+        id: judgement.id,
+        relevanceLevel: judgement.relevanceLevel,
+        relevanceCharacterRanges: partsAnnotated.map(
+          annotated => partsAvailableCharacterRanges[annotated],
+        ),
+        rotate: judgement.rotate,
+        mode: judgement.mode,
+        durationUsedToJudgeMs: judgement.durationUsedToJudgeMs,
+        judgedAtUnixTS: Math.round(judgement.judgedAt.getTime() / 1000),
+        documentId: judgement.document.document.id,
+        queryId: judgement.query.query.id,
+        userId: judgement.user.id,
+      };
+    });
+  };
 
   private async preloadNextJudgements({
     priorities,
@@ -316,4 +346,31 @@ function mapToResponse(openJudgement: Judgement): PreloadJudgement {
     docAnnotationParts: annotationParts,
     mode: openJudgement.mode,
   };
+}
+
+/**
+ * Construct map of character ranges for the given text parts.
+ *
+ * Example for text "The house":
+ * - "textParts" is ["The", " ", "house"]
+ * - map of character ranges will then be:
+ *  {
+ *    0: {startChar: 0, endChar:2},
+ *    1: {startChar: 3, endChar:3},
+ *    2: {startChar: 4, endChar:8},
+ *  }
+ */
+function constructCharacterRangesMap(textParts: string[]) {
+  const partsCharacterRanges: {
+    [index: number]: { startChar: number; endChar: number };
+  } = {};
+
+  let partOffset = -1;
+  textParts.forEach((part, index) => {
+    const startChar = partOffset + 1;
+    partsCharacterRanges[index] = { startChar, endChar: startChar + part.length - 1 };
+    partOffset += part.length;
+  });
+
+  return partsCharacterRanges;
 }

@@ -9,12 +9,9 @@ import { IdentityManagementModule } from '../identity-management/identity-manage
 import { LoggerModule } from '../logger/app-logger.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Judgement, User]),
-    IdentityManagementModule,
-    LoggerModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Judgement, User]), IdentityManagementModule, LoggerModule],
   controllers: [JudgementsController],
   providers: [JudgementsService],
+  exports: [JudgementsService],
 })
 export class JudgementsModule {}
