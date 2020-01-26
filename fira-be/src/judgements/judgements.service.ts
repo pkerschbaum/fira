@@ -24,6 +24,7 @@ import { AppLogger } from '../logger/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import { assertUnreachable } from 'src/util/types.util';
 import * as config from '../config';
+import d3 = require('d3');
 
 @Injectable()
 export class JudgementsService {
@@ -170,6 +171,31 @@ export class JudgementsService {
       }
     });
   }
+
+  public exportJudgementsTsv: () => Promise<string> = async () => {
+    const judgements = await this.exportJudgements();
+
+    return d3.tsvFormat(
+      judgements.map(judgement => {
+        // build string for ranges, e.g. '0-4;6-9'
+        let relevanceCharacterRanges = '';
+        for (const range of judgement.relevanceCharacterRanges) {
+          relevanceCharacterRanges += `${range.startChar}-${range.endChar}`;
+          relevanceCharacterRanges += ';';
+        }
+        // remove last semicolon
+        relevanceCharacterRanges = relevanceCharacterRanges.substr(
+          0,
+          relevanceCharacterRanges.length - 1,
+        );
+
+        return {
+          ...judgement,
+          relevanceCharacterRanges,
+        };
+      }),
+    );
+  };
 
   public exportJudgements: () => Promise<ExportJudgement[]> = async () => {
     const allJudgements = await this.connection

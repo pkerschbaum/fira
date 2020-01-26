@@ -7,8 +7,9 @@ import {
   Post,
   HttpException,
   Get,
+  Header,
 } from '@nestjs/common';
-import { ApiTags, ApiHeader } from '@nestjs/swagger';
+import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 
 import * as config from '../config';
 import { AdminService } from './admin.service';
@@ -95,5 +96,16 @@ export class AdminController {
   @Get('v1/judgements/export')
   async exportJudgements(): Promise<ExportJudgementsResponseDto> {
     return { judgements: await this.judgementsService.exportJudgements() };
+  }
+
+  @Get('v1/judgements/export/tsv')
+  @ApiResponse({
+    status: 200,
+    content: {
+      'text/tab-separated-values': {},
+    },
+  })
+  async exportJudgementsTsv(): Promise<string> {
+    return await this.judgementsService.exportJudgementsTsv();
   }
 }
