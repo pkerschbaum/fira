@@ -15,6 +15,8 @@ const COLUMN_DOCUMENT_TEXT = 'doc_text';
 const COLUMN_QUERY_ID = 'query_id';
 const COLUMN_QUERY_TEXT = 'query_text';
 const COLUMN_PRIORITY = 'priority';
+const COLUMN_ANNO_TARGET_USER = 'annotation_target_per_user';
+const COLUMN_ANNO_TARGET_JUDGE_PAIR = 'annotation_target_per_judgement_pair';
 
 export async function importInitialData({
   logger,
@@ -91,6 +93,20 @@ export async function importInitialData({
     }),
     importFn: adminService.importJudgementPairs,
   });
+
+  /* --- CONFIG --- */
+
+  await importAsset<{ annotationTargetPerUser: number; annotationTargetPerJudgPair: number }>({
+    logger,
+    assetType: 'config',
+    getCountFn: adminService.getCountOfConfig,
+    tsvSkipFn: () => false, // don't skip anything
+    tsvMapFn: entry => ({
+      annotationTargetPerUser: Number(entry[COLUMN_ANNO_TARGET_USER]),
+      annotationTargetPerJudgPair: Number(entry[COLUMN_ANNO_TARGET_JUDGE_PAIR]),
+    }),
+    importFn: configs => adminService.updateConfig(configs[0]),
+  });
 }
 
 type ObjectLiteral = {
@@ -120,7 +136,7 @@ async function importAsset<T>({
   getCountFn: () => Promise<number>;
   tsvSkipFn: (obj: ObjectLiteral) => boolean;
   tsvMapFn: (obj: ObjectLiteral) => T;
-  importFn: (assetsParsed: T[]) => Promise<ImportResult[]>;
+  importFn: (assetsParsed: T[]) => Promise<ImportResult[] | void>;
 }) {
   const countOfAssets = await getCountFn();
   if (countOfAssets > 0) {
@@ -133,7 +149,9 @@ async function importAsset<T>({
   const assetsParsed = tsvParse(assetFileContent, tsvSkipFn, tsvMapFn) as T[];
 
   const assetsImportResult = await importFn(assetsParsed);
-  abortOnFailedImport(logger, assetsImportResult);
+  if (assetsImportResult) {
+    abortOnFailedImport(logger, assetsImportResult);
+  }
 
   logger.log(`import of ${assetType} successful!`);
 }

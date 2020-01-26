@@ -167,7 +167,11 @@ export class AdminService {
     return this.connection.getRepository(JudgementPair).count();
   };
 
-  public updateConfig: (config: UpdateConfig) => void = async config => {
+  public getCountOfConfig: () => Promise<number> = () => {
+    return this.connection.getRepository(Config).count();
+  };
+
+  public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
     const dbEntry = new Config();
     dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
     dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
