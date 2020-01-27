@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import styles from './FloatingTextInput.module.css';
 
@@ -43,14 +43,15 @@ const FloatingLabel: React.FC<FloatingLabelProps> = ({ active, children, ...prop
   </label>
 );
 
-type FloatingInputProps = { active: boolean } & React.DetailedHTMLProps<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->;
+type FloatingInputProps = {
+  active: boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
+} & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
-const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, ...props }) => (
+const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, inputRef, ...props }) => (
   <input
     {...props}
+    ref={inputRef}
     onBlur={props.onBlur}
     className={`${props.className} ${!!active && styles.floatingInputActive} ${
       styles.floatingInput
@@ -60,16 +61,10 @@ const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, ...prop
   </input>
 );
 
-const FloatingTextInput: React.FC<any> = ({
-  id,
-  label,
-  type,
-  ref,
-  className,
-  value,
-  ...otherProps
-}) => {
+const FloatingTextInput: React.FC<any> = ({ id, label, type, className, value, ...otherProps }) => {
   const [active, setActive] = useState(!!value && value.length > 0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   function onFocus(event: any) {
     setActive(true);
     if (otherProps.onFocus) {
@@ -85,9 +80,13 @@ const FloatingTextInput: React.FC<any> = ({
     }
   }
 
+  function onContainerClick() {
+    inputRef.current!.focus();
+  }
+
   return (
     <FloatingLabelInput>
-      <FloatingLabelInputContainer className={className}>
+      <FloatingLabelInputContainer onClick={onContainerClick} className={className}>
         <FloatingLabel htmlFor={id} active={active}>
           {label}
         </FloatingLabel>
@@ -97,7 +96,7 @@ const FloatingTextInput: React.FC<any> = ({
           id={id}
           onBlur={onBlur}
           onFocus={onFocus}
-          ref={ref}
+          inputRef={inputRef}
           type={type}
         />
       </FloatingLabelInputContainer>

@@ -27,15 +27,20 @@
 
 .submitButton {
   margin-top: var(--margin-medium);
+  padding: var(--padding-small) var(--padding-xlarge);
+
   width: 100%;
   background-color: var(--color-primary);
-  padding: var(--padding-small) var(--padding-xlarge);
   color: white;
   font-weight: var(--weight-large);
   border: none;
   border-radius: var(--border-radius-normal);
   transition: box-shadow 0.2s ease 0s, transform 0.1s ease 0s;
   transform-origin: center center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .submitButton:active {

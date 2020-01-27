@@ -7,6 +7,7 @@ import styles from './Login.module.css';
 import { authService } from '../auth/auth.service';
 import { RootState } from '../store/store';
 import FloatingTextInput from './elements/FloatingTextInput';
+import LoadingIndicator from './elements/LoadingIndicator';
 
 const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
   React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> = ({
@@ -59,10 +60,15 @@ const Login = () => {
               await authService.login(values.username, values.password);
               // omit setSubmitting here because if login was successful, it will redirect and thus unmount the component
             } catch (e) {
-              if (e.getStatus() === 401) {
-                setErrors({ loginError: `Credentials invalid` });
+              if (typeof e.getStatus === 'function' && e.getStatus() === 401) {
+                setErrors({ loginError: `Credentials invalid.` });
+              } else if (
+                (typeof e.message === 'string' && /Network Error/i.test(e.message)) ||
+                e.code === 'ECONNABORTED'
+              ) {
+                setErrors({ loginError: `Network error. Please make sure to be online.` });
               } else {
-                setErrors({ loginError: `Unexpected error occured during login` });
+                setErrors({ loginError: `Unexpected error occured during login.` });
               }
               setSubmitting(false);
             }
@@ -80,7 +86,7 @@ const Login = () => {
                 </ul>
               )}
               <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
-                Submit
+                {!isSubmitting ? 'Submit' : <LoadingIndicator />}
               </button>
             </Form>
           )}
