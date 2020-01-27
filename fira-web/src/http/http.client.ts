@@ -193,6 +193,23 @@ export const httpClient = {
       throw e;
     }
   },
+
+  exportJudgements: async (accessToken: string): Promise<string> => {
+    logger.info('executing export of judgements...');
+
+    try {
+      return (
+        await axiosClient.get(`admin/v1/judgements/export/tsv`, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('export of judgements failed!', e);
+      throw e;
+    }
+  },
 };
 
 function timeout(ms: number) {
