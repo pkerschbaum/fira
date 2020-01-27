@@ -8,4 +8,30 @@
   flex-direction: column;
 
   background-color: white;
+
+  --color-primary: #4d606e;
+  --color-error: rgb(193, 53, 21);
+  --color-dense: #1d1d1d;
+  --color-soft: #9b9b9b;
+
+  --weight-xlarge: 800;
+  --weight-large: 600;
+
+  --font-small: 0.75rem;
+
+  --border-small: 0.0625rem;
+  --border-radius-normal: 0.5rem;
+
+  --margin-xsmall: 0.75rem;
+  --margin-medium: 1rem;
+  --margin-xxlarge: 1.625rem;
+  --padding-xxxsmall: 0.25rem;
+  --padding-small: 0.875rem;
+  --padding-xlarge: 1.5rem;
+
+  --transform-submit: scale(0.96);
+}
+
+.app * {
+  font-size: 1rem;
 }

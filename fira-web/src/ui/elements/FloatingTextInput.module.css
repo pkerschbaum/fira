@@ -1,0 +1,50 @@
+.floatingLabelInput {
+  width: 100%;
+}
+
+.floatingLabelInputContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  height: 3.5rem;
+}
+
+.floatingLabel {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  position: absolute;
+  color: var(--color-soft);
+  bottom: 0.83rem;
+  top: 1.125rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  transition: all 0.2s ease-in-out;
+  transform-origin: left top;
+  cursor: text;
+  pointer-events: none;
+  transform: none;
+}
+
+.floatingLabelActive {
+  transform: translateY(-0.5rem) scale(0.75);
+}
+
+.floatingInput {
+  padding: 0;
+  margin: 1.625rem 0.75rem 0.625rem 0.75rem;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+
+.floatingInput::placeholder {
+  color: var(--color-soft);
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+}
+
+.floatingInputActive::placeholder {
+  opacity: 1;
+}

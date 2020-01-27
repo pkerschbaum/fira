@@ -1,0 +1,83 @@
+.container {
+  /* START center children, vertical and horizontal */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  /* END center children, vertical and horizontal */
+}
+
+.inputArea {
+  width: 32.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputArea > * {
+  width: 100%;
+}
+
+.inputArea > span {
+  text-align: center;
+  font-weight: var(--weight-xlarge);
+  margin-bottom: var(--margin-medium);
+}
+
+.submitButton {
+  margin-top: var(--margin-medium);
+  width: 100%;
+  background-color: var(--color-primary);
+  padding: var(--padding-small) var(--padding-xlarge);
+  color: white;
+  font-weight: var(--weight-large);
+  border: none;
+  border-radius: var(--border-radius-normal);
+  transition: box-shadow 0.2s ease 0s, transform 0.1s ease 0s;
+  transform-origin: center center;
+}
+
+.submitButton:active {
+  transform: var(--transform-submit);
+}
+
+.errorList {
+  margin: var(--margin-medium) 0 0 0;
+  color: var(--color-error);
+  list-style-position: inside;
+  list-style-type: '\1f6a8'; /* thumbs up sign */
+  padding: 0;
+}
+
+.errorList > li > span {
+  padding-left: var(--padding-xxxsmall);
+}
+
+.inputField {
+  border: var(--border-small) solid var(--color-soft);
+  border-radius: var(--border-radius-normal);
+}
+
+.inputField:focus-within {
+  border: var(--border-small) solid var(--color-dense);
+}
+
+.inputFieldError {
+  font-weight: var(--weight-xlarge);
+  border-color: var(--color-error);
+}
+
+.inputFieldError:focus-within {
+  border-color: var(--color-error);
+}
+
+.inputFieldError > label {
+  color: var(--color-error);
+}
+
+@media (max-width: 520px) {
+  .inputArea {
+    width: 100%;
+  }
+}
