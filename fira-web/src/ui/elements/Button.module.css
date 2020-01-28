@@ -16,7 +16,7 @@
   align-items: center;
 }
 
-.button:active {
+.animate {
   transform: var(--transform-button);
 }
 

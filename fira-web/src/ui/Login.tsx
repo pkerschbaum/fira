@@ -43,7 +43,7 @@ const Login = () => {
   return (
     <div className={styles.container}>
       <div className={styles.inputArea}>
-        <span>Einloggen</span>
+        <span>Login</span>
         <Formik
           initialValues={{ username: '', password: '', loginError: '' }}
           validate={values => {

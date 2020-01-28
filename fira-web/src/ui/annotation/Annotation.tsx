@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import styles from './Annotation.module.css';
@@ -16,6 +16,45 @@ const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
   const dispatch = useDispatch<AppDispatch>();
 
+  const button1Ref = useRef<HTMLButtonElement>(null);
+  const button2Ref = useRef<HTMLButtonElement>(null);
+  const button3Ref = useRef<HTMLButtonElement>(null);
+  const button4Ref = useRef<HTMLButtonElement>(null);
+  const button5Ref = useRef<HTMLButtonElement>(null);
+
+  const digitRefMap = {
+    Digit1: button1Ref,
+    Digit2: button2Ref,
+    Digit3: button3Ref,
+    Digit4: button4Ref,
+    Digit5: button5Ref,
+  } as const;
+
+  const rateButtonRefMap = {
+    [RelevanceLevel.MISLEADING_ANSWER]: button1Ref,
+    [RelevanceLevel.NOT_RELEVANT]: button2Ref,
+    [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: button3Ref,
+    [RelevanceLevel.GOOD_ANSWER]: button4Ref,
+    [RelevanceLevel.PERFECT_ANSWER]: button5Ref,
+  } as const;
+
+  useLayoutEffect(() => {
+    const keyUpHandler = (e: KeyboardEvent) => {
+      const key = e.code;
+      if (
+        key === 'Digit1' ||
+        key === 'Digit2' ||
+        key === 'Digit3' ||
+        key === 'Digit4' ||
+        key === 'Digit5'
+      ) {
+        digitRefMap[key].current!.click();
+      }
+    };
+    document.addEventListener('keyup', keyUpHandler, { passive: true });
+    return () => document.removeEventListener('keyup', keyUpHandler);
+  });
+
   const pairsSuccessfullySent = annotationState.judgementPairs.filter(
     pair => pair.status === JudgementPairStatus.SEND_SUCCESS,
   );
@@ -27,6 +66,7 @@ const Annotation: React.FC = () => {
     annotationState.alreadyFinished === undefined
       ? undefined
       : annotationState.alreadyFinished + pairsSuccessfullySent.length;
+
   if (remainingToFinish !== undefined && remainingToFinish <= 0) {
     return <div>Finished!</div>;
   }
@@ -114,6 +154,7 @@ const Annotation: React.FC = () => {
                 }}
                 className={styles.rateButton}
                 onClick={createRatingFn(rateButton.relevanceLevel)}
+                componentRef={rateButtonRefMap[rateButton.relevanceLevel]}
               >
                 {rateButton.text}
               </Button>
