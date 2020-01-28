@@ -19,6 +19,9 @@ export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   readonly judgements: PreloadJudgementDto[];
   @IsInt()
   @IsDefined()
+  readonly alreadyFinished: number;
+  @IsInt()
+  @IsDefined()
   readonly remainingToFinish: number;
 }
 

@@ -1,4 +1,11 @@
+.progressBar {
+  background-color: lightgreen;
+  height: 0.5rem;
+  margin: -8px 0 0 -8px;
+}
+
 .container {
+  height: 100%;
   flex-grow: 1;
 
   display: flex;
@@ -11,11 +18,20 @@
 }
 
 .container > *:first-child {
-  margin-top: 0;
+  margin-top: var(--margin-xsmall);
+}
+
+.queryText {
+  font-weight: var(--weight-large);
 }
 
 .annotationArea {
   flex-grow: 1;
+
+  box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
+    2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
+    0 2px 0 0 var(--color-dense) inset;
+  overflow: scroll;
 }
 
 .annotatePart {

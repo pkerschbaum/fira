@@ -23,6 +23,10 @@ const Annotation: React.FC = () => {
     annotationState.remainingToFinish === undefined
       ? undefined
       : annotationState.remainingToFinish - pairsSuccessfullySent.length;
+  const alreadyFinished =
+    annotationState.alreadyFinished === undefined
+      ? undefined
+      : annotationState.alreadyFinished + pairsSuccessfullySent.length;
   if (remainingToFinish !== undefined && remainingToFinish <= 0) {
     return <div>Finished!</div>;
   }
@@ -56,61 +60,73 @@ const Annotation: React.FC = () => {
       (currentJudgementPair.annotatedRanges.length === 0 ||
         currentJudgementPair.currentAnnotationStart !== undefined));
 
+  let progressBarWidth: number | undefined;
+  if (remainingToFinish !== undefined && alreadyFinished !== undefined) {
+    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const annotationTarget = remainingToFinish + alreadyFinished;
+    const finishedFraction = alreadyFinished / annotationTarget;
+    progressBarWidth = vw * finishedFraction;
+  }
+
   return (
-    <div className={styles.container}>
-      <div>Remaining to finish: {remainingToFinish}</div>
-      <div>{currentJudgementPair.queryText}</div>
-      <div className={styles.annotationArea}>
-        {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
-          // replace blank by fixed-width blank character (otherwise, styles like border don't apply)
-          const textToShow = annotationPart.replace(' ', '\u00a0');
+    <>
+      {progressBarWidth && (
+        <div style={{ width: progressBarWidth }} className={styles.progressBar} />
+      )}
+      <div className={styles.container}>
+        <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
+        <div className={styles.annotationArea}>
+          {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
+            // replace blank by fixed-width blank character (otherwise, styles like border don't apply)
+            const textToShow = annotationPart.replace(' ', '\u00a0');
 
-          // set css class if part is start of the current selected range
-          const currentRangeStartStyle =
-            currentJudgementPair.currentAnnotationStart === i ? styles.rangeStart : '';
+            // set css class if part is start of the current selected range
+            const currentRangeStartStyle =
+              currentJudgementPair.currentAnnotationStart === i ? styles.rangeStart : '';
 
-          // set css class if part is in one of the selected ranges
-          const isInRangeStyle = currentJudgementPair.annotatedRanges.some(
-            range => range.start <= i && range.end >= i,
-          )
-            ? styles.isInRange
-            : '';
+            // set css class if part is in one of the selected ranges
+            const isInRangeStyle = currentJudgementPair.annotatedRanges.some(
+              range => range.start <= i && range.end >= i,
+            )
+              ? styles.isInRange
+              : '';
 
-          // display the span as selectable if annotation is possible
-          const selectableStyle = canAnnotate ? styles.selectable : '';
+            // display the span as selectable if annotation is possible
+            const selectableStyle = canAnnotate ? styles.selectable : '';
 
-          return (
-            <span
-              key={i}
-              onClick={!canAnnotate ? noop : createAnnotatePartFn(i)}
-              className={`${styles.annotatePart} ${currentRangeStartStyle} ${isInRangeStyle} ${selectableStyle}`}
-            >
-              {textToShow}
-            </span>
-          );
-        })}
+            return (
+              <span
+                key={i}
+                onClick={!canAnnotate ? noop : createAnnotatePartFn(i)}
+                className={`${styles.annotatePart} ${currentRangeStartStyle} ${isInRangeStyle} ${selectableStyle}`}
+              >
+                {textToShow}
+              </span>
+            );
+          })}
+        </div>
+        <div className={styles.buttonContainer}>
+          {RateLevels.map(rateButton => (
+            <div key={rateButton.relevanceLevel}>
+              <Button
+                style={{
+                  background: rateButton.buttonColor,
+                }}
+                className={styles.rateButton}
+                onClick={createRatingFn(rateButton.relevanceLevel)}
+              >
+                {rateButton.text}
+              </Button>
+            </div>
+          ))}
+        </div>
+        <div>
+          <Button disabled={hasToAnnotate} onClick={submitAnnotation}>
+            Next
+          </Button>
+        </div>
       </div>
-      <div className={styles.buttonContainer}>
-        {RateLevels.map(rateButton => (
-          <div key={rateButton.relevanceLevel}>
-            <Button
-              style={{
-                background: rateButton.buttonColor,
-              }}
-              className={styles.rateButton}
-              onClick={createRatingFn(rateButton.relevanceLevel)}
-            >
-              {rateButton.text}
-            </Button>
-          </div>
-        ))}
-      </div>
-      <div>
-        <Button disabled={hasToAnnotate} onClick={submitAnnotation}>
-          Next
-        </Button>
-      </div>
-    </div>
+    </>
   );
 };
 

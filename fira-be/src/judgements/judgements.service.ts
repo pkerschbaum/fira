@@ -68,6 +68,7 @@ export class JudgementsService {
         // --> do not preload more judgements
         return {
           judgements: currentOpenJudgements.map(mapToResponse),
+          alreadyFinished: currentFinishedJudgements.length,
           remainingToFinish,
         };
       }
@@ -106,6 +107,7 @@ export class JudgementsService {
 
       return {
         judgements: openJudgements.map(mapToResponse),
+        alreadyFinished: currentFinishedJudgements.length,
         remainingToFinish,
       };
     });
