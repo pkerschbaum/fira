@@ -10,6 +10,7 @@ import {
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 import { judgementsService } from '../../judgements/judgements.service';
 import { noop } from '../../util/functions';
+import Button from '../elements/Button';
 
 const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
@@ -18,11 +19,11 @@ const Annotation: React.FC = () => {
   const pairsSuccessfullySent = annotationState.judgementPairs.filter(
     pair => pair.status === JudgementPairStatus.SEND_SUCCESS,
   );
-  const remainingToFinish = annotationState.remainingToFinish;
-  if (
-    remainingToFinish !== undefined &&
-    (remainingToFinish <= 0 || pairsSuccessfullySent.length >= remainingToFinish)
-  ) {
+  const remainingToFinish =
+    annotationState.remainingToFinish === undefined
+      ? undefined
+      : annotationState.remainingToFinish - pairsSuccessfullySent.length;
+  if (remainingToFinish !== undefined && remainingToFinish <= 0) {
     return <div>Finished!</div>;
   }
 
@@ -56,12 +57,13 @@ const Annotation: React.FC = () => {
         currentJudgementPair.currentAnnotationStart !== undefined));
 
   return (
-    <div>
+    <div className={styles.container}>
+      <div>Remaining to finish: {remainingToFinish}</div>
       <div>{currentJudgementPair.queryText}</div>
-      <div>
+      <div className={styles.annotationArea}>
         {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
           // replace blank by fixed-width blank character (otherwise, styles like border don't apply)
-          const textToShow = annotationPart !== ' ' ? annotationPart : '\u00a0';
+          const textToShow = annotationPart.replace(' ', '\u00a0');
 
           // set css class if part is start of the current selected range
           const currentRangeStartStyle =
@@ -88,22 +90,26 @@ const Annotation: React.FC = () => {
           );
         })}
       </div>
-      <div>
+      <div className={styles.buttonContainer}>
         {RateLevels.map(rateButton => (
-          <button
-            key={rateButton.relevanceLevel}
-            onClick={createRatingFn(rateButton.relevanceLevel)}
-          >
-            {rateButton.text}
-          </button>
+          <div key={rateButton.relevanceLevel}>
+            <Button
+              style={{
+                background: rateButton.buttonColor,
+              }}
+              className={styles.rateButton}
+              onClick={createRatingFn(rateButton.relevanceLevel)}
+            >
+              {rateButton.text}
+            </Button>
+          </div>
         ))}
       </div>
       <div>
-        <button disabled={hasToAnnotate} onClick={submitAnnotation}>
+        <Button disabled={hasToAnnotate} onClick={submitAnnotation}>
           Next
-        </button>
+        </Button>
       </div>
-      <div>Remaining to finish: {annotationState.remainingToFinish}</div>
     </div>
   );
 };

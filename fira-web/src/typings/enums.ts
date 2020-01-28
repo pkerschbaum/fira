@@ -11,17 +11,30 @@ export const RateLevels = [
     text: 'Misleading Answer',
     relevanceLevel: RelevanceLevel.MISLEADING_ANSWER,
     annotationRequired: false,
+    buttonColor: '#FF7E61',
   },
-  { text: 'Not Relevant', relevanceLevel: RelevanceLevel.NOT_RELEVANT, annotationRequired: false },
+  {
+    text: 'Not Relevant',
+    relevanceLevel: RelevanceLevel.NOT_RELEVANT,
+    annotationRequired: false,
+    buttonColor: '#EBB25B',
+  },
   {
     text: 'Topic Relevant, But Does Not Answer',
     relevanceLevel: RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER,
     annotationRequired: true,
+    buttonColor: '#FFF498',
   },
-  { text: 'Good Answer', relevanceLevel: RelevanceLevel.GOOD_ANSWER, annotationRequired: true },
+  {
+    text: 'Good Answer',
+    relevanceLevel: RelevanceLevel.GOOD_ANSWER,
+    annotationRequired: true,
+    buttonColor: '#A1E880',
+  },
   {
     text: 'Perfect Answer',
     relevanceLevel: RelevanceLevel.PERFECT_ANSWER,
     annotationRequired: true,
+    buttonColor: '#73FFC3',
   },
 ] as const;

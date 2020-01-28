@@ -1,23 +1,57 @@
+.container {
+  flex-grow: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.container > * {
+  margin-top: var(--margin-medium);
+}
+
+.container > *:first-child {
+  margin-top: 0;
+}
+
+.annotationArea {
+  flex-grow: 1;
+}
+
 .annotatePart {
   display: inline-block;
+  padding: 1px 2px 1px 3px;
 }
 
 .selectable {
-  --border-style: 1px solid black;
-  border-left: var(--border-style);
-  border-top: var(--border-style);
-  border-bottom: var(--border-style);
-  padding: 0 2px;
-}
-
-.selectable:last-of-type {
-  border-right: var(--border-style);
+  box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
+    2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
+    0 2px 0 0 var(--color-dense) inset;
 }
 
 .isInRange {
-  background-color: darkgreen;
+  background-color: lightgreen;
 }
 
 .rangeStart {
   background-color: lightcoral;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.buttonContainer > div {
+  width: 10rem;
+
+  display: flex;
+}
+
+.rateButton {
+  color: var(--color-dense);
+  font-size: var(--font-small);
+  font-weight: var(--weight-medium);
+  padding: var(--padding-xsmall) var(--padding-xxxsmall);
 }

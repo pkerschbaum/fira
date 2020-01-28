@@ -1,0 +1,25 @@
+.button {
+  padding: var(--padding-small) var(--padding-xxxsmall);
+
+  width: 100%;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: var(--weight-large);
+  border: none;
+  border-radius: var(--border-radius-normal);
+  outline: none;
+  transition: box-shadow 0.2s ease 0s, transform 0.1s ease 0s, background-color 0.1s ease 0s;
+  transform-origin: center center;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button:active {
+  transform: var(--transform-button);
+}
+
+.button:disabled {
+  background-color: var(--color-disabled);
+}
