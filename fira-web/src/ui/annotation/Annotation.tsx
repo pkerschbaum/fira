@@ -1,5 +1,6 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Manager, Reference, Popper } from 'react-popper';
 
 import styles from './Annotation.module.css';
 import { RootState, AppDispatch } from '../../store/store';
@@ -15,6 +16,9 @@ import Button from '../elements/Button';
 const Annotation: React.FC = () => {
   const annotationState = useSelector((state: RootState) => state.annotation);
   const dispatch = useDispatch<AppDispatch>();
+  const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
+    undefined,
+  );
 
   const button1Ref = useRef<HTMLButtonElement>(null);
   const button2Ref = useRef<HTMLButtonElement>(null);
@@ -86,6 +90,9 @@ const Annotation: React.FC = () => {
     dispatch(annotationActions.selectRangeStartEnd({ annotationPartIndex }));
   };
 
+  const createShowTooltipFn = (annotationPartIndex: number) => () =>
+    setTooltipAnnotatePartIndex(annotationPartIndex);
+
   const submitAnnotation = () => {
     judgementsService.submitCurrentJudgement();
   };
@@ -93,7 +100,7 @@ const Annotation: React.FC = () => {
   const currentRateLevel = RateLevels.find(
     rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
   );
-  const canAnnotate = currentRateLevel?.annotationRequired;
+  const rateLevelAllowsAnnotation = currentRateLevel?.annotationRequired;
   const hasToAnnotate =
     !currentRateLevel ||
     (currentRateLevel.annotationRequired &&
@@ -110,12 +117,15 @@ const Annotation: React.FC = () => {
 
   return (
     <>
-      {progressBarWidth && (
+      {progressBarWidth !== undefined && (
         <div style={{ width: progressBarWidth }} className={styles.progressBar} />
       )}
-      <div className={styles.container}>
+      <div
+        className={styles.container}
+        onClickCapture={() => setTooltipAnnotatePartIndex(undefined)}
+      >
         <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
-        <div className={styles.annotationArea}>
+        <div key={currentJudgementPair.id} className={styles.annotationArea}>
           {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
             // replace blank by fixed-width blank character (otherwise, styles like border don't apply)
             const textToShow = annotationPart.replace(' ', '\u00a0');
@@ -124,24 +134,65 @@ const Annotation: React.FC = () => {
             const currentRangeStartStyle =
               currentJudgementPair.currentAnnotationStart === i ? styles.rangeStart : '';
 
-            // set css class if part is in one of the selected ranges
-            const isInRangeStyle = currentJudgementPair.annotatedRanges.some(
+            // determine if part is in one of the selected ranges
+            const isInSelectedRange = currentJudgementPair.annotatedRanges.some(
               range => range.start <= i && range.end >= i,
-            )
-              ? styles.isInRange
-              : '';
+            );
+
+            const canAnnotatePart = rateLevelAllowsAnnotation && !isInSelectedRange;
 
             // display the span as selectable if annotation is possible
-            const selectableStyle = canAnnotate ? styles.selectable : '';
+            const annotationGridStyle = rateLevelAllowsAnnotation ? styles.gridStyle : '';
 
-            return (
+            const annotatePartSpan = (ref?: any) => (
               <span
+                ref={ref}
                 key={i}
-                onClick={!canAnnotate ? noop : createAnnotatePartFn(i)}
-                className={`${styles.annotatePart} ${currentRangeStartStyle} ${isInRangeStyle} ${selectableStyle}`}
+                onClick={
+                  canAnnotatePart
+                    ? createAnnotatePartFn(i)
+                    : isInSelectedRange
+                    ? createShowTooltipFn(i)
+                    : noop
+                }
+                className={`${styles.annotatePart} ${currentRangeStartStyle} ${
+                  !!isInSelectedRange ? styles.isInRange : ''
+                } ${annotationGridStyle}`}
               >
                 {textToShow}
               </span>
+            );
+
+            return tooltipAnnotatePartIndex !== i ? (
+              annotatePartSpan()
+            ) : (
+              <Manager>
+                <Reference>{({ ref }) => annotatePartSpan(ref)}</Reference>
+                <Popper placement="top">
+                  {({ ref, style, placement }) => (
+                    <div ref={ref} style={style} data-placement={placement}>
+                      <Button
+                        className={styles.annotatePartTooltipButton}
+                        onClick={e => {
+                          dispatch(annotationActions.deleteRange({ annotationPartIndex: i }));
+                          setTooltipAnnotatePartIndex(undefined);
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="18"
+                          viewBox="5 3 14 18"
+                          fill="white"
+                        >
+                          <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                        </svg>
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </Popper>
+              </Manager>
             );
           })}
         </div>
@@ -162,7 +213,7 @@ const Annotation: React.FC = () => {
           ))}
         </div>
         <div>
-          <Button disabled={hasToAnnotate} onClick={submitAnnotation}>
+          <Button buttonStyle="bold" disabled={hasToAnnotate} onClick={submitAnnotation}>
             Next
           </Button>
         </div>

@@ -4,9 +4,11 @@ import styles from './Button.module.css';
 
 const Button: React.FC<{
   componentRef?: React.RefObject<HTMLButtonElement>;
+  buttonStyle?: 'bold' | 'normal';
 } & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>> = ({
   componentRef,
   children,
+  buttonStyle = 'normal',
   ...props
 }) => {
   const [animate, setAnimate] = useState(false);
@@ -39,7 +41,9 @@ const Button: React.FC<{
       onClick={onClick}
       onTransitionEnd={onTransitionEnd}
       ref={componentRef}
-      className={`${props.className} ${styles.button} ${animate && styles.animate}`}
+      className={`${props.className} ${styles.button} ${animate && styles.animate} ${
+        buttonStyle === 'normal' ? styles.styleNormal : styles.styleBold
+      }`}
     >
       {children}
     </button>

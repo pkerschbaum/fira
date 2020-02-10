@@ -38,6 +38,10 @@ type SelectRangeStartEndPayload = {
   readonly annotationPartIndex: number;
 };
 
+type DeleteRangePayload = {
+  readonly annotationPartIndex: number;
+};
+
 type SetJudgementStatusPayload = {
   readonly id: PreloadJudgement['id'];
   readonly status: JudgementPairStatus;
@@ -48,6 +52,7 @@ const INITIAL_STATE = { judgementPairs: [] } as AnnotationState;
 const preloadJudgements = createAction<PreloadJudgementsPayload>('JUDGEMENTS_PRELOADED');
 const rateJudgementPair = createAction<RateJudgementPairPayload>('JUDGEMENT_PAIR_RATED');
 const selectRangeStartEnd = createAction<SelectRangeStartEndPayload>('RANGE_STARTOREND_SELECTED');
+const deleteRange = createAction<DeleteRangePayload>('RANGE_DELETED');
 const setJudgementStatus = createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET');
 const selectJudgementPair = createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED');
 
@@ -113,6 +118,19 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         currentJudgementPair!.currentAnnotationStart = undefined;
       }
     })
+    .addCase(deleteRange, (state, action) => {
+      const currentJudgementPair = state.judgementPairs.find(
+        pair => pair.id === state.currentJudgementPairId,
+      );
+      currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
+        range => {
+          return !(
+            action.payload.annotationPartIndex >= range.start &&
+            action.payload.annotationPartIndex <= range.end
+          );
+        },
+      );
+    })
     .addCase(setJudgementStatus, (state, action) => {
       const judgementPair = state.judgementPairs.find(pair => pair.id === action.payload.id);
       judgementPair!.status = action.payload.status;
@@ -137,6 +155,7 @@ export const actions = {
   preloadJudgements,
   rateJudgementPair,
   selectRangeStartEnd,
+  deleteRange,
   setJudgementStatus,
   selectJudgementPair,
 };

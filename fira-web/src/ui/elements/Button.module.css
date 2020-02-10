@@ -1,10 +1,7 @@
 .button {
-  padding: var(--padding-small) var(--padding-xxxsmall);
-
   width: 100%;
   background-color: var(--color-primary);
   color: white;
-  font-weight: var(--weight-large);
   border: none;
   border-radius: var(--border-radius-normal);
   outline: none;
@@ -14,6 +11,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.styleBold {
+  padding: var(--padding-small) var(--padding-xxxsmall);
+  font-weight: var(--weight-large);
+}
+
+.styleNormal {
+  padding: var(--padding-xxsmall) var(--padding-xxsmall);
+  font-size: var(--font-small);
+  font-weight: var(--weight-medium);
 }
 
 .animate {

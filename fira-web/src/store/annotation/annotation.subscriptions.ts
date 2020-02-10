@@ -2,6 +2,7 @@ import { createLogger } from '../../logger/logger';
 import { RootStore } from '../store';
 import { judgementsService } from '../../judgements/judgements.service';
 import { actions as annotationActions, JudgementPairStatus } from '../annotation/annotation.slice';
+import { UserRole } from '../user/user.slice';
 
 const logger = createLogger('annotation.subscriptions');
 
@@ -9,6 +10,21 @@ export const setupSubscriptions = (store: RootStore) => {
   // if no judgement pairs got loaded from the server yet, preload pairs
   store.subscribe(() => {
     const annotationState = store.getState().annotation;
+
+    const user = store.getState().user;
+    if (!user || !user.accessToken) {
+      logger.info(
+        'no judgement pairs got loaded from the server yet, but there is no access token available --> skip preload',
+      );
+      return;
+    }
+    if (user.role !== UserRole.ANNOTATOR) {
+      logger.info(
+        'no judgement pairs got loaded from the server yet, but user role is not annotator --> skip preload',
+      );
+      return;
+    }
+
     if (annotationState.remainingToFinish === undefined) {
       logger.info('no judgement pairs got loaded from the server yet --> execute preload...');
       judgementsService.preloadJudgements();

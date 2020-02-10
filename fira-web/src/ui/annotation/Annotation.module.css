@@ -37,9 +37,14 @@
 .annotatePart {
   display: inline-block;
   padding: 1px 2px 1px 3px;
+  transition: box-shadow 0.2s ease 0s, background-color 0.1s ease 0s;
 }
 
-.selectable {
+.annotatePartTooltipButton > *:first-child {
+  padding-right: 4px;
+}
+
+.gridStyle {
   box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
     2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
     0 2px 0 0 var(--color-dense) inset;
@@ -47,6 +52,7 @@
 
 .isInRange {
   background-color: lightgreen;
+  cursor: pointer;
 }
 
 .rangeStart {
@@ -60,14 +66,11 @@
 }
 
 .buttonContainer > div {
-  width: 10rem;
+  width: 9rem;
 
   display: flex;
 }
 
 .rateButton {
   color: var(--color-dense);
-  font-size: var(--font-small);
-  font-weight: var(--weight-medium);
-  padding: var(--padding-xsmall) var(--padding-xxxsmall);
 }

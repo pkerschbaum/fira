@@ -86,7 +86,7 @@ const Login = () => {
                   </li>
                 </ul>
               )}
-              <Button type="submit" disabled={isSubmitting}>
+              <Button buttonStyle="bold" type="submit" disabled={isSubmitting}>
                 {!isSubmitting ? 'Submit' : <LoadingIndicator />}
               </Button>
             </Form>
