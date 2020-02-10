@@ -1,11 +1,30 @@
-version: "3"
+version: '3'
 
 services:
-
   postgres_fira:
     ports:
-      - "${FIRA_DATABASE_PUBLIC_PORT}:5432"
+      - '${FIRA_DATABASE_PUBLIC_PORT}:5432'
 
   keycloak:
     ports:
-      - "${KEYCLOAK_PUBLIC_PORT}:8080"
+      - '${KEYCLOAK_PUBLIC_PORT}:8080'
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - '${PGADMIN_PUBLIC_PORT}:80'
+    networks:
+      - backend
+    volumes:
+      - postgres-keycloak-pgadmin-volume:/var/lib/pgadmin
+    depends_on:
+      - postgres_keycloak
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${ADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${ADMIN_PASSWORD}
+
+networks:
+  backend:
+
+volumes:
+  postgres-keycloak-pgadmin-volume:

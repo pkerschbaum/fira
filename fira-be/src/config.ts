@@ -21,7 +21,7 @@ export const database: TypeOrmModuleOptions = {
   port: 5432,
   username: process.env.DB_USER ?? 'fira',
   password: process.env.DB_PASSWORD ?? 'password',
-  database: process.env.DB_NAME ?? 'fira',
+  database: 'fira',
   synchronize: true,
   namingStrategy: new NamingStrategies.SnakeNamingStrategy(),
 } as const;
@@ -29,7 +29,7 @@ export const database: TypeOrmModuleOptions = {
 export const keycloak = {
   host: {
     protocol: 'http',
-    base: 'localhost:8080',
+    base: process.env.KEYCLOAK_HOST_BASE ?? 'localhost:8080',
   },
   refetchInterval: moment.duration(1, 'day'),
   clientId: 'fira-be',

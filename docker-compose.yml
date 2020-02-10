@@ -12,11 +12,13 @@ services:
       - keycloak
     environment:
       - DB_ADDR=postgres_fira
-      - DB_NAME=${FIRA_DB}
       - DB_USER=${FIRA_DB_USER}
       - DB_PASSWORD=${FIRA_DB_PASSWORD}
+      - KEYCLOAK_HOST_BASE=keycloak:8080
       - KEYCLOAK_ADMIN_USER=${ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - ${FIRA_BE_DATA_DIRECTORY}:/usr/src/app/data
     
   postgres_fira:
     image: postgres:12
@@ -25,7 +27,7 @@ services:
     volumes: 
       - postgres-fira-volume:/var/lib/postgresql/data
     environment: 
-      - POSTGRES_DB=${FIRA_DB}
+      - POSTGRES_DB=fira
       - POSTGRES_USER=${FIRA_DB_USER}
       - POSTGRES_PASSWORD=${FIRA_DB_PASSWORD}
 

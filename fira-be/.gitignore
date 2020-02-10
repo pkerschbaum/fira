@@ -35,6 +35,3 @@ lerna-debug.log*
 
 # Folder for initial import of assets
 /data
-
-# Folder for client app (static assets)
-/client
