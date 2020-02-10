@@ -57,10 +57,14 @@ Further, all services normally not exposed from the docker network (e.g. keycloa
 This allows to connect the local instance of the fira backend to the services running in docker.  
 You can even fire this command if the application was bootstrapped via the first command; only the admin tools will get additionally started.
 
-The detached mode (Flag ```-d```) is used in both options because this is the recommended way of launching an application with docker-compose (not using the detached mode leads to the problem that if the terminal is closed or the process is terminated via Ctrl+C, the entire application stops...).
-
-Keep in mind that for viewing logs (```docker-compose logs```), viewing the running containers (```docker-compose ps```) or stopping the application (```docker-compose down```), one has to use the same options as used for starting the application.
-
 ### #4: Inspect the file containing the imported users
 
 Fira will write the generated credentials of all imported users to the file `FIRA_BE_DATA_DIRECTORY\out\users.tsv`.
+
+## Additional information
+
+### Hints for using Docker-Compose
+
+The detached mode (Flag ```-d```) is used in both options because this is the recommended way of launching an application with docker-compose (not using the detached mode leads to the problem that if the terminal is closed or the process is terminated via Ctrl+C, the entire application stops...).
+
+Keep in mind that for viewing logs (```docker-compose logs```), viewing the running containers (```docker-compose ps```) or stopping the application (```docker-compose down```), one has to use the same options as used for starting the application.
