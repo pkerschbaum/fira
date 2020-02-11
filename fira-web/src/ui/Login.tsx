@@ -77,8 +77,8 @@ const Login = () => {
         >
           {({ isSubmitting, errors }) => (
             <Form>
-              <TextInput type="text" label="Username" name="username" />
-              <TextInput type="text" label="Password" name="password" />
+              <TextInput type="text" label="Username" name="username" autoComplete="off" />
+              <TextInput type="text" label="Password" name="password" autoComplete="off" />
               {errors.loginError && errors.loginError.length > 0 && (
                 <ul className={styles.errorList}>
                   <li>

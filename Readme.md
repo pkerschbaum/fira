@@ -35,7 +35,7 @@ KEYCLOAK_DB_USER=keycloak
 KEYCLOAK_DB_PASSWORD=password
 
 # externally exposed ports (i.e., ports mapped on host system)
-FIRA_BE_PUBLIC_PORT=8081
+FIRA_BE_PUBLIC_PORT=443
 
 # externally exposed ports (only applicable if the application is run in development mode)
 KEYCLOAK_PUBLIC_PORT=8080
@@ -43,7 +43,7 @@ PGADMIN_PUBLIC_PORT=8079
 FIRA_DATABASE_PUBLIC_PORT=5432
 
 # data volume for fira backend
-FIRA_BE_DATA_DIRECTORY=/c/data/TEMP/data
+FIRA_BE_DATA_DIRECTORY=/c/fira/sample/data
 ```
 
 ### #3: Run the application
@@ -51,7 +51,7 @@ FIRA_BE_DATA_DIRECTORY=/c/data/TEMP/data
 Use either of the following two commands:
 
 1. **For the production environment**, use ```docker-compose up -d```. This will launch all services of the application necessary to operate in production. One can inspect the logs with ```docker-compose logs -f```.
-1. **For development purposes**, use ```docker-compose -f docker-compose.yml -f docker-compose.admin.yml up -d```.
+1. **For development purposes**, use ```docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d```.
 This will launch not only the essential services, but also PgAdmin to inspect the contents of the Postgres Databases.
 Further, all services normally not exposed from the docker network (e.g. keycloak, postgres database servers) will get exposed to the host system.
 This allows to connect the local instance of the fira backend to the services running in docker.  
@@ -68,3 +68,13 @@ Fira will write the generated credentials of all imported users to the file `FIR
 The detached mode (Flag ```-d```) is used in both options because this is the recommended way of launching an application with docker-compose (not using the detached mode leads to the problem that if the terminal is closed or the process is terminated via Ctrl+C, the entire application stops...).
 
 Keep in mind that for viewing logs (```docker-compose logs```), viewing the running containers (```docker-compose ps```) or stopping the application (```docker-compose down```), one has to use the same options as used for starting the application.
+
+If you do not have `docker-compose` installed on your host system, you can try the following command (taken from [cloud.google.com/community/tutorials/docker-compose-on-container-optimized-os](https://cloud.google.com/community/tutorials/docker-compose-on-container-optimized-os)):
+
+```sh
+docker run --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$PWD:$PWD" \
+    -w="$PWD" \
+    docker/compose:latest up
+```
