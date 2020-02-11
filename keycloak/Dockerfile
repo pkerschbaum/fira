@@ -5,6 +5,9 @@ COPY ["./docker-resources/realm-to-import.json", "~/"]
 ENV KEYCLOAK_IMPORT="~/realm-to-import.json"
 
 # override start sequence of keycloak image: use custom script to add an admin user for the realm, then start the server
-ADD "./docker-resources/start.sh" "/"
+COPY "./docker-resources/start.sh" "/"
+USER root
+RUN chmod a+x "/start.sh"
+USER 1000
 ENTRYPOINT ["/start.sh"]
 CMD [""]
