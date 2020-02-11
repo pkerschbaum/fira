@@ -1,19 +1,15 @@
 @import-normalize; /* bring in normalize.css styles */
 
-@font-face {
-  font-family: 'seguibl';
-  src: local('seguibl'), /* IE6-IE8: */ url(./fonts/seguibl.eot?#iefix) format('embedded-opentype'),
-    /* Pretty Modern Browsers: */ url(./fonts/seguibl.woff) format('woff'),
-    /* Safari, Android, iOS: */ url(./fonts/seguibl.ttf) format('truetype');
-}
-
 body {
   margin: 0;
-  font-family: seguibl, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: #cecece;
+}
+
+body * {
+  font-family: 'SelawikRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', SegoeUI, 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #cecece;
 }
 
 code {

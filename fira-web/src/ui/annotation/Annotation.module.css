@@ -37,7 +37,7 @@
 .annotatePart {
   display: inline-block;
   padding: 1px 2px 1px 3px;
-  transition: box-shadow 0.2s ease 0s, background-color 0.1s ease 0s;
+  transition: box-shadow 0.2s ease 0s, background-color 0.1s ease 0s, padding 0.3s ease-in-out;
 }
 
 .annotatePartTooltipButton > *:first-child {
@@ -48,6 +48,13 @@
   box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
     2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
     0 2px 0 0 var(--color-dense) inset;
+}
+
+/* mobile devices, touch only */
+@media only screen and (pointer: coarse) {
+  .gridStyle {
+    padding: 4px 6px 4px 9px;
+  }
 }
 
 .isInRange {
