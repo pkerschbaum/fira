@@ -1,4 +1,4 @@
-# FiRA - Fine-grained Relevance Annotation
+# Fira - Fine-grained Relevance Annotation
 
 ## How to run
 
@@ -78,5 +78,5 @@ docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "$PWD:$PWD" \
     -w="$PWD" \
-    docker/compose:latest up
+    docker/compose:latest up -d
 ```

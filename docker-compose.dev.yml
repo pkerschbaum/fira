@@ -4,10 +4,16 @@ services:
   postgres_fira:
     ports:
       - '${FIRA_DATABASE_PUBLIC_PORT}:5432'
+    volumes:
+      - postgres-fira-volume:/var/lib/postgresql/data
 
   keycloak:
     ports:
       - '${KEYCLOAK_PUBLIC_PORT}:8080'
+
+  postgres_keycloak:
+    volumes:
+      - postgres-keycloak-volume:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
@@ -28,3 +34,7 @@ networks:
 
 volumes:
   postgres-keycloak-pgadmin-volume:
+  postgres-fira-volume:
+    driver: local
+  postgres-keycloak-volume:
+    driver: local
