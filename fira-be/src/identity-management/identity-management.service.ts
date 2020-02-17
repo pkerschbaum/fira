@@ -61,7 +61,7 @@ export class IdentityManagementService {
     return Promise.all(
       users.map(async user => {
         const password = generate(
-          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
           8,
         );
 

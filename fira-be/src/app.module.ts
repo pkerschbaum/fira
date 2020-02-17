@@ -24,7 +24,7 @@ import * as config from './config';
     LoggerModule,
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'client', 'build'),
-      renderPath: '/',
+      renderPath: '/*',
     }),
     TypeOrmModule.forRoot({
       ...config.database,
