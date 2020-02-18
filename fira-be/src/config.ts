@@ -8,7 +8,7 @@ export const application = {
   port: 80,
   rateLimit: {
     windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 200, // limit each IP to 200 requests per windowMs
+    max: 500, // limit each IP to 200 requests per windowMs
   },
   judgementsPreloadSize: 3,
   judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
