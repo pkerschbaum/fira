@@ -1,0 +1,8 @@
+.container {
+  width: 9rem;
+  display: flex;
+}
+
+.button {
+  color: var(--color-dense);
+}

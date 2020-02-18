@@ -9,7 +9,7 @@ export enum JudgementPairStatus {
   SEND_FAILED = 'SEND_FAILED',
 }
 
-type JudgementPair = PreloadJudgement & {
+export type JudgementPair = PreloadJudgement & {
   readonly relevanceLevel?: RelevanceLevel;
   readonly currentAnnotationStart?: number;
   readonly annotatedRanges: Array<{ start: number; end: number }>;

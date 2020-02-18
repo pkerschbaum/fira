@@ -15,7 +15,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ requiredRole, ...rest }) =>
   if (!!user && user?.role === requiredRole) {
     return <Route {...rest} />;
   } else {
-    return <Redirect to="/login" />;
+    return <Redirect to="/" />;
   }
 };
 

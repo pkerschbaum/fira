@@ -6,7 +6,14 @@ export enum RelevanceLevel {
   MISLEADING_ANSWER = '-1_MISLEADING_ANSWER',
 }
 
-export const RateLevels = [
+export type RateLevelType = {
+  readonly text: string;
+  readonly relevanceLevel: RelevanceLevel;
+  readonly annotationRequired: boolean;
+  readonly buttonColor: string;
+};
+
+export const RateLevels: RateLevelType[] = [
   {
     text: 'Misleading Answer',
     relevanceLevel: RelevanceLevel.MISLEADING_ANSWER,
@@ -37,4 +44,4 @@ export const RateLevels = [
     annotationRequired: true,
     buttonColor: '#73FFC3',
   },
-] as const;
+];
