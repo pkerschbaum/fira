@@ -3,13 +3,27 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 import { useSelector } from 'react-redux';
 
 import styles from './App.module.css';
-import Login from './Login';
+import Login from './login/Login';
 import Admin from './admin/Admin';
 import Annotation from './annotation/Annotation';
 import PrivateRoute from './PrivateRoute';
 import { RootState } from '../store/store';
 import { UserRole } from '../store/user/user.slice';
 import { assertUnreachable } from '../util/types.util';
+
+const RouteToPage: React.FC = () => {
+  const user = useSelector((state: RootState) => state.user);
+
+  if (!user) {
+    return <Redirect to="/login" />;
+  } else if (user.role === UserRole.ADMIN) {
+    return <Redirect to="/admin" />;
+  } else if (user.role === UserRole.ANNOTATOR) {
+    return <Redirect to="/annotator" />;
+  } else {
+    assertUnreachable(user.role);
+  }
+};
 
 const App: React.FC = () => {
   return (
@@ -28,24 +42,11 @@ const App: React.FC = () => {
           <PrivateRoute path="/annotator" requiredRole={UserRole.ANNOTATOR}>
             <Annotation />
           </PrivateRoute>
+          <Redirect to="/" />
         </Switch>
       </Router>
     </div>
   );
-};
-
-const RouteToPage: React.FC = () => {
-  const user = useSelector((state: RootState) => state.user);
-
-  if (!user) {
-    return <Redirect to="/login" />;
-  } else if (user.role === UserRole.ADMIN) {
-    return <Redirect to="/admin" />;
-  } else if (user.role === UserRole.ANNOTATOR) {
-    return <Redirect to="/annotator" />;
-  } else {
-    assertUnreachable(user.role);
-  }
 };
 
 export default App;

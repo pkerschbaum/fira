@@ -4,11 +4,11 @@ import { Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import styles from './Login.module.css';
-import { authService } from '../auth/auth.service';
-import { RootState } from '../store/store';
-import FloatingTextInput from './elements/FloatingTextInput';
-import LoadingIndicator from './elements/LoadingIndicator';
-import Button from './elements/Button';
+import { authService } from '../../auth/auth.service';
+import { RootState } from '../../store/store';
+import FloatingTextInput from '../elements/FloatingTextInput';
+import LoadingIndicator from '../elements/LoadingIndicator';
+import Button from '../elements/Button';
 
 const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
   React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> = ({

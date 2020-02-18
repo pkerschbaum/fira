@@ -17,7 +17,7 @@ import {
   ImportJudgementPairsResp,
   PreloadJudgementResponse,
   SaveJudgement,
-} from '../typings/typings';
+} from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
   timeout: 5000,

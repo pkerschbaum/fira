@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
-import { PreloadJudgement } from '../../typings/typings';
+import { PreloadJudgement } from '../../typings/fira-be-typings';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
 
 export enum JudgementPairStatus {

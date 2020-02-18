@@ -13,10 +13,9 @@ export const judgementsService = {
     logger.info(`executing preload judgements...`);
 
     const response = await httpClient.preloadJudgements(store.getState().user!.accessToken.val);
-    store.dispatch(annotationActions.preloadJudgements(response));
 
-    logger.info(`preload judgements succeeded!`, { response });
-    return response;
+    logger.info(`preload judgements succeeded! dispatching preload judgements...`, { response });
+    store.dispatch(annotationActions.preloadJudgements(response));
   },
 
   submitCurrentJudgement: async () => {
