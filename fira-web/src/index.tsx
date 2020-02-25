@@ -10,12 +10,19 @@ import { executeBootScripts } from './boot/boot';
 
 executeBootScripts();
 
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById('root'),
-);
+const renderApp = () =>
+  ReactDOM.render(
+    <Provider store={store}>
+      <App />
+    </Provider>,
+    document.getElementById('root'),
+  );
+
+if (process.env.NODE_ENV !== 'production' && (module as any).hot) {
+  (module as any).hot.accept('./ui/App', renderApp);
+}
+
+renderApp();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
