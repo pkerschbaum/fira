@@ -4,7 +4,9 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { Connection, EntityManager } from 'typeorm';
+import { Connection, EntityManager, LessThan, MoreThan } from 'typeorm';
+import moment = require('moment');
+import d3 = require('d3');
 
 import {
   PreloadJudgement,
@@ -24,7 +26,7 @@ import { AppLogger } from '../logger/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import { assertUnreachable } from 'src/util/types.util';
 import * as config from '../config';
-import d3 = require('d3');
+import { Statistic } from '../admin/admin.types';
 
 @Injectable()
 export class JudgementsService {
@@ -275,6 +277,76 @@ export class JudgementsService {
 
     return remainingJudgementsToPreload;
   }
+
+  public getStatistics: () => Promise<Statistic[]> = async () => {
+    const dbConfig = await this.connection.getRepository(Config).findOneOrFail();
+    const judgementRepository = this.connection.getRepository(Judgement);
+
+    // count of all judgements with status JUDGED (i.e., completed judgements)
+    const countOfAllCompletedJudgements = await judgementRepository
+      .createQueryBuilder()
+      .where({ status: JudgementStatus.JUDGED })
+      .getCount();
+
+    // count of all judgements with status JUDGED (i.e., completed judgements)
+    // in the last 24 hours
+    const countOfAllCompletedJudgementsLast24Hours = await judgementRepository
+      .createQueryBuilder('j')
+      .where({
+        status: JudgementStatus.JUDGED,
+        judgedAt: MoreThan(
+          moment()
+            .subtract(24, 'hours')
+            .toDate(),
+        ),
+      })
+      .getCount();
+
+    // count of users with at least 5 completed judgements
+    const countUsersWithAtLeast5ComplJudgements = (
+      await judgementRepository
+        .createQueryBuilder('j')
+        .select(`j.user_id AS user, count(*) AS count`)
+        .where({ status: JudgementStatus.JUDGED })
+        .groupBy(`j.user_id`)
+        .having(`count(*) >= 5`)
+        .execute()
+    ).length;
+
+    // count of users who reached their annotation targets
+    const countUsersTargetReached = (
+      await judgementRepository
+        .createQueryBuilder('j')
+        .select(`j.user_id AS user, count(*) AS count`)
+        .where({ status: JudgementStatus.JUDGED })
+        .groupBy(`j.user_id`)
+        .having(`count(*) >= ${dbConfig.annotationTargetPerUser}`)
+        .execute()
+    ).length;
+
+    return [
+      {
+        id: 'countOfAllCompletedJudgements',
+        label: 'count of all judgements',
+        value: `${countOfAllCompletedJudgements}`,
+      },
+      {
+        id: 'countOfAllCompletedJudgementsLast24Hours',
+        label: 'count of all judgements in the last 24 hours',
+        value: `${countOfAllCompletedJudgementsLast24Hours}`,
+      },
+      {
+        id: 'countUsersWithAtLeast5ComplJudgements',
+        label: 'count of users with at least 5 judgements',
+        value: `${countUsersWithAtLeast5ComplJudgements}`,
+      },
+      {
+        id: 'countUsersTargetReached',
+        label: 'count of users who reached their annotation targets',
+        value: `${countUsersTargetReached}`,
+      },
+    ];
+  };
 }
 
 async function getCandidatesByPriority(

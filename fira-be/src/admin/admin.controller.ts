@@ -26,6 +26,7 @@ import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 import { JudgementsService } from '../judgements/judgements.service';
 import { ExportJudgementsResponseDto } from './dto/export-judgements.dto';
+import { StatisticsResponseDto } from './dto/get-statistics.dto';
 
 @ApiTags('admin')
 @Controller('admin')
@@ -107,5 +108,10 @@ export class AdminController {
   })
   async exportJudgementsTsv(): Promise<string> {
     return await this.judgementsService.exportJudgementsTsv();
+  }
+
+  @Get('v1/statistics')
+  async getStatistics(): Promise<StatisticsResponseDto> {
+    return { statistics: await this.judgementsService.getStatistics() };
   }
 }

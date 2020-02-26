@@ -1,0 +1,43 @@
+.container {
+  /* START center children, vertical and horizontal */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  /* END center children, vertical and horizontal */
+}
+
+.adminArea {
+  width: var(--narrow-content-area-width);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.statisticsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+.statisticValue {
+  font-size: var(--font-xxxlarge);
+}
+
+.statisticLabel {
+  text-align: center;
+}
+
+.statistic {
+  flex-basis: 50%;
+  min-width: 150px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: var(--margin-medium) 0;
+}

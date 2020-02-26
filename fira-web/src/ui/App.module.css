@@ -4,6 +4,7 @@
   margin: 0 auto; /* horizontal align */
   padding: 8px;
   box-sizing: border-box;
+  overflow: auto;
 
   display: flex;
   flex-direction: column;
@@ -21,6 +22,7 @@
   --weight-medium: 400;
 
   --font-small: 0.875rem;
+  --font-xxxlarge: 2rem;
 
   --border-small: 0.0625rem;
   --border-radius-normal: 0.5rem;
@@ -36,8 +38,10 @@
   --padding-xlarge: 1.5rem;
 
   --transform-button: scale(0.96);
+
+  --narrow-content-area-width: 32.5rem;
 }
 
-.app * {
+* {
   font-size: 1rem;
 }

@@ -13,6 +13,15 @@ export const adminService = {
 
     logger.info(`export of judgements succeeded!`, { response });
   },
+
+  getStatistics: async () => {
+    logger.info(`executing retrieval of statistics...`);
+
+    const response = await httpClient.getStatistics(store.getState().user!.accessToken.val);
+
+    logger.info(`retrieval of statistics succeeded!`, { response });
+    return response;
+  },
 };
 
 function saveTsv(filename: string, data: string) {

@@ -17,6 +17,7 @@ import {
   ImportJudgementPairsResp,
   PreloadJudgementResponse,
   SaveJudgement,
+  StatisticsResp,
 } from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
@@ -207,6 +208,23 @@ export const httpClient = {
       ).data;
     } catch (e) {
       logger.error('export of judgements failed!', e);
+      throw e;
+    }
+  },
+
+  getStatistics: async (accessToken: string): Promise<StatisticsResp> => {
+    logger.info('executing retrieval of statistics...');
+
+    try {
+      return (
+        await axiosClient.get(`admin/v1/statistics`, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('retrieval of statistics failed!', e);
       throw e;
     }
   },

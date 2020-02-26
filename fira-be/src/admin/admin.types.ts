@@ -52,3 +52,13 @@ export type UpdateConfig = {
   readonly annotationTargetPerUser: number;
   readonly annotationTargetPerJudgPair: number;
 };
+
+export type StatisticsResp = {
+  readonly statistics: Statistic[];
+};
+
+export type Statistic = {
+  readonly id: string;
+  readonly label: string;
+  readonly value: string;
+};
