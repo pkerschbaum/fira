@@ -50,10 +50,8 @@ const Annotation: React.FC<{
       (currentJudgementPair.annotatedRanges.length === 0 ||
         currentJudgementPair.currentAnnotationStart !== undefined));
 
-  const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
   const annotationTarget = remainingToFinish + alreadyFinished;
-  const finishedFraction = alreadyFinished / annotationTarget;
-  const progressBarWidth = vw * finishedFraction;
+  const finishedFraction = (alreadyFinished / annotationTarget) * 100;
 
   function hideTooltip() {
     setTooltipAnnotatePartIndex(undefined);
@@ -61,8 +59,8 @@ const Annotation: React.FC<{
 
   return (
     <>
-      {progressBarWidth !== undefined && (
-        <div style={{ width: progressBarWidth }} className={styles.progressBar} />
+      {finishedFraction !== undefined && (
+        <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
       )}
       <div className={styles.container} onClickCapture={hideTooltip}>
         <div className={styles.queryText}>{currentJudgementPair.queryText}</div>

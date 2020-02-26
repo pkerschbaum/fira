@@ -5,7 +5,6 @@ import styles from './AnnotationPart.module.css';
 import Button from '../elements/Button';
 
 const AnnotationPart: React.FC<{
-  key: number;
   text: string;
   isRangeStart: boolean;
   isInSelectedRange: boolean;
@@ -14,7 +13,6 @@ const AnnotationPart: React.FC<{
   onPartClick: () => void;
   onTooltipClick: () => void;
 }> = ({
-  key,
   text,
   isRangeStart,
   isInSelectedRange,
@@ -35,7 +33,6 @@ const AnnotationPart: React.FC<{
   const annotatePartSpan = (ref?: any) => (
     <span
       ref={ref}
-      key={key}
       onClick={onPartClick}
       className={`${styles.annotatePart} ${currentRangeStartStyle} ${
         !!isInSelectedRange ? styles.isInRange : ''

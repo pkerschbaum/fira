@@ -22,8 +22,9 @@ services:
     networks:
       - backend
     volumes:
-      - postgres-keycloak-pgadmin-volume:/var/lib/pgadmin
+      - pgadmin-volume:/var/lib/pgadmin
     depends_on:
+      - postgres_fira
       - postgres_keycloak
     environment:
       - PGADMIN_DEFAULT_EMAIL=${ADMIN_EMAIL}
@@ -33,7 +34,7 @@ networks:
   backend:
 
 volumes:
-  postgres-keycloak-pgadmin-volume:
+  pgadmin-volume:
   postgres-fira-volume:
     driver: local
   postgres-keycloak-volume:
