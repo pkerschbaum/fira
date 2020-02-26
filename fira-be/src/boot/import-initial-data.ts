@@ -8,6 +8,7 @@ import { isEmpty } from '../util/strings';
 import { ImportStatus } from '../typings/commons';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
+import { JudgementMode } from '../judgements/judgements.types';
 
 const COLUMN_USER_ID = 'user_id';
 const COLUMN_DOCUMENT_ID = 'doc_id';
@@ -17,6 +18,7 @@ const COLUMN_QUERY_TEXT = 'query_text';
 const COLUMN_PRIORITY = 'priority';
 const COLUMN_ANNO_TARGET_USER = 'annotation_target_per_user';
 const COLUMN_ANNO_TARGET_JUDGE_PAIR = 'annotation_target_per_judgement_pair';
+const COLUMN_JUDGEMENT_MODE = 'judgement_mode';
 
 export async function importInitialData({
   logger,
@@ -96,15 +98,27 @@ export async function importInitialData({
 
   /* --- CONFIG --- */
 
-  await importAsset<{ annotationTargetPerUser: number; annotationTargetPerJudgPair: number }>({
+  await importAsset<{
+    annotationTargetPerUser: number;
+    annotationTargetPerJudgPair: number;
+    judgementMode: JudgementMode;
+  }>({
     logger,
     assetType: 'config',
     getCountFn: adminService.getCountOfConfig,
     tsvSkipFn: () => false, // don't skip anything
-    tsvMapFn: entry => ({
-      annotationTargetPerUser: Number(entry[COLUMN_ANNO_TARGET_USER]),
-      annotationTargetPerJudgPair: Number(entry[COLUMN_ANNO_TARGET_JUDGE_PAIR]),
-    }),
+    tsvMapFn: entry => {
+      const judgementModeStr = entry[COLUMN_JUDGEMENT_MODE];
+      if (!Object.values(JudgementMode).includes(judgementModeStr)) {
+        throw new Error(`${COLUMN_JUDGEMENT_MODE} has an invalid value`);
+      }
+
+      return {
+        annotationTargetPerUser: Number(entry[COLUMN_ANNO_TARGET_USER]),
+        annotationTargetPerJudgPair: Number(entry[COLUMN_ANNO_TARGET_JUDGE_PAIR]),
+        judgementMode: judgementModeStr,
+      };
+    },
     importFn: configs => adminService.updateConfig(configs[0]),
   });
 }

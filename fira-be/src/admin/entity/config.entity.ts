@@ -1,5 +1,7 @@
 import { Entity, PrimaryColumn, Column, Check, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
+import { JudgementMode } from '../../judgements/judgements.types';
+
 const nameOfUniqueColumn = 'id';
 const uniqueValue = 1;
 
@@ -18,6 +20,8 @@ export class Config {
   annotationTargetPerUser: number;
   @Column({ type: 'integer', nullable: false })
   annotationTargetPerJudgPair: number;
+  @Column({ enum: JudgementMode, nullable: false })
+  judgementMode: JudgementMode;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

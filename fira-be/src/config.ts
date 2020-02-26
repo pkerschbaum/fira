@@ -11,7 +11,6 @@ export const application = {
     max: 500, // limit each IP to 200 requests per windowMs
   },
   judgementsPreloadSize: 3,
-  judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
   splitRegex: /([ .\-,]+)/g,
 } as const;
 

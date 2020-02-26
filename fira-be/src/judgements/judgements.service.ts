@@ -15,6 +15,7 @@ import {
   CountResult,
   PreloadJudgementResponse,
   ExportJudgement,
+  JudgementMode,
 } from './judgements.types';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
@@ -271,7 +272,7 @@ export class JudgementsService {
       this.appLogger.log(
         `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(pairsToPersist)}`,
       );
-      await persistPairs(pairsToPersist, user, transactionalEntityManager);
+      await persistPairs(pairsToPersist, user, dbConfig.judgementMode, transactionalEntityManager);
       remainingJudgementsToPreload -= pairsToPersist.length;
     }
 
@@ -390,6 +391,7 @@ async function getCandidatesByPriority(
 async function persistPairs(
   pairs: CountResult[],
   user: User,
+  judgementMode: JudgementMode,
   entityManager: EntityManager,
 ): Promise<void> {
   // determine whether to set 'rotate text'-flag or not
@@ -421,7 +423,7 @@ async function persistPairs(
       const dbJudgement = new Judgement();
       dbJudgement.status = JudgementStatus.TO_JUDGE;
       dbJudgement.rotate = rotate;
-      dbJudgement.mode = config.application.judgementMode;
+      dbJudgement.mode = judgementMode;
       dbJudgement.document = dbDocumentVersion;
       dbJudgement.query = dbQueryVersion;
       dbJudgement.user = user;

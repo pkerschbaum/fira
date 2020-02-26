@@ -1,4 +1,5 @@
 import { ImportStatus } from '../typings/commons';
+import { JudgementMode } from '../judgements/judgements.types';
 
 export type ImportDocumentsReq = {
   readonly documents: ImportAsset[];
@@ -51,6 +52,7 @@ export type ImportJudgementPairResult = {
 export type UpdateConfig = {
   readonly annotationTargetPerUser: number;
   readonly annotationTargetPerJudgPair: number;
+  readonly judgementMode: JudgementMode;
 };
 
 export type StatisticsResp = {

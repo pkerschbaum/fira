@@ -1,2 +1,2 @@
-annotation_target_per_user	annotation_target_per_judgement_pair
-30	10
+annotation_target_per_user	annotation_target_per_judgement_pair	judgement_mode
+30	10	SCORING_AND_SELECT_SPANS

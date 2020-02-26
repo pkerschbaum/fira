@@ -159,6 +159,7 @@ export class AdminService {
     const dbEntry = new Config();
     dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
     dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
+    dbEntry.judgementMode = config.judgementMode;
     await this.configRepository.save(dbEntry);
   };
 

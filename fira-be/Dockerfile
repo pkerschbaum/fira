@@ -3,9 +3,13 @@ FROM node:12.14.0
 # Switch workdir to the main app directory
 WORKDIR /usr/src/app
 
-# Copy fira-be sources and install dependencies
-COPY . .
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
 RUN npm install
+
+# Copy fira-be sources
+COPY . .
 
 # Add and execute scrpts which wait for the keycloak server to start, then start the fira backend
 ADD "./docker-resources/start.sh" "./"
