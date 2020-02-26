@@ -1,27 +1,10 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { actions, JudgementPairStatus } from './annotation.slice';
 import { RootState } from '../store';
+import { useActionsWithDispatch } from '../util/actions.util';
 
-type Dispatch<FuncType> = FuncType;
-
-type DispatchType = {
-  [P in keyof typeof actions]: Dispatch<typeof actions[P]>;
-};
-
-export const useAnnotationActions = () => {
-  const dispatch = useDispatch<any>();
-
-  const annotationActions: any = {};
-
-  for (const action in actions) {
-    if (actions.hasOwnProperty(action)) {
-      annotationActions[action] = (...args: any[]) => dispatch((actions as any)[action](...args));
-    }
-  }
-
-  return annotationActions as DispatchType;
-};
+export const useAnnotationActions = () => useActionsWithDispatch(actions);
 
 export const useAnnotationState = () => {
   const pairsSuccessfullySent = useSelector((state: RootState) =>

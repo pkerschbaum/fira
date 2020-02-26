@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 
 import styles from './Button.module.css';
 
-const Button: React.FC<{
-  componentRef?: React.RefObject<HTMLButtonElement>;
-  buttonStyle?: 'bold' | 'normal';
-} & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>> = ({
-  componentRef,
-  children,
-  buttonStyle = 'normal',
-  ...props
-}) => {
+const Button = React.forwardRef<
+  HTMLButtonElement,
+  {
+    buttonStyle?: 'bold' | 'normal';
+    buttonType?: 'primary' | 'normal';
+  } & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
+>(({ children, buttonStyle = 'normal', buttonType = 'normal', ...props }, ref) => {
   const [animate, setAnimate] = useState(false);
 
   function animateStart() {
@@ -40,14 +38,14 @@ const Button: React.FC<{
       {...props}
       onClick={onClick}
       onTransitionEnd={onTransitionEnd}
-      ref={componentRef}
+      ref={ref}
       className={`${props.className} ${styles.button} ${animate && styles.animate} ${
         buttonStyle === 'normal' ? styles.styleNormal : styles.styleBold
-      }`}
+      } ${buttonType === 'primary' && styles.typePrimary}`}
     >
       {children}
     </button>
   );
-};
+});
 
 export default Button;

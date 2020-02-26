@@ -17,8 +17,11 @@
   margin-top: var(--margin-medium);
 }
 
-.container > *:first-child {
+.topBar {
   margin-top: var(--margin-xsmall);
+
+  display: flex;
+  justify-content: space-between;
 }
 
 .queryText {
@@ -31,7 +34,7 @@
   box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
     2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
     0 2px 0 0 var(--color-dense) inset;
-  overflow: scroll;
+  overflow: auto;
 }
 
 .buttonContainer {

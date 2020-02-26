@@ -3,6 +3,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { UserRole } from './user.slice';
 import { assertUnreachable } from '../../util/types.util';
+import { actions } from './user.slice';
+import { useActionsWithDispatch } from '../util/actions.util';
 
 export function useUserState() {
   const userRole = useSelector((state: RootState) => {
@@ -17,3 +19,5 @@ export function useUserState() {
 
   return { userRole };
 }
+
+export const useUserActions = () => useActionsWithDispatch(actions);

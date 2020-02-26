@@ -16,6 +16,19 @@
   align-items: center;
 }
 
+.topBar {
+  margin-top: var(--margin-xsmall);
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.exportJudgementsButton {
+  width: auto;
+}
+
 .statisticsContainer {
   display: flex;
   flex-wrap: wrap;

@@ -9,6 +9,7 @@ import { useKeyupEvent as useKeyupHandler } from '../util/events.hooks';
 import RateButton from './RateButton';
 import { JudgementPair } from '../../store/annotation/annotation.slice';
 import AnnotationPart from './AnnotationPart';
+import Menu from '../elements/Menu';
 
 const Annotation: React.FC<{
   currentJudgementPair: JudgementPair;
@@ -63,7 +64,10 @@ const Annotation: React.FC<{
         <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
       )}
       <div className={styles.container} onClickCapture={hideTooltip}>
-        <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
+        <div className={styles.topBar}>
+          <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
+          <Menu />
+        </div>
         <div key={currentJudgementPair.id} className={styles.annotationArea}>
           {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
             // determine if part is in one of the selected ranges
@@ -108,6 +112,7 @@ const Annotation: React.FC<{
         <div>
           <Button
             buttonStyle="bold"
+            buttonType="primary"
             disabled={hasToAnnotate}
             onClick={() => judgementsService.submitCurrentJudgement()}
           >

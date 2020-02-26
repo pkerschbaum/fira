@@ -1,7 +1,5 @@
 .button {
   width: 100%;
-  background-color: var(--color-primary);
-  color: white;
   border: none;
   border-radius: var(--border-radius-normal);
   outline: none;
@@ -11,6 +9,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.button:hover {
+  filter: brightness(110%);
+}
+
+.typePrimary {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .styleBold {

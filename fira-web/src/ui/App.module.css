@@ -16,6 +16,7 @@
   --color-disabled: #9b9b9b;
   --color-dense: #1d1d1d;
   --color-soft: #9b9b9b;
+  --color-ui-element-highlight: #cccccc;
 
   --weight-xlarge: 800;
   --weight-large: 600;
@@ -44,4 +45,9 @@
 
 * {
   font-size: 1rem;
+}
+
+button:active,
+button:focus {
+  outline: 0;
 }

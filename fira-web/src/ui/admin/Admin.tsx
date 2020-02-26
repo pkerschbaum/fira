@@ -4,6 +4,7 @@ import styles from './Admin.module.css';
 import { adminService } from '../../admin/admin.service';
 import Button from '../elements/Button';
 import { Statistic } from '../../typings/fira-be-typings';
+import Menu from '../elements/Menu';
 
 const Admin: React.FC = () => {
   const [statistics, updateStatistics] = useState<Statistic[] | undefined>(undefined);
@@ -19,6 +20,16 @@ const Admin: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.adminArea}>
+        <div className={styles.topBar}>
+          <Button
+            className={styles.exportJudgementsButton}
+            buttonType="primary"
+            onClick={adminService.exportJudgements}
+          >
+            Export Judgements
+          </Button>
+          <Menu />
+        </div>
         <div className={styles.statisticsContainer}>
           {statistics &&
             statistics.map(statistic => (
@@ -28,7 +39,6 @@ const Admin: React.FC = () => {
               </div>
             ))}
         </div>
-        <Button onClick={adminService.exportJudgements}>Export Judgements</Button>
       </div>
     </div>
   );
