@@ -126,14 +126,14 @@ const Annotation: React.FC<{
                 {currentSelectionNotFinished ? (
                   <>Finish your selection</>
                 ) : annotationIsRequired ? (
-                  <>Select at least one range of the document text.</>
+                  <>Please select the relevant regions of the document.</>
                 ) : (
-                  <>Feel free to add more selections or go to next judgement pair.</>
+                  <>Feel free to add more relevant regions or go to the next judgement pair.</>
                 )}
               </span>
               <Button
                 buttonType="primary"
-                style={{ width: 'auto' }}
+                style={{ width: '60px', height: '50px' }}
                 disabled={currentSelectionNotFinished || annotationIsRequired}
                 onClick={() => judgementsService.submitCurrentJudgement()}
               >
