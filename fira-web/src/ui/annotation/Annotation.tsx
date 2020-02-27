@@ -44,27 +44,18 @@ const Annotation: React.FC<{
   const currentRateLevel = RateLevels.find(
     rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
   );
-  const annotationIsAllowed =
-    currentJudgementPair.mode !== JudgementMode.PLAIN_RELEVANCE_SCORING &&
-    !!currentRateLevel?.annotationRequired;
 
-  /*
-   * the annotation is finished only if the user rated the judgement pair (i.e., selected a rate level)
-   * and
-   * - either the judgement pair requires no annotation (because the judgement mode returned by the server
-   *   is not "SCORING_AND_SELECT_SPANS", or the rate level does not require annotation)
-   * - or the user annotated at least one section of the paragraph and is not currently in the process of
-   *   annotating the next section
-   */
-  const annotationFinished =
-    currentRateLevel &&
-    (currentJudgementPair.mode === JudgementMode.PLAIN_RELEVANCE_SCORING ||
-      !currentRateLevel.annotationRequired ||
-      (currentJudgementPair.annotatedRanges.length > 0 &&
-        currentJudgementPair.currentAnnotationStart === undefined));
-
+  // compute fraction of finished annotation; used for progress bar
   const annotationTarget = remainingToFinish + alreadyFinished;
   const finishedFraction = (alreadyFinished / annotationTarget) * 100;
+
+  // compute some boolean variables needed to guide the user throw the annotation process
+  const ratingRequired = !currentRateLevel;
+  const currentSelectionNotFinished = currentJudgementPair.currentAnnotationStart !== undefined;
+  const annotationIsRequired =
+    currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
+    !!currentRateLevel?.annotationRequired &&
+    currentJudgementPair.annotatedRanges.length === 0;
 
   function hideTooltip() {
     setTooltipAnnotatePartIndex(undefined);
@@ -76,7 +67,7 @@ const Annotation: React.FC<{
         <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
       )}
       <div className={styles.container} onClickCapture={hideTooltip}>
-        <div className={styles.topBar}>
+        <div className={styles.actionBar}>
           <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
           <Menu />
         </div>
@@ -87,6 +78,12 @@ const Annotation: React.FC<{
             const isInSelectedRange = currentJudgementPair.annotatedRanges.some(
               range => range.start <= i && range.end >= i,
             );
+
+            // annotation is allowed if the corresponding judgement mode is set,
+            // and the current rate level explicitly requires it
+            const annotationIsAllowed =
+              currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
+              !!currentRateLevel?.annotationRequired;
 
             const canAnnotatePart = annotationIsAllowed && !isInSelectedRange;
 
@@ -113,24 +110,36 @@ const Annotation: React.FC<{
             );
           })}
         </div>
-        <div className={styles.buttonContainer}>
-          {RateLevels.map(rateButton => (
-            <RateButton
-              key={rateButton.relevanceLevel}
-              rateLevel={rateButton}
-              onClick={() => rateJudgementPair({ relevanceLevel: rateButton.relevanceLevel })}
-            />
-          ))}
-        </div>
-        <div>
-          <Button
-            buttonStyle="bold"
-            buttonType="primary"
-            disabled={!annotationFinished}
-            onClick={() => judgementsService.submitCurrentJudgement()}
-          >
-            Next
-          </Button>
+        <div className={styles.footer}>
+          {ratingRequired ? (
+            RateLevels.map(rateButton => (
+              <RateButton
+                key={rateButton.relevanceLevel}
+                rateLevel={rateButton}
+                onClick={() => judgementsService.rateJudgementPair(rateButton.relevanceLevel)}
+              />
+            ))
+          ) : (
+            <>
+              <span className={styles.guideText}>
+                {currentSelectionNotFinished ? (
+                  <>Finish your selection</>
+                ) : annotationIsRequired ? (
+                  <>Select at least one range of the document text.</>
+                ) : (
+                  <>Feel free to add more selections or go to next judgement pair.</>
+                )}
+              </span>
+              <Button
+                buttonType="primary"
+                style={{ width: 'auto' }}
+                disabled={currentSelectionNotFinished || annotationIsRequired}
+                onClick={() => judgementsService.submitCurrentJudgement()}
+              >
+                Next
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </>

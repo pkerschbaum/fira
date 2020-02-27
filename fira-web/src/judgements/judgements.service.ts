@@ -5,6 +5,7 @@ import {
   actions as annotationActions,
   JudgementPairStatus,
 } from '../store/annotation/annotation.slice';
+import { RelevanceLevel, RateLevels } from '../typings/enums';
 
 const logger = createLogger('judgements.service');
 
@@ -16,6 +17,28 @@ export const judgementsService = {
 
     logger.info(`preload judgements succeeded! dispatching preload judgements...`, { response });
     store.dispatch(annotationActions.preloadJudgements(response));
+  },
+
+  rateJudgementPair: async (relevanceLevel: RelevanceLevel) => {
+    logger.info(`executing rate judgement pair...`);
+
+    store.dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));
+
+    const annotationState = store.getState().annotation;
+    const currentJudgementPair = annotationState.judgementPairs.find(
+      pair => pair.id === annotationState.currentJudgementPairId,
+    )!;
+    const currentRateLevel = RateLevels.find(
+      rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
+    );
+
+    if (!currentRateLevel!.annotationRequired) {
+      // if the chosen rate level does not require annotation, immediately submit current
+      // judgement and proceed
+      await judgementsService.submitCurrentJudgement();
+    }
+
+    logger.info(`rate judgement pair succeeded!`);
   },
 
   submitCurrentJudgement: async () => {

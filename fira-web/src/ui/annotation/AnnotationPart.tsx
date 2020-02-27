@@ -28,7 +28,7 @@ const AnnotationPart: React.FC<{
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : '';
 
   // display the span as selectable if annotation is allowed
-  const annotationGridStyle = annotationIsAllowed ? styles.gridStyle : '';
+  const annotationAllowedStyle = annotationIsAllowed ? styles.annotationAllowed : '';
 
   const annotatePartSpan = (ref?: any) => (
     <span
@@ -36,7 +36,7 @@ const AnnotationPart: React.FC<{
       onClick={onPartClick}
       className={`${styles.annotatePart} ${currentRangeStartStyle} ${
         !!isInSelectedRange ? styles.isInRange : ''
-      } ${annotationGridStyle}`}
+      } ${annotationAllowedStyle}`}
     >
       {textToShow}
     </span>

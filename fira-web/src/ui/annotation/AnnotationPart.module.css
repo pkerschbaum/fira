@@ -5,7 +5,7 @@
 }
 
 .rangeStart {
-  background-color: lightcoral;
+  background-color: hsla(0, 79%, 72%, 50%);
 }
 
 .isInRange {
@@ -13,9 +13,13 @@
   cursor: pointer;
 }
 
+.annotationAllowed:hover:not(.rangeStart):not(.isInRange) {
+  background-color: hsla(120, 73%, 75%, 50%);
+}
+
 /* mobile devices, touch only */
 @media only screen and (pointer: coarse) {
-  .gridStyle {
+  .annotationAllowed {
     padding: 3px 6px 3px 9px;
   }
 }

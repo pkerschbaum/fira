@@ -17,7 +17,7 @@
   margin: calc(var(--margin-medium) / 2) 0;
 }
 
-.topBar {
+.actionBar {
   margin-top: var(--margin-xsmall);
 
   display: flex;
@@ -38,15 +38,21 @@
   overflow: auto;
 }
 
-.buttonContainer {
+.footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   /* the button container does not need any margin because the flex items will 
      get margins, and thus make the container bigger anyways */
   margin: 0;
 }
 
-.buttonContainer > * {
+.footer > * {
   margin: calc(var(--margin-xxsmall) / 2);
+}
+
+.guideText {
+  flex-grow: 1;
+  width: 0;
 }
