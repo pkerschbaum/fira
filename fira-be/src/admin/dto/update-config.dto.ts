@@ -1,4 +1,4 @@
-import { IsInt, IsEnum, IsOptional } from 'class-validator';
+import { IsInt, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 
 import { UpdateConfig } from '../admin.types';
 import { JudgementMode } from '../../judgements/judgements.types';
@@ -13,4 +13,7 @@ export class UpdateConfigReqDto implements UpdateConfig {
   @IsOptional()
   @IsEnum(JudgementMode)
   readonly judgementMode?: JudgementMode;
+  @IsOptional()
+  @IsBoolean()
+  readonly rotateDocumentText?: boolean;
 }

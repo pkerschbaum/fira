@@ -17,7 +17,7 @@
 }
 
 .actionBar {
-  margin-top: var(--margin-xsmall);
+  margin: var(--margin-medium) 0;
   width: 100%;
 
   display: flex;

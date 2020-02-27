@@ -22,6 +22,8 @@ export class Config {
   annotationTargetPerJudgPair: number;
   @Column({ enum: JudgementMode, nullable: false })
   judgementMode: JudgementMode;
+  @Column({ type: 'boolean', nullable: false })
+  rotateDocumentText: boolean;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

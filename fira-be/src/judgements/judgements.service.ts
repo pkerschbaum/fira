@@ -274,7 +274,13 @@ export class JudgementsService {
       this.appLogger.log(
         `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(pairsToPersist)}`,
       );
-      await persistPairs(pairsToPersist, user, dbConfig.judgementMode, transactionalEntityManager);
+      await persistPairs(
+        pairsToPersist,
+        user,
+        dbConfig.judgementMode,
+        dbConfig.rotateDocumentText,
+        transactionalEntityManager,
+      );
       remainingJudgementsToPreload -= pairsToPersist.length;
     }
 
@@ -394,22 +400,31 @@ async function persistPairs(
   pairs: CountResult[],
   user: User,
   judgementMode: JudgementMode,
+  rotateDocumentText: boolean,
   entityManager: EntityManager,
 ): Promise<void> {
   // determine whether to set 'rotate text'-flag or not
-  const rotateStats: Array<{ rotate: boolean; count: number }> = (
-    await entityManager
-      .createQueryBuilder(Judgement, 'j')
-      .select('j.rotate, count(j.*)')
-      .groupBy('j.rotate')
-      .execute()
-  ).map((elem: { rotate: boolean; count: string }) => ({
-    ...elem,
-    count: Number(elem.count),
-  }));
-  const countRotate = rotateStats.find(elem => elem.rotate === true)?.count ?? 0;
-  const countNoRotate = rotateStats.find(elem => elem.rotate === false)?.count ?? 0;
-  const rotate = countRotate < countNoRotate;
+  let rotate: boolean;
+  if (!rotateDocumentText) {
+    // according to the server config, no rotation should be done
+    rotate = false;
+  } else {
+    // determine how often each variant - rotation or no-rotation - was used,
+    // and set the variant which was used less often
+    const rotateStats: Array<{ rotate: boolean; count: number }> = (
+      await entityManager
+        .createQueryBuilder(Judgement, 'j')
+        .select('j.rotate, count(j.*)')
+        .groupBy('j.rotate')
+        .execute()
+    ).map((elem: { rotate: boolean; count: string }) => ({
+      ...elem,
+      count: Number(elem.count),
+    }));
+    const countRotate = rotateStats.find(elem => elem.rotate === true)?.count ?? 0;
+    const countNoRotate = rotateStats.find(elem => elem.rotate === false)?.count ?? 0;
+    rotate = countRotate < countNoRotate;
+  }
 
   // gather data and persist judgements
   await Promise.all(

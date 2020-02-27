@@ -53,6 +53,7 @@ export type UpdateConfig = {
   readonly annotationTargetPerUser?: number;
   readonly annotationTargetPerJudgPair?: number;
   readonly judgementMode?: JudgementMode;
+  readonly rotateDocumentText?: boolean;
 };
 
 export type StatisticsResp = {

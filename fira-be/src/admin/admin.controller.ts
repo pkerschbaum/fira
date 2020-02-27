@@ -7,7 +7,8 @@ import {
   Post,
   HttpException,
   Get,
-  Header,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 
@@ -90,6 +91,7 @@ export class AdminController {
   }
 
   @Put('v1/config')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async updateConfig(@Body() updateConfigReq: UpdateConfigReqDto) {
     await this.adminService.updateConfig(updateConfigReq);
   }

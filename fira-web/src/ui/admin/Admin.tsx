@@ -34,10 +34,16 @@ const Admin: React.FC = () => {
           <Menu />
         </div>
         <Formik
-          initialValues={{ judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS }}
+          initialValues={{
+            judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
+            rotateDocumentText: 'true',
+          }}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              await adminService.updateConfig(values.judgementMode);
+              await adminService.updateConfig({
+                ...values,
+                rotateDocumentText: values.rotateDocumentText === 'true',
+              });
               setSubmitting(true);
             } catch (e) {
               setSubmitting(false);
@@ -46,20 +52,30 @@ const Admin: React.FC = () => {
         >
           {({ isSubmitting }) => (
             <Form className={styles.actionBar}>
-              <Field name="judgementMode" as="select">
-                {Object.values(JudgementMode).map(judgementMode => (
-                  <option key={judgementMode} value={judgementMode}>
-                    {judgementMode}
-                  </option>
-                ))}
-              </Field>
+              <div>
+                <label htmlFor="judgementMode">Judgement Mode:</label>
+                <Field name="judgementMode" as="select">
+                  {Object.values(JudgementMode).map(judgementMode => (
+                    <option key={judgementMode} value={judgementMode}>
+                      {judgementMode}
+                    </option>
+                  ))}
+                </Field>
+              </div>
+              <div>
+                <label htmlFor="rotateDocumentText">Rotate Document Text:</label>
+                <Field name="rotateDocumentText" as="select">
+                  <option value="true">true</option>
+                  <option value="false">false</option>
+                </Field>
+              </div>
               <Button
                 className={styles.button}
                 buttonType="primary"
                 type="submit"
                 disabled={isSubmitting}
               >
-                {!isSubmitting ? 'Submit' : <LoadingIndicator />}
+                {!isSubmitting ? 'Update Config' : <LoadingIndicator />}
               </Button>
             </Form>
           )}

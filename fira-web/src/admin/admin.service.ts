@@ -1,7 +1,7 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
-import { JudgementMode } from '../typings/fira-be-typings';
+import { UpdateConfig } from '../typings/fira-be-typings';
 
 const logger = createLogger('admin.service');
 
@@ -15,10 +15,10 @@ export const adminService = {
     logger.info(`export of judgements succeeded!`, { response });
   },
 
-  updateConfig: async (judgementMode: JudgementMode) => {
+  updateConfig: async (config: UpdateConfig) => {
     logger.info(`executing update of config...`);
 
-    await httpClient.updateConfig(store.getState().user!.accessToken.val, { judgementMode });
+    await httpClient.updateConfig(store.getState().user!.accessToken.val, config);
 
     logger.info(`update of config succeeded!`);
   },

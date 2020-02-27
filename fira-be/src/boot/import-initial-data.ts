@@ -19,6 +19,7 @@ const COLUMN_PRIORITY = 'priority';
 const COLUMN_ANNO_TARGET_USER = 'annotation_target_per_user';
 const COLUMN_ANNO_TARGET_JUDGE_PAIR = 'annotation_target_per_judgement_pair';
 const COLUMN_JUDGEMENT_MODE = 'judgement_mode';
+const COLUMN_ROTATE_DOCUMENT_TEXT = 'rotate_document_text';
 
 export async function importInitialData({
   logger,
@@ -102,6 +103,7 @@ export async function importInitialData({
     annotationTargetPerUser: number;
     annotationTargetPerJudgPair: number;
     judgementMode: JudgementMode;
+    rotateDocumentText: boolean;
   }>({
     logger,
     assetType: 'config',
@@ -117,6 +119,7 @@ export async function importInitialData({
         annotationTargetPerUser: Number(entry[COLUMN_ANNO_TARGET_USER]),
         annotationTargetPerJudgPair: Number(entry[COLUMN_ANNO_TARGET_JUDGE_PAIR]),
         judgementMode: judgementModeStr,
+        rotateDocumentText: entry[COLUMN_ROTATE_DOCUMENT_TEXT] === 'true',
       };
     },
     importFn: configs => adminService.updateConfig(configs[0]),
