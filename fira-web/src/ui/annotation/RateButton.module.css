@@ -4,5 +4,6 @@
 }
 
 .button {
+  height: 50px;
   color: var(--color-dense);
 }

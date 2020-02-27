@@ -80,6 +80,7 @@ const Annotation: React.FC<{
           <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
           <Menu />
         </div>
+        <div className={styles.horizontalLine} />
         <div key={currentJudgementPair.id} className={styles.annotationArea}>
           {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
             // determine if part is in one of the selected ranges

@@ -21,12 +21,14 @@
 }
 
 .styleBold {
-  padding: var(--padding-small) var(--padding-xxxsmall);
+  height: 50px;
+  padding: 0 var(--padding-xxxsmall);
   font-weight: var(--weight-large);
 }
 
 .styleNormal {
-  padding: var(--padding-xxsmall) var(--padding-xxsmall);
+  height: 35px;
+  padding: 0 var(--padding-xxsmall);
   font-size: var(--font-small);
   font-weight: var(--weight-medium);
 }

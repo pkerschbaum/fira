@@ -93,15 +93,15 @@ const Login = () => {
                 autoCorrect="off"
                 autoCapitalize="off"
               />
-              {errors.loginError && errors.loginError.length > 0 && (
+              {/* {errors.loginError && errors.loginError.length > 0 && (
                 <ul className={styles.errorList}>
                   <li>
                     <span>{errors.loginError}</span>
                   </li>
                 </ul>
-              )}
+              )} */}
               <Button buttonStyle="bold" buttonType="primary" type="submit" disabled={isSubmitting}>
-                {!isSubmitting ? 'Submit' : <LoadingIndicator />}
+                {!isSubmitting ? <span>Submit</span> : <LoadingIndicator />}
               </Button>
             </Form>
           )}

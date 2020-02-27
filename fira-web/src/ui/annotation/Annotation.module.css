@@ -14,7 +14,7 @@
 }
 
 .container > * {
-  margin-top: var(--margin-medium);
+  margin: calc(var(--margin-medium) / 2) 0;
 }
 
 .topBar {
@@ -28,12 +28,13 @@
   font-weight: var(--weight-large);
 }
 
+.horizontalLine {
+  margin: 0;
+  border-bottom: 2px black solid;
+}
+
 .annotationArea {
   flex-grow: 1;
-
-  box-shadow: 2px 0 0 0 var(--color-dense), 0 2px 0 0 var(--color-dense),
-    2px 2px 0 0 var(--color-dense), 2px 0 0 0 var(--color-dense) inset,
-    0 2px 0 0 var(--color-dense) inset;
   overflow: auto;
 }
 
@@ -41,4 +42,11 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  /* the button container does not need any margin because the flex items will 
+     get margins, and thus make the container bigger anyways */
+  margin: 0;
+}
+
+.buttonContainer > * {
+  margin: calc(var(--margin-xxsmall) / 2);
 }

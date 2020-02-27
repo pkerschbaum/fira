@@ -1,14 +1,14 @@
 /* from: https://loading.io/css/ */
 
 .ldsEllipsis {
-  display: inline-block;
+  display: flex;
+  align-items: center;
   position: relative;
   width: 5rem;
-  height: 1rem;
+  height: 1.33rem;
 }
 .ldsEllipsis div {
   position: absolute;
-  top: 0;
   width: 0.75rem;
   height: 0.75rem;
   border-radius: 50%;
