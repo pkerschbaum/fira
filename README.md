@@ -2,6 +2,11 @@
 
 ## How to run (in production mode)
 
+1. [Put data files in a directory on the host system](##1:-Put-data-files-in-a-directory-on-the-host-system)
+1. [Set environment variables](##2:-Set-environment-variables)
+1. [Run the application](##3:-Run-the-application)
+1. [Inspect the file containing the imported users](##4:-Inspect-the-file-containing-the-imported-users)
+
 ### #1: Put data files in a directory on the host system
 
 On the first startup, Fira will import all the data necessary to run the application.
@@ -62,11 +67,9 @@ Fira will write the generated credentials of all imported users to the file `FIR
 
 The detached mode (Flag `-d`) is used in both options because this is the recommended way of launching an application with docker-compose (not using the detached mode leads to the problem that if the terminal is closed or the process is terminated via Ctrl+C, the entire application stops...).
 
-Keep in mind that for viewing logs (`docker-compose logs`), viewing the running containers (`docker-compose ps`) or stopping the application (`docker-compose down`), one has to use the same options as used for starting the application.
-
 If you do not have `docker-compose` installed on your host system, you can try the following command (taken from [cloud.google.com/community/tutorials/docker-compose-on-container-optimized-os](https://cloud.google.com/community/tutorials/docker-compose-on-container-optimized-os)):
 
-```sh
+```bash
 docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "$PWD:$PWD" \
@@ -93,3 +96,6 @@ The PgAdmin Web UI is available at <http://localhost:8079> (or whatever port set
    - Port: Value of `FIRA_DATABASE_PUBLIC_PORT`
    - Username: Value of `FIRA_DB_USER`
    - Password: Value of `FIRA_DB_PASSWORD`
+
+Keep in mind that for viewing logs (`docker-compose logs`), viewing the running containers (`docker-compose ps`) or stopping the application (`docker-compose down`), one has to use the same docker-compose.yml files as used for starting the application.  
+So the command to view logs would be e.g. `docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs`.
