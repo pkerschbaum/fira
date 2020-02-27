@@ -1,6 +1,7 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
+import { JudgementMode } from '../typings/fira-be-typings';
 
 const logger = createLogger('admin.service');
 
@@ -12,6 +13,14 @@ export const adminService = {
     saveTsv('judgements.tsv', response);
 
     logger.info(`export of judgements succeeded!`, { response });
+  },
+
+  updateConfig: async (judgementMode: JudgementMode) => {
+    logger.info(`executing update of config...`);
+
+    await httpClient.updateConfig(store.getState().user!.accessToken.val, { judgementMode });
+
+    logger.info(`update of config succeeded!`);
   },
 
   getStatistics: async () => {

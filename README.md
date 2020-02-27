@@ -88,7 +88,7 @@ The PgAdmin Web UI is available at <http://localhost:8079> (or whatever port set
 1. Tab General:
    - Name: `fira`
 1. Tab Connection:
-   - Host name/address: `localhost`
+   - Host name/address: `postgres_fira`
      - Hint: if you experience problems connecting to the database docker container, try that: <https://medium.com/@samichkhachkhi/localhost-postgres-docker-connection-refused-using-pgadmin-a27b91de7342>
    - Port: Value of `FIRA_DATABASE_PUBLIC_PORT`
    - Username: Value of `FIRA_DB_USER`

@@ -1,15 +1,16 @@
-import { IsDefined, IsInt } from 'class-validator';
+import { IsInt, IsEnum, IsOptional } from 'class-validator';
 
 import { UpdateConfig } from '../admin.types';
 import { JudgementMode } from '../../judgements/judgements.types';
 
 export class UpdateConfigReqDto implements UpdateConfig {
+  @IsOptional()
   @IsInt()
-  @IsDefined()
-  readonly annotationTargetPerUser: number;
+  readonly annotationTargetPerUser?: number;
+  @IsOptional()
   @IsInt()
-  @IsDefined()
-  readonly annotationTargetPerJudgPair: number;
-  @IsDefined()
-  readonly judgementMode: JudgementMode;
+  readonly annotationTargetPerJudgPair?: number;
+  @IsOptional()
+  @IsEnum(JudgementMode)
+  readonly judgementMode?: JudgementMode;
 }

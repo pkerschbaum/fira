@@ -18,6 +18,7 @@ import {
   PreloadJudgementResponse,
   SaveJudgement,
   StatisticsResp,
+  UpdateConfig,
 } from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
@@ -208,6 +209,23 @@ export const httpClient = {
       ).data;
     } catch (e) {
       logger.error('export of judgements failed!', e);
+      throw e;
+    }
+  },
+
+  updateConfig: async (accessToken: string, updateConfigRequest: UpdateConfig): Promise<void> => {
+    logger.info('executing update of config...', { updateConfigRequest });
+
+    try {
+      return (
+        await axiosClient.put(`admin/v1/config`, updateConfigRequest, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('update of config failed!', e);
       throw e;
     }
   },

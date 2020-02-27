@@ -157,9 +157,15 @@ export class AdminService {
 
   public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
     const dbEntry = new Config();
-    dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
-    dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
-    dbEntry.judgementMode = config.judgementMode;
+    if (config.annotationTargetPerUser) {
+      dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
+    }
+    if (config.annotationTargetPerJudgPair) {
+      dbEntry.annotationTargetPerJudgPair = config.annotationTargetPerJudgPair;
+    }
+    if (config.judgementMode) {
+      dbEntry.judgementMode = config.judgementMode;
+    }
     await this.configRepository.save(dbEntry);
   };
 

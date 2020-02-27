@@ -16,7 +16,7 @@
   align-items: center;
 }
 
-.topBar {
+.actionBar {
   margin-top: var(--margin-xsmall);
   width: 100%;
 
@@ -25,7 +25,7 @@
   align-items: center;
 }
 
-.exportJudgementsButton {
+.button {
   width: auto;
 }
 

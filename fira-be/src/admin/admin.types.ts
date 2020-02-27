@@ -50,9 +50,9 @@ export type ImportJudgementPairResult = {
 };
 
 export type UpdateConfig = {
-  readonly annotationTargetPerUser: number;
-  readonly annotationTargetPerJudgPair: number;
-  readonly judgementMode: JudgementMode;
+  readonly annotationTargetPerUser?: number;
+  readonly annotationTargetPerJudgPair?: number;
+  readonly judgementMode?: JudgementMode;
 };
 
 export type StatisticsResp = {
