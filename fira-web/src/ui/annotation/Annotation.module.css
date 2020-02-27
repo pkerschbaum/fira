@@ -28,11 +28,6 @@
   font-weight: var(--weight-large);
 }
 
-.horizontalLine {
-  margin: 0;
-  border-bottom: 2px black solid;
-}
-
 .annotationArea {
   flex-grow: 1;
   overflow: auto;

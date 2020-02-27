@@ -10,6 +10,7 @@ import RateButton from './RateButton';
 import { JudgementPair } from '../../store/annotation/annotation.slice';
 import AnnotationPart from './AnnotationPart';
 import Menu from '../elements/Menu';
+import Line from '../elements/Line';
 
 const Annotation: React.FC<{
   currentJudgementPair: JudgementPair;
@@ -71,7 +72,7 @@ const Annotation: React.FC<{
           <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
           <Menu />
         </div>
-        <div className={styles.horizontalLine} />
+        <Line orientation="horizontal" />
         <div key={currentJudgementPair.id} className={styles.annotationArea}>
           {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
             // determine if part is in one of the selected ranges

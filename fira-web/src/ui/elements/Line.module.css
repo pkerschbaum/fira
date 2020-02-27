@@ -1,0 +1,5 @@
+.horizontalLine {
+  margin: 0;
+  width: 100%;
+  border-bottom: 2px black solid;
+}

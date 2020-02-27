@@ -16,14 +16,27 @@
   align-items: center;
 }
 
+.adminArea > * {
+  margin: calc(var(--margin-medium) / 2) 0;
+}
+
 .actionBar {
-  margin: var(--margin-medium) 0;
+  margin: calc(var(--margin-medium) / 2) 0;
   width: 100%;
 
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+}
+
+.options > * {
+  margin: calc(var(--margin-xxsmall) / 2) 0;
 }
 
 .button {

@@ -8,6 +8,7 @@ import { adminService } from '../../admin/admin.service';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
 import LoadingIndicator from '../elements/LoadingIndicator';
+import Line from '../elements/Line';
 
 const Admin: React.FC = () => {
   const [statistics, updateStatistics] = useState<Statistic[] | undefined>(undefined);
@@ -33,6 +34,7 @@ const Admin: React.FC = () => {
           </Button>
           <Menu />
         </div>
+        <Line orientation="horizontal" />
         <Formik
           initialValues={{
             judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
@@ -52,22 +54,24 @@ const Admin: React.FC = () => {
         >
           {({ isSubmitting }) => (
             <Form className={styles.actionBar}>
-              <div>
-                <label htmlFor="judgementMode">Judgement Mode:</label>
-                <Field name="judgementMode" as="select">
-                  {Object.values(JudgementMode).map(judgementMode => (
-                    <option key={judgementMode} value={judgementMode}>
-                      {judgementMode}
-                    </option>
-                  ))}
-                </Field>
-              </div>
-              <div>
-                <label htmlFor="rotateDocumentText">Rotate Document Text:</label>
-                <Field name="rotateDocumentText" as="select">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </Field>
+              <div className={styles.options}>
+                <div>
+                  <label htmlFor="judgementMode">Judgement Mode:</label>
+                  <Field name="judgementMode" as="select">
+                    {Object.values(JudgementMode).map(judgementMode => (
+                      <option key={judgementMode} value={judgementMode}>
+                        {judgementMode}
+                      </option>
+                    ))}
+                  </Field>
+                </div>
+                <div>
+                  <label htmlFor="rotateDocumentText">Rotate Document Text:</label>
+                  <Field name="rotateDocumentText" as="select">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </Field>
+                </div>
               </div>
               <Button
                 className={styles.button}
@@ -80,6 +84,7 @@ const Admin: React.FC = () => {
             </Form>
           )}
         </Formik>
+        <Line orientation="horizontal" />
         <div className={styles.statisticsContainer}>
           {statistics &&
             statistics.map(statistic => (
