@@ -9,7 +9,7 @@ const AnnotationPart: React.FC<{
   isRangeStart: boolean;
   isInSelectedRange: boolean;
   showTooltip: boolean;
-  rateLevelAllowsAnnotation: boolean;
+  annotationIsAllowed: boolean;
   onPartClick: () => void;
   onTooltipClick: () => void;
 }> = ({
@@ -17,7 +17,7 @@ const AnnotationPart: React.FC<{
   isRangeStart,
   isInSelectedRange,
   showTooltip,
-  rateLevelAllowsAnnotation,
+  annotationIsAllowed,
   onPartClick,
   onTooltipClick,
 }) => {
@@ -27,8 +27,8 @@ const AnnotationPart: React.FC<{
   // set css class if part is start of the current selected range
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : '';
 
-  // display the span as selectable if annotation is possible
-  const annotationGridStyle = rateLevelAllowsAnnotation ? styles.gridStyle : '';
+  // display the span as selectable if annotation is allowed
+  const annotationGridStyle = annotationIsAllowed ? styles.gridStyle : '';
 
   const annotatePartSpan = (ref?: any) => (
     <span

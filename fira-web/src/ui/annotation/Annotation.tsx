@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import styles from './Annotation.module.css';
-import { RelevanceLevel, RateLevels } from '../../typings/enums';
+import { RelevanceLevel, RateLevels, JudgementMode } from '../../typings/enums';
 import { judgementsService } from '../../judgements/judgements.service';
 import { noop } from '../../util/functions';
 import Button from '../elements/Button';
@@ -44,12 +44,24 @@ const Annotation: React.FC<{
   const currentRateLevel = RateLevels.find(
     rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
   );
-  const rateLevelAllowsAnnotation = !!currentRateLevel?.annotationRequired;
-  const hasToAnnotate =
-    !currentRateLevel ||
-    (currentRateLevel.annotationRequired &&
-      (currentJudgementPair.annotatedRanges.length === 0 ||
-        currentJudgementPair.currentAnnotationStart !== undefined));
+  const annotationIsAllowed =
+    currentJudgementPair.mode !== JudgementMode.PLAIN_RELEVANCE_SCORING &&
+    !!currentRateLevel?.annotationRequired;
+
+  /*
+   * the annotation is finished only if the user rated the judgement pair (i.e., selected a rate level)
+   * and
+   * - either the judgement pair requires no annotation (because the judgement mode returned by the server
+   *   is not "SCORING_AND_SELECT_SPANS", or the rate level does not require annotation)
+   * - or the user annotated at least one section of the paragraph and is not currently in the process of
+   *   annotating the next section
+   */
+  const annotationFinished =
+    currentRateLevel &&
+    (currentJudgementPair.mode === JudgementMode.PLAIN_RELEVANCE_SCORING ||
+      !currentRateLevel.annotationRequired ||
+      (currentJudgementPair.annotatedRanges.length > 0 &&
+        currentJudgementPair.currentAnnotationStart === undefined));
 
   const annotationTarget = remainingToFinish + alreadyFinished;
   const finishedFraction = (alreadyFinished / annotationTarget) * 100;
@@ -75,7 +87,7 @@ const Annotation: React.FC<{
               range => range.start <= i && range.end >= i,
             );
 
-            const canAnnotatePart = rateLevelAllowsAnnotation && !isInSelectedRange;
+            const canAnnotatePart = annotationIsAllowed && !isInSelectedRange;
 
             return (
               <AnnotationPart
@@ -84,7 +96,7 @@ const Annotation: React.FC<{
                 isRangeStart={currentJudgementPair.currentAnnotationStart === i}
                 isInSelectedRange={isInSelectedRange}
                 showTooltip={tooltipAnnotatePartIndex === i}
-                rateLevelAllowsAnnotation={rateLevelAllowsAnnotation}
+                annotationIsAllowed={annotationIsAllowed}
                 onPartClick={
                   canAnnotatePart
                     ? () => selectRangeStartEnd({ annotationPartIndex: i })
@@ -113,7 +125,7 @@ const Annotation: React.FC<{
           <Button
             buttonStyle="bold"
             buttonType="primary"
-            disabled={hasToAnnotate}
+            disabled={!annotationFinished}
             onClick={() => judgementsService.submitCurrentJudgement()}
           >
             Next

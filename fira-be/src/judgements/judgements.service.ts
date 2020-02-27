@@ -70,7 +70,7 @@ export class JudgementsService {
         // or the preload limit of judgements is met
         // --> do not preload more judgements
         return {
-          judgements: currentOpenJudgements.map(mapToResponse),
+          judgements: mapJudgementsToResponse(currentOpenJudgements),
           alreadyFinished: currentFinishedJudgements.length,
           remainingToFinish,
         };
@@ -109,7 +109,7 @@ export class JudgementsService {
       });
 
       return {
-        judgements: openJudgements.map(mapToResponse),
+        judgements: mapJudgementsToResponse(openJudgements),
         alreadyFinished: currentFinishedJudgements.length,
         remainingToFinish,
       };
@@ -151,7 +151,9 @@ export class JudgementsService {
 
         dbJudgement.status = JudgementStatus.JUDGED;
         dbJudgement.relevanceLevel = judgementData.relevanceLevel;
-        dbJudgement.relevancePositions = judgementData.relevancePositions;
+        if (judgementData.relevancePositions.length > 0) {
+          dbJudgement.relevancePositions = judgementData.relevancePositions;
+        }
         dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
         dbJudgement.judgedAt = new Date();
 
@@ -433,21 +435,25 @@ async function persistPairs(
   );
 }
 
-function mapToResponse(openJudgement: Judgement): PreloadJudgement {
-  // rotate text (annotation parts), if requested to do so
-  let annotationParts = openJudgement.document.annotateParts;
-  if (openJudgement.rotate) {
-    annotationParts = annotationParts
-      .slice(annotationParts.length / 2, annotationParts.length)
-      .concat(annotationParts.slice(0, annotationParts.length / 2));
-  }
+function mapJudgementsToResponse(openJudgements: Judgement[]) {
+  return openJudgements
+    .map(openJudgement => {
+      // rotate text (annotation parts), if requested to do so
+      let annotationParts = openJudgement.document.annotateParts;
+      if (openJudgement.rotate) {
+        annotationParts = annotationParts
+          .slice(annotationParts.length / 2, annotationParts.length)
+          .concat(annotationParts.slice(0, annotationParts.length / 2));
+      }
 
-  return {
-    id: openJudgement.id,
-    queryText: openJudgement.query.text,
-    docAnnotationParts: annotationParts,
-    mode: openJudgement.mode,
-  };
+      return {
+        id: openJudgement.id,
+        queryText: openJudgement.query.text,
+        docAnnotationParts: annotationParts,
+        mode: openJudgement.mode,
+      } as PreloadJudgement;
+    })
+    .sort((judg1, judg2) => judg1.id - judg2.id);
 }
 
 /**
