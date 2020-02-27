@@ -1,6 +1,8 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
+
 import { PreloadJudgement } from '../../typings/fira-be-typings';
 import { RelevanceLevel, RateLevels } from '../../typings/enums';
+import { actions as userActions } from '../user/user.slice';
 
 export enum JudgementPairStatus {
   TO_JUDGE = 'TO_JUDGE',
@@ -93,10 +95,11 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         rateLevel => rateLevel.relevanceLevel === currentJudgementPair!.relevanceLevel,
       );
 
-      // clear annotated ranges if rating is changed to a level which
-      // does not require annotation of ranges
+      // clear annotated ranges and current annotation start if
+      // rating is changed to a level which does not require annotation of ranges
       if (!currentRateLevel!.annotationRequired) {
         currentJudgementPair!.annotatedRanges = [];
+        currentJudgementPair!.currentAnnotationStart = undefined;
       }
     })
     .addCase(selectRangeStartEnd, (state, action) => {
@@ -140,6 +143,10 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         state.currentJudgementPairId = action.payload?.id;
         state.currentJudgementPairSelectedOnMs = new Date().getTime();
       }
+    })
+    .addCase(userActions.logout, () => {
+      // on logout, erase annotation state
+      return INITIAL_STATE;
     }),
 );
 
