@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "fira",
+      "Group": "Servers",
+      "Port": 5432,
+      "Username": "fira",
+      "Host": "postgres_fira",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "postgres"
+    }
+  }
+}
