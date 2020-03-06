@@ -80,15 +80,10 @@ const Annotation: React.FC<{
               range => range.start <= i && range.end >= i,
             );
 
-            /*
-             * annotation of a part is allowed if
-             * - the corresponding judgement mode is set,
-             * - the current rate level explicitly requires it
-             * - and it is no whitespace
-             */
+            // annotation of a part is allowed if the corresponding judgement mode
+            // is set and it is no whitespace
             const annotationIsAllowed =
               currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
-              !!currentRateLevel?.annotationRequired &&
               annotationPart !== ' ';
 
             const canAnnotatePart = annotationIsAllowed && !isInSelectedRange;

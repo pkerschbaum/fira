@@ -32,9 +32,10 @@ export const judgementsService = {
       rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
     );
 
-    if (!currentRateLevel!.annotationRequired) {
-      // if the chosen rate level does not require annotation, immediately submit current
-      // judgement and proceed
+    if (!currentRateLevel!.annotationRequired || currentJudgementPair!.annotatedRanges.length > 0) {
+      // if the chosen rate level does not require annotation, or it does and regions are
+      // annotated already,
+      // immediately submit current judgement and proceed
       await judgementsService.submitCurrentJudgement();
     }
 
