@@ -31,6 +31,7 @@ export const setupSubscriptions = (store: RootStore) => {
       browserStorage.saveUser({
         accessToken: currentUser.accessToken.val,
         refreshToken: currentUser.refreshToken.val,
+        acknowledgedInfoScreen: currentUser.acknowledgedInfoScreen,
       });
       logger.info('user saved to browser storage');
 

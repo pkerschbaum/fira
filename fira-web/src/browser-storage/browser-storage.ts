@@ -3,10 +3,12 @@ import { createLogger } from '../logger/logger';
 type LocalStorageUser = {
   accessToken: string;
   refreshToken: string;
+  acknowledgedInfoScreen: boolean;
 };
 
-const logger = createLogger('browser-storage');
 const USER_KEY = 'user';
+
+const logger = createLogger('browser-storage');
 
 export const browserStorage = {
   saveUser: (user: LocalStorageUser) => {

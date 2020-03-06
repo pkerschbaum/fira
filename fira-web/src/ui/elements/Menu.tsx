@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Manager, Reference, Popper } from 'react-popper';
+import { useHistory } from 'react-router-dom';
 
 import styles from './Menu.module.css';
 import Button from './Button';
 import { useOnViewportClick } from '../util/events.hooks';
 import { useUserActions } from '../../store/user/user.hooks';
+import { INFO_RELATIVE_URL } from '../App';
 
 const MenuButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
   ({ onClick }, ref) => (
@@ -22,14 +24,14 @@ const Menu: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   useOnViewportClick(() => setShowMenu(false));
   const userActions = useUserActions();
+  const history = useHistory();
 
   function onLogout() {
     userActions.logout();
   }
 
   function onShowStartScreen() {
-    // TODO implement
-    console.log('onShowStartScreen');
+    history.push(INFO_RELATIVE_URL);
   }
 
   function toggleShowMenu() {
@@ -48,7 +50,7 @@ const Menu: React.FC = () => {
       <Popper placement="bottom-start">
         {({ ref, style, placement }) => (
           <div ref={ref} style={style} data-placement={placement}>
-            <Button onClick={onShowStartScreen}>Go to Start Screen</Button>
+            <Button onClick={onShowStartScreen}>Go to Info Screen</Button>
             <Button onClick={onLogout}>Logout</Button>
           </div>
         )}

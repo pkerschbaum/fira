@@ -12,6 +12,7 @@ type UserState = null | {
     readonly val: string;
     readonly expiry: number; // unix timestamp
   };
+  readonly acknowledgedInfoScreen: boolean;
   readonly role: UserRole;
 };
 
@@ -24,10 +25,15 @@ type AuthenticatePayload = {
   accessToken: string;
   refreshToken: string;
 };
+type AckInfoScreenPayload = {
+  acknowledgedInfoScreen: boolean;
+};
 
 const INITIAL_STATE = null as UserState;
+const DEFAULT_ACKNOWLEDGED_INFO_SCREEN = false;
 
 const authenticate = createAction<AuthenticatePayload>('AUTHENTICATED');
+const acknowledgeInfoScreen = createAction<AckInfoScreenPayload>('ACKNOWLEDGED_INFO_SCREEN');
 const logout = createAction<void>('LOGGED_OUT');
 const reducer = createReducer(INITIAL_STATE, builder =>
   builder
@@ -37,6 +43,9 @@ const reducer = createReducer(INITIAL_STATE, builder =>
       const isAdmin = !!accessTokenJwtPayload.resource_access?.['realm-management']?.roles?.some(
         role => role === 'manage-users',
       );
+
+      const acknowledgedInfoScreen =
+        state?.acknowledgedInfoScreen ?? DEFAULT_ACKNOWLEDGED_INFO_SCREEN;
 
       return {
         ...state,
@@ -48,13 +57,17 @@ const reducer = createReducer(INITIAL_STATE, builder =>
           val: action.payload.refreshToken,
           expiry: refreshTokenJwtPayload.exp,
         },
+        acknowledgedInfoScreen,
         role: isAdmin ? UserRole.ADMIN : UserRole.ANNOTATOR,
       };
+    })
+    .addCase(acknowledgeInfoScreen, (state, action) => {
+      state!.acknowledgedInfoScreen = action.payload.acknowledgedInfoScreen;
     })
     .addCase(logout, () => {
       return INITIAL_STATE;
     }),
 );
 
-export const actions = { authenticate, logout };
+export const actions = { authenticate, acknowledgeInfoScreen, logout };
 export default reducer;
