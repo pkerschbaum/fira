@@ -1,10 +1,9 @@
 .container {
-  /* START center children, vertical and horizontal */
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   flex-grow: 1;
-  /* END center children, vertical and horizontal */
 }
 
 .inputArea {
@@ -19,7 +18,11 @@
   width: 100%;
 }
 
-.inputArea > span {
+.headline {
+  text-align: center;
+}
+
+.inputHeadline {
   text-align: center;
   font-weight: var(--weight-xlarge);
   margin-bottom: var(--margin-medium);
