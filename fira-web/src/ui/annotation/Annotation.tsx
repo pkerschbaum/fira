@@ -18,28 +18,27 @@ const Annotation: React.FC<{
   alreadyFinished: number;
   selectRangeStartEnd: ({ annotationPartIndex }: { annotationPartIndex: number }) => void;
   deleteRange: ({ annotationPartIndex }: { annotationPartIndex: number }) => void;
-  rateJudgementPair: ({ relevanceLevel }: { relevanceLevel: RelevanceLevel }) => void;
 }> = ({
   currentJudgementPair,
   remainingToFinish,
   alreadyFinished,
   selectRangeStartEnd,
   deleteRange,
-  rateJudgementPair,
 }) => {
   const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
 
+  function createJudgementFn(relevanceLevel: RelevanceLevel) {
+    return () => judgementsService.rateJudgementPair(relevanceLevel);
+  }
+
   useKeyupHandler({
-    Digit1: () => rateJudgementPair({ relevanceLevel: RelevanceLevel.MISLEADING_ANSWER }),
-    Digit2: () => rateJudgementPair({ relevanceLevel: RelevanceLevel.NOT_RELEVANT }),
-    Digit3: () =>
-      rateJudgementPair({
-        relevanceLevel: RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER,
-      }),
-    Digit4: () => rateJudgementPair({ relevanceLevel: RelevanceLevel.GOOD_ANSWER }),
-    Digit5: () => rateJudgementPair({ relevanceLevel: RelevanceLevel.PERFECT_ANSWER }),
+    Digit1: createJudgementFn(RelevanceLevel.MISLEADING_ANSWER),
+    Digit2: createJudgementFn(RelevanceLevel.NOT_RELEVANT),
+    Digit3: createJudgementFn(RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER),
+    Digit4: createJudgementFn(RelevanceLevel.GOOD_ANSWER),
+    Digit5: createJudgementFn(RelevanceLevel.PERFECT_ANSWER),
   });
 
   const currentRateLevel = RateLevels.find(
@@ -123,7 +122,7 @@ const Annotation: React.FC<{
               <RateButton
                 key={rateButton.relevanceLevel}
                 rateLevel={rateButton}
-                onClick={() => judgementsService.rateJudgementPair(rateButton.relevanceLevel)}
+                onClick={createJudgementFn(rateButton.relevanceLevel)}
               />
             ))
           ) : (

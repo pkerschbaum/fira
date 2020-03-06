@@ -5,7 +5,7 @@ import { useAnnotationState, useAnnotationActions } from '../../store/annotation
 
 const AnnotationContainer: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
-  const { selectRangeStartEnd, deleteRange, rateJudgementPair } = useAnnotationActions();
+  const { selectRangeStartEnd, deleteRange } = useAnnotationActions();
 
   /*
    * - if we know that no annotations must be finished anymore
@@ -35,7 +35,6 @@ const AnnotationContainer: React.FC = () => {
       alreadyFinished={alreadyFinished ?? 0}
       selectRangeStartEnd={selectRangeStartEnd}
       deleteRange={deleteRange}
-      rateJudgementPair={rateJudgementPair}
     />
   );
 };
