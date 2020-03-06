@@ -53,8 +53,10 @@ const Annotation: React.FC<{
   // compute some boolean variables needed to guide the user throw the annotation process
   const ratingRequired = !currentRateLevel;
   const currentSelectionNotFinished = currentJudgementPair.currentAnnotationStart !== undefined;
+  const annotationIsAllowedInGeneral =
+    currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS;
   const annotationIsRequired =
-    currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
+    annotationIsAllowedInGeneral &&
     !!currentRateLevel?.annotationRequired &&
     currentJudgementPair.annotatedRanges.length === 0;
 
@@ -80,13 +82,16 @@ const Annotation: React.FC<{
               range => range.start <= i && range.end >= i,
             );
 
-            // annotation of a part is allowed if the corresponding judgement mode
-            // is set and it is no whitespace
-            const annotationIsAllowed =
+            /*
+             * annotation of a part is allowed if
+             * - the corresponding judgement mode is set,
+             * - it is no whitespace
+             * - and the part is not already part of a selected region
+             */
+            const canAnnotatePart =
               currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
-              annotationPart !== ' ';
-
-            const canAnnotatePart = annotationIsAllowed && !isInSelectedRange;
+              annotationPart !== ' ' &&
+              !isInSelectedRange;
 
             return (
               <AnnotationPart
@@ -95,7 +100,8 @@ const Annotation: React.FC<{
                 isRangeStart={currentJudgementPair.currentAnnotationStart === i}
                 isInSelectedRange={isInSelectedRange}
                 showTooltip={tooltipAnnotatePartIndex === i}
-                annotationIsAllowed={annotationIsAllowed}
+                annotationIsAllowedOnPart={canAnnotatePart}
+                annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
                 onPartClick={
                   canAnnotatePart
                     ? () => selectRangeStartEnd({ annotationPartIndex: i })

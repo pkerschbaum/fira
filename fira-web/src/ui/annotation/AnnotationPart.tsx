@@ -9,7 +9,8 @@ const AnnotationPart: React.FC<{
   isRangeStart: boolean;
   isInSelectedRange: boolean;
   showTooltip: boolean;
-  annotationIsAllowed: boolean;
+  annotationIsAllowedOnPart: boolean;
+  annotationIsAllowedInGeneral: boolean;
   onPartClick: () => void;
   onTooltipClick: () => void;
 }> = ({
@@ -17,7 +18,8 @@ const AnnotationPart: React.FC<{
   isRangeStart,
   isInSelectedRange,
   showTooltip,
-  annotationIsAllowed,
+  annotationIsAllowedOnPart,
+  annotationIsAllowedInGeneral,
   onPartClick,
   onTooltipClick,
 }) => {
@@ -27,8 +29,15 @@ const AnnotationPart: React.FC<{
   // set css class if part is start of the current selected range
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : '';
 
-  // display the span as selectable if annotation is allowed
-  const annotationAllowedStyle = annotationIsAllowed ? styles.annotationAllowed : '';
+  // highlight the span as selectable (e.g., on hover) if annotation on the part is allowed
+  const annotationAllowedOnPartStyle = annotationIsAllowedOnPart
+    ? styles.annotationAllowedOnPart
+    : '';
+
+  // apply additional styles if annotation is allowed (e.g., spacing for mobile devices)
+  const annotationAllowedInGeneralStyle = annotationIsAllowedInGeneral
+    ? styles.annotationAllowedInGeneral
+    : '';
 
   const annotatePartSpan = (ref?: any) => (
     <span
@@ -36,7 +45,7 @@ const AnnotationPart: React.FC<{
       onClick={onPartClick}
       className={`${styles.annotatePart} ${currentRangeStartStyle} ${
         !!isInSelectedRange ? styles.isInRange : ''
-      } ${annotationAllowedStyle}`}
+      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle}`}
     >
       {textToShow}
     </span>
