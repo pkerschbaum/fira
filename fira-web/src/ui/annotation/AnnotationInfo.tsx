@@ -17,7 +17,7 @@ const AnnotationInfo: React.FC = () => {
           annotatorsService.acknowledgeInfoScreen(() => history.push(ANNOTATE_RELATIVE_URL))
         }
       >
-        Annotate
+        Continue
       </Button>
     </div>
   );

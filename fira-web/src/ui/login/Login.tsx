@@ -44,7 +44,7 @@ const Login = () => {
     <div className={styles.container}>
       <h1 className={styles.headline}>Fira</h1>
       <div className={styles.inputArea}>
-        <span className={styles.inputHeadline}>Login</span>
+        <span className={styles.inputHeadline}>Log in</span>
         <Formik
           initialValues={{ username: '', password: '', loginError: '' }}
           validate={values => {
@@ -94,15 +94,15 @@ const Login = () => {
                 autoCorrect="off"
                 autoCapitalize="off"
               />
-              {/* {errors.loginError && errors.loginError.length > 0 && (
+              {errors.loginError && errors.loginError.length > 0 && (
                 <ul className={styles.errorList}>
                   <li>
                     <span>{errors.loginError}</span>
                   </li>
                 </ul>
-              )} */}
+              )}
               <Button buttonStyle="bold" buttonType="primary" type="submit" disabled={isSubmitting}>
-                {!isSubmitting ? <span>Submit</span> : <LoadingIndicator />}
+                {!isSubmitting ? <span>Continue</span> : <LoadingIndicator />}
               </Button>
             </Form>
           )}

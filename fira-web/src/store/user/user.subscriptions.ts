@@ -11,7 +11,7 @@ export const setupSubscriptions = (store: RootStore) => {
   // listen for changes on user state and synchronize with browser storage
   const REFRESH_OFFSET = moment.duration(1, 'minutes');
   let currentUser = store.getState().user;
-  let scheduleId: NodeJS.Timeout;
+  let scheduleId: NodeJS.Timeout | undefined;
 
   store.subscribe(() => {
     const userOfStore = store.getState().user;
@@ -20,10 +20,14 @@ export const setupSubscriptions = (store: RootStore) => {
 
       currentUser = userOfStore;
 
+      // clear old schedule of refresh of token, if present
+      if (scheduleId) {
+        clearTimeout(scheduleId);
+      }
+
       if (!currentUser) {
         // if no user is present (e.g., logout was executed), clear scheduled refresh and browser storage
         logger.info('no user present, clear scheduled refresh and browser storage');
-        clearTimeout(scheduleId);
         return browserStorage.clearUser();
       }
 
