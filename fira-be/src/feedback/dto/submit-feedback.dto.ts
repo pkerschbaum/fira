@@ -1,11 +1,11 @@
 import { IsDefined, IsString, IsOptional, IsEnum } from 'class-validator';
 
-import { SaveFeedback, FeedbackScore } from '../feedback.types';
+import { SubmitFeedback, FeedbackScore } from '../feedback.types';
 
-export class SaveFeedbackDto implements SaveFeedback {
+export class SubmitFeedbackDto implements SubmitFeedback {
   @IsDefined()
   @IsEnum(FeedbackScore)
-  status: FeedbackScore;
+  score: FeedbackScore;
   @IsString()
   @IsOptional()
   text?: string;

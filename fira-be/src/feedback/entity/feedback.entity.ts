@@ -15,7 +15,7 @@ export class Feedback {
   @PrimaryGeneratedColumn()
   id: number;
   @Column({ enum: FeedbackScore, nullable: false })
-  status: FeedbackScore;
+  score: FeedbackScore;
   @Column({ type: 'text', nullable: true })
   text?: string;
   @ManyToOne(() => User, {

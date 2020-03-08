@@ -1,5 +1,5 @@
-export type SaveFeedback = {
-  status: FeedbackScore;
+export type SubmitFeedback = {
+  score: FeedbackScore;
   text?: string;
 };
 
