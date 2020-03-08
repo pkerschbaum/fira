@@ -37,25 +37,28 @@
   margin-top: var(--margin-medium);
 }
 
-.errorList {
-  margin: var(--margin-medium) 0 0 0;
-  color: var(--color-error);
-  list-style-position: inside;
-  list-style-type: '\1f6a8'; /* thumbs up sign */
-  padding: 0;
-}
-
-.errorList > li > span {
-  padding-left: var(--padding-xxxsmall);
-}
-
-.inputField {
+.inputContainer {
   border: var(--border-small) solid var(--color-soft);
   border-radius: var(--border-radius-normal);
 }
 
+.inputDivider {
+  width: 100%;
+  border-top: var(--border-small) solid var(--color-soft);
+}
+
+.inputContainer:focus-within > .inputDivider {
+  height: var(--border-small);
+  border: 0;
+}
+
 .inputField:focus-within {
-  border: var(--border-small) solid var(--color-dense);
+  border: var(--border-xlarge) solid var(--color-dense);
+  border-radius: var(--border-radius-normal);
+  margin-top: calc(var(--border-xlarge) * -1);
+  margin-bottom: calc(var(--border-xlarge) * -1);
+  margin-left: calc(var(--border-xlarge) * -1);
+  margin-right: calc(var(--border-xlarge) * -1);
 }
 
 .inputFieldError {
@@ -69,6 +72,18 @@
 
 .inputFieldError > label {
   color: var(--color-error);
+}
+
+.errorList {
+  margin: var(--margin-medium) 0 0 0;
+  color: var(--color-error);
+  list-style-position: inside;
+  list-style-type: '\1f6a8'; /* thumbs up sign */
+  padding: 0;
+}
+
+.errorList > li > span {
+  padding-left: var(--padding-xxxsmall);
 }
 
 @media (max-width: 520px) {

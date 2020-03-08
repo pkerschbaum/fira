@@ -81,22 +81,25 @@ const Login = () => {
         >
           {({ isSubmitting, errors }) => (
             <Form>
-              <TextInput
-                type="text"
-                label="Username"
-                name="username"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
-              <TextInput
-                type="password"
-                label="Password"
-                name="password"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
+              <div className={styles.inputContainer}>
+                <TextInput
+                  type="text"
+                  label="Username"
+                  name="username"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
+                <div className={styles.inputDivider} />
+                <TextInput
+                  type="password"
+                  label="Password"
+                  name="password"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
+              </div>
               {errors.loginError && errors.loginError.length > 0 && (
                 <ul className={styles.errorList}>
                   <li>
