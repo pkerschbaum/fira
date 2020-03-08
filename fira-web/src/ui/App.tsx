@@ -5,7 +5,7 @@ import styles from './App.module.css';
 import Login from './login/Login';
 import Admin from './admin/Admin';
 import AnnotationContainer from './annotation/AnnotationContainer';
-import AnnotationInfo from './annotation/AnnotationInfo';
+import AnnotationInfo from './annotation/info-page/AnnotationInfo';
 import PrivateRoute from './PrivateRoute';
 import { UserRole } from '../store/user/user.slice';
 import { useUserState } from '../store/user/user.hooks';
@@ -30,14 +30,14 @@ export const INFO_RELATIVE_URL = 'info';
 
 const AnnotatorRouter: React.FC = () => {
   const match = useRouteMatch();
-  const { userAcknowledgedInfoScreen } = useUserState();
+  const { userAcknowledgedInfoPage } = useUserState();
 
   return (
     <Switch>
       <Route path={`${match.path}/${ANNOTATE_RELATIVE_URL}`}>
-        {!userAcknowledgedInfoScreen ? (
-          // on this device, the info screen was never shown and
-          // acknowledged by the user --> show screen
+        {!userAcknowledgedInfoPage ? (
+          // on this device, the info page was never shown and
+          // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${INFO_RELATIVE_URL}`} />
         ) : (
           <AnnotationContainer />

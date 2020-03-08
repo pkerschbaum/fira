@@ -9,24 +9,24 @@ const AnnotationContainer: React.FC = () => {
 
   /*
    * - if we know that no annotations must be finished anymore
-   *   --> render finished screen
+   *   --> render finished page
    * - if we don't know how many annotations must be finished,
    *   or if we currently have no judgement pair to show
-   *   --> render loading screen
+   *   --> render loading page
    * - else, i.e. if we know that at least one judgement must be finished
    *   and we have a judgement pair to show
-   *   --> render annotation screen
+   *   --> render annotation page
    */
 
   if (remainingToFinish !== undefined && remainingToFinish <= 0) {
     return (
-      // TODO implement finished screen
+      // TODO implement finished page
       <div>Finished!</div>
     );
   }
 
   return remainingToFinish === undefined || !currentJudgementPair ? (
-    // TODO implement loading screen
+    // TODO implement loading page
     <div>Loading...</div>
   ) : (
     <Annotation

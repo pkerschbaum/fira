@@ -12,7 +12,7 @@ type UserState = null | {
     readonly val: string;
     readonly expiry: number; // unix timestamp
   };
-  readonly acknowledgedInfoScreen: boolean;
+  readonly acknowledgedInfoPage: boolean;
   readonly role: UserRole;
 };
 
@@ -25,15 +25,15 @@ type AuthenticatePayload = {
   accessToken: string;
   refreshToken: string;
 };
-type AckInfoScreenPayload = {
-  acknowledgedInfoScreen: boolean;
+type AckInfoPagePayload = {
+  acknowledgedInfoPage: boolean;
 };
 
 const INITIAL_STATE = null as UserState;
-const DEFAULT_ACKNOWLEDGED_INFO_SCREEN = false;
+const DEFAULT_ACKNOWLEDGED_INFO_PAGE = false;
 
 const authenticate = createAction<AuthenticatePayload>('AUTHENTICATED');
-const acknowledgeInfoScreen = createAction<AckInfoScreenPayload>('ACKNOWLEDGED_INFO_SCREEN');
+const acknowledgeInfoPage = createAction<AckInfoPagePayload>('ACKNOWLEDGED_INFO_PAGE');
 const logout = createAction<void>('LOGGED_OUT');
 const reducer = createReducer(INITIAL_STATE, builder =>
   builder
@@ -44,8 +44,7 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         role => role === 'manage-users',
       );
 
-      const acknowledgedInfoScreen =
-        state?.acknowledgedInfoScreen ?? DEFAULT_ACKNOWLEDGED_INFO_SCREEN;
+      const acknowledgedInfoPage = state?.acknowledgedInfoPage ?? DEFAULT_ACKNOWLEDGED_INFO_PAGE;
 
       return {
         ...state,
@@ -57,17 +56,17 @@ const reducer = createReducer(INITIAL_STATE, builder =>
           val: action.payload.refreshToken,
           expiry: refreshTokenJwtPayload.exp,
         },
-        acknowledgedInfoScreen,
+        acknowledgedInfoPage,
         role: isAdmin ? UserRole.ADMIN : UserRole.ANNOTATOR,
       };
     })
-    .addCase(acknowledgeInfoScreen, (state, action) => {
-      state!.acknowledgedInfoScreen = action.payload.acknowledgedInfoScreen;
+    .addCase(acknowledgeInfoPage, (state, action) => {
+      state!.acknowledgedInfoPage = action.payload.acknowledgedInfoPage;
     })
     .addCase(logout, () => {
       return INITIAL_STATE;
     }),
 );
 
-export const actions = { authenticate, acknowledgeInfoScreen, logout };
+export const actions = { authenticate, acknowledgeInfoPage, logout };
 export default reducer;

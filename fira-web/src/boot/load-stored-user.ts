@@ -10,13 +10,13 @@ export function loadStoredUser() {
   const storedUser = browserStorage.getUser();
 
   if (storedUser) {
-    logger.info('stored user found. dispatching authenticate and acknowledge info screen...', {
+    logger.info('stored user found. dispatching authenticate and acknowledge info page...', {
       storedUser,
     });
     store.dispatch(userActions.authenticate(storedUser));
     store.dispatch(
-      userActions.acknowledgeInfoScreen({
-        acknowledgedInfoScreen: storedUser.acknowledgedInfoScreen,
+      userActions.acknowledgeInfoPage({
+        acknowledgedInfoPage: storedUser.acknowledgedInfoPage,
       }),
     );
   } else {

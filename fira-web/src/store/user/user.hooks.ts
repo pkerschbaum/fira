@@ -16,11 +16,11 @@ export function useUserState() {
       assertUnreachable(state.user.role);
     }
   });
-  const userAcknowledgedInfoScreen = useSelector((state: RootState) => {
-    return !!state.user?.acknowledgedInfoScreen;
+  const userAcknowledgedInfoPage = useSelector((state: RootState) => {
+    return !!state.user?.acknowledgedInfoPage;
   });
 
-  return { userRole, userAcknowledgedInfoScreen };
+  return { userRole, userAcknowledgedInfoPage };
 }
 
 export const useUserActions = () => useActionsWithDispatch(actions);

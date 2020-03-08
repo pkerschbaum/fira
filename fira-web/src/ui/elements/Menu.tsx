@@ -30,7 +30,7 @@ const Menu: React.FC = () => {
     userActions.logout();
   }
 
-  function onShowStartScreen() {
+  function onShowInfoPage() {
     history.push(INFO_RELATIVE_URL);
   }
 
@@ -50,7 +50,7 @@ const Menu: React.FC = () => {
       <Popper placement="bottom-start">
         {({ ref, style, placement }) => (
           <div ref={ref} style={style} data-placement={placement}>
-            <Button onClick={onShowStartScreen}>Go to Info Screen</Button>
+            <Button onClick={onShowInfoPage}>Go to Info Page</Button>
             <Button onClick={onLogout}>Logout</Button>
           </div>
         )}

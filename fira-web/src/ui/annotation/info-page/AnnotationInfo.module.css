@@ -1,0 +1,25 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.container > * {
+  margin: calc(var(--margin-medium) / 2) 0;
+}
+
+.container > *:first-child {
+  margin-top: var(--margin-xsmall);
+}
+
+.headline {
+  text-align: center;
+  font-weight: var(--weight-xlarge);
+  margin-bottom: var(--margin-medium);
+}
+
+.infoImage {
+  border: 1px solid black;
+  width: 100%;
+  max-width: 400px;
+}

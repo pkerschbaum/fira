@@ -3,7 +3,7 @@ import { createLogger } from '../logger/logger';
 type LocalStorageUser = {
   accessToken: string;
   refreshToken: string;
-  acknowledgedInfoScreen: boolean;
+  acknowledgedInfoPage: boolean;
 };
 
 const USER_KEY = 'user';
