@@ -15,7 +15,9 @@ import { Query, QueryVersion } from './admin/entity/query.entity';
 import { Config } from './admin/entity/config.entity';
 import { Judgement } from './judgements/entity/judgement.entity';
 import { JudgementPair } from './admin/entity/judgement-pair.entity';
+import { Feedback } from './feedback/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import * as config from './config';
 
 @Module({
@@ -37,11 +39,13 @@ import * as config from './config';
         JudgementPair,
         Config,
         Judgement,
+        Feedback,
       ],
     }),
     AuthModule,
     AdminModule,
     JudgementsModule,
+    FeedbackModule,
   ],
   controllers: [],
   providers: [],

@@ -5,6 +5,8 @@ import {
   IsString,
   IsNumber,
   IsDefined,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -51,7 +53,9 @@ class ImportJudgementPairResultDto implements ImportJudgementPairResult {
   readonly queryId: number;
   @IsString()
   @IsNotEmpty()
+  @IsEnum(ImportStatus)
   readonly status: ImportStatus;
   @IsString()
+  @IsOptional()
   readonly error?: string;
 }

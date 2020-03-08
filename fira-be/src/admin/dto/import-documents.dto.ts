@@ -5,6 +5,8 @@ import {
   IsString,
   IsNumber,
   IsDefined,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -40,7 +42,9 @@ class ImportDocumentResult implements ImportResult {
   readonly id: number;
   @IsString()
   @IsNotEmpty()
+  @IsEnum(ImportStatus)
   readonly status: ImportStatus;
   @IsString()
+  @IsOptional()
   readonly error?: string;
 }

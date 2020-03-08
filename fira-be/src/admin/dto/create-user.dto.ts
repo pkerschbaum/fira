@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, ArrayMinSize, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  ArrayMinSize,
+  ValidateNested,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 import { ImportStatus } from '../../typings/commons';
@@ -34,11 +41,15 @@ class ImportUserResponseDto implements ImportUserResponse {
   @IsNotEmpty()
   readonly id: string;
   @IsNotEmpty()
+  @IsEnum(ImportStatus)
   readonly status: ImportStatus;
   @IsString()
+  @IsOptional()
   readonly username?: string;
   @IsString()
+  @IsOptional()
   readonly password?: string;
   @IsString()
+  @IsOptional()
   readonly error?: string;
 }

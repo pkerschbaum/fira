@@ -1,4 +1,4 @@
-import { ValidateNested, IsInt, IsDefined, IsString, IsNotEmpty } from 'class-validator';
+import { ValidateNested, IsInt, IsDefined, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
 import {
@@ -19,12 +19,14 @@ class ExportJudgementResponseDto implements ExportJudgement {
   @IsDefined()
   readonly id: number;
   @IsDefined()
+  @IsEnum(RelevanceLevel)
   readonly relevanceLevel: RelevanceLevel;
   @ValidateNested({ each: true })
   readonly relevanceCharacterRanges: Array<{ startChar: number; endChar: number }>;
   @IsDefined()
   readonly rotate: boolean;
   @IsDefined()
+  @IsEnum(JudgementMode)
   readonly mode: JudgementMode;
   @IsInt()
   @IsDefined()

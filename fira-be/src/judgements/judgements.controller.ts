@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Headers,
-  UnauthorizedException,
   UseGuards,
   Put,
   Param,
@@ -10,13 +9,12 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
-import * as jwt from 'jsonwebtoken';
 
-import { JwtPayload } from '../typings/commons';
 import { JudgementsService } from './judgements.service';
 import { PreloadJudgementsResponseDto } from './dto/preload-judgements.dto';
-import { AuthGuard } from 'src/auth.guard';
+import { AuthGuard } from '../auth.guard';
 import { SaveJudgementRequestDto } from './dto/save-judgement.dto';
+import { extractJwtPayload } from '../util/jwt.util';
 
 @ApiTags('judgements')
 @Controller('judgements')
@@ -59,20 +57,4 @@ export class JudgementsController {
       saveJudgementRequest,
     );
   }
-}
-
-function extractJwtPayload(authHeader: string): JwtPayload & { preferred_username: string } {
-  const accessToken = /Bearer (.+)/.exec(authHeader)?.[1]!; // AuthGuard ensures that the token is present
-
-  // extract jwt data
-  let jwtPayload: JwtPayload;
-  try {
-    jwtPayload = jwt.decode(accessToken) as JwtPayload;
-  } catch (e) {
-    throw new UnauthorizedException(`token not parsable, error: ${e}`);
-  }
-  if (!jwtPayload.preferred_username) {
-    throw new UnauthorizedException(`no preferred_username found in token`);
-  }
-  return jwtPayload as JwtPayload & { preferred_username: string };
 }
