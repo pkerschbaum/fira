@@ -16,6 +16,7 @@ import {
   PreloadJudgementResponse,
   ExportJudgement,
   JudgementMode,
+  UserAnnotationAction,
 } from './judgements.types';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
@@ -23,6 +24,7 @@ import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.e
 import { Document } from '../admin/entity/document.entity';
 import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
+import { Feedback } from '../feedback/entity/feedback.entity';
 import { AppLogger } from '../logger/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import { assertUnreachable } from 'src/util/types.util';
@@ -42,6 +44,11 @@ export class JudgementsService {
       const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
         where: { user },
       });
+      const countOfFeedbacks = await transactionalEntityManager.count(Feedback, {
+        where: { user },
+      });
+
+      // compute some statistics for this user
       const currentOpenJudgements = judgementsOfUser.filter(
         judgement => judgement.status === JudgementStatus.TO_JUDGE,
       );
@@ -50,6 +57,8 @@ export class JudgementsService {
       );
 
       const remainingToFinish = dbConfig.annotationTargetPerUser - currentFinishedJudgements.length;
+      const remainingUntilFirstFeedbackRequired =
+        dbConfig.annotationTargetToRequireFeedback - currentFinishedJudgements.length;
       const remainingUntilTargetMet =
         dbConfig.annotationTargetPerUser - judgementsOfUser.length <= 0
           ? 0
@@ -59,9 +68,21 @@ export class JudgementsService {
       let remainingJudgementsToPreload =
         remainingUntilTargetMet > maximumToPreload ? maximumToPreload : remainingUntilTargetMet;
 
+      // the user has to submit feedback if
+      // - the annotation target for the first feedback is reached and the user hasn't submitted any feedback
+      // - or if the user has reached his annotation target (i.e., has finished his annotations) and
+      //   has not submitted a second feedback yet
+      const requiredUserAction =
+        (remainingUntilFirstFeedbackRequired <= 0 && countOfFeedbacks === 0) ||
+        (remainingToFinish <= 0 && countOfFeedbacks <= 1)
+          ? UserAnnotationAction.SUBMIT_FEEDBACK
+          : UserAnnotationAction.ANNOTATE;
+
       this.appLogger.log(
         `judgements stats for user: sum=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
-          `finished=${currentFinishedJudgements.length}, remainingUntilTargetMet=${remainingUntilTargetMet}, remainingToPreload=${remainingJudgementsToPreload}`,
+          `finished=${currentFinishedJudgements.length}, remainingUntilTargetMet=${remainingUntilTargetMet}, ` +
+          `remainingToPreload=${remainingJudgementsToPreload}, countOfFeedbacks=${countOfFeedbacks}, ` +
+          `requiredUserAction=${requiredUserAction}`,
       );
 
       if (remainingJudgementsToPreload < 1) {
@@ -73,6 +94,7 @@ export class JudgementsService {
           judgements: mapJudgementsToResponse(currentOpenJudgements),
           alreadyFinished: currentFinishedJudgements.length,
           remainingToFinish,
+          requiredUserAction,
         };
       }
 
@@ -112,6 +134,7 @@ export class JudgementsService {
         judgements: mapJudgementsToResponse(openJudgements),
         alreadyFinished: currentFinishedJudgements.length,
         remainingToFinish,
+        requiredUserAction,
       };
     });
   }

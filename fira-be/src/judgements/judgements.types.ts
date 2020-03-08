@@ -2,6 +2,7 @@ export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
+  readonly requiredUserAction: UserAnnotationAction;
 };
 
 export type PreloadJudgement = {
@@ -57,4 +58,9 @@ export enum RelevanceLevel {
 export enum JudgementMode {
   PLAIN_RELEVANCE_SCORING = 'PLAIN_RELEVANCE_SCORING',
   SCORING_AND_SELECT_SPANS = 'SCORING_AND_SELECT_SPANS',
+}
+
+export enum UserAnnotationAction {
+  ANNOTATE = 'ANNOTATE',
+  SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
 }

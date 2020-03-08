@@ -10,7 +10,12 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { JudgementMode, PreloadJudgement, PreloadJudgementResponse } from '../judgements.types';
+import {
+  JudgementMode,
+  PreloadJudgement,
+  PreloadJudgementResponse,
+  UserAnnotationAction,
+} from '../judgements.types';
 
 export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ArrayMinSize(1)
@@ -23,6 +28,9 @@ export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @IsInt()
   @IsDefined()
   readonly remainingToFinish: number;
+  @IsEnum(UserAnnotationAction)
+  @IsDefined()
+  readonly requiredUserAction: UserAnnotationAction;
 }
 
 class PreloadJudgementDto implements PreloadJudgement {
