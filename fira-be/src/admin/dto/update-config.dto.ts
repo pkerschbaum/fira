@@ -16,4 +16,7 @@ export class UpdateConfigReqDto implements UpdateConfig {
   @IsOptional()
   @IsBoolean()
   readonly rotateDocumentText?: boolean;
+  @IsOptional()
+  @IsInt()
+  readonly annotationTargetToRequireFeedback?: number;
 }

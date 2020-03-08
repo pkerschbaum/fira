@@ -169,6 +169,9 @@ export class AdminService {
     if (config.rotateDocumentText !== undefined) {
       dbEntry.rotateDocumentText = config.rotateDocumentText;
     }
+    if (config.annotationTargetToRequireFeedback !== undefined) {
+      dbEntry.annotationTargetToRequireFeedback = config.annotationTargetToRequireFeedback;
+    }
     await this.configRepository.save(dbEntry);
   };
 

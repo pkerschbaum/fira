@@ -24,6 +24,8 @@ export class Config {
   judgementMode: JudgementMode;
   @Column({ type: 'boolean', nullable: false })
   rotateDocumentText: boolean;
+  @Column({ type: 'integer', nullable: false })
+  annotationTargetToRequireFeedback: number;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()
