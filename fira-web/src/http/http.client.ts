@@ -19,6 +19,7 @@ import {
   SaveJudgement,
   StatisticsResp,
   UpdateConfig,
+  SubmitFeedback,
 } from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
@@ -193,6 +194,26 @@ export const httpClient = {
       ).data;
     } catch (e) {
       logger.error('submit judgement failed!', e);
+      throw e;
+    }
+  },
+
+  submitFeedback: async (
+    accessToken: string,
+    submitFeedbackRequest: SubmitFeedback,
+  ): Promise<void> => {
+    logger.info('executing submit feedback...', { submitFeedbackRequest });
+
+    try {
+      return (
+        await axiosClient.post(`feedback/v1`, submitFeedbackRequest, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('submit feedback failed!', e);
       throw e;
     }
   },

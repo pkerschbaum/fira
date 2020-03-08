@@ -33,6 +33,11 @@ const AnnotationInfo: React.FC = () => {
     },
   ] as const;
 
+  function onAcknowledge() {
+    annotatorsService.acknowledgeInfoPage();
+    history.push(ANNOTATE_RELATIVE_URL);
+  }
+
   return (
     <div className={styles.container}>
       <span className={styles.headline}>Info - How to annotate</span>
@@ -43,12 +48,7 @@ const AnnotationInfo: React.FC = () => {
           <img key={idx} className={styles.infoImage} src={entry.content} alt={entry.alt} />
         ),
       )}
-      <Button
-        buttonType="primary"
-        onClick={() =>
-          annotatorsService.acknowledgeInfoPage(() => history.push(ANNOTATE_RELATIVE_URL))
-        }
-      >
+      <Button buttonType="primary" onClick={onAcknowledge}>
         Continue
       </Button>
     </div>

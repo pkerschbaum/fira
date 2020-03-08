@@ -6,10 +6,13 @@ import Login from './login/Login';
 import Admin from './admin/Admin';
 import AnnotationContainer from './annotation/AnnotationContainer';
 import AnnotationInfo from './annotation/info-page/AnnotationInfo';
+import AnnotationFeedback from './annotation/feedback-page/AnnotationFeedback';
 import PrivateRoute from './PrivateRoute';
 import { UserRole } from '../store/user/user.slice';
 import { useUserState } from '../store/user/user.hooks';
+import { useAnnotationState } from '../store/annotation/annotation.hooks';
 import { assertUnreachable } from '../util/types.util';
+import { UserAnnotationAction } from '../typings/enums';
 
 const RouteToPage: React.FC = () => {
   const { userRole } = useUserState();
@@ -27,10 +30,14 @@ const RouteToPage: React.FC = () => {
 
 export const ANNOTATE_RELATIVE_URL = 'annotate';
 export const INFO_RELATIVE_URL = 'info';
+export const FEEDBACK_RELATIVE_URL = 'feedback';
 
 const AnnotatorRouter: React.FC = () => {
   const match = useRouteMatch();
   const { userAcknowledgedInfoPage } = useUserState();
+  const { requiredUserAction } = useAnnotationState();
+
+  const redirectToDefault = <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />;
 
   return (
     <Switch>
@@ -39,6 +46,8 @@ const AnnotatorRouter: React.FC = () => {
           // on this device, the info page was never shown and
           // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${INFO_RELATIVE_URL}`} />
+        ) : requiredUserAction === UserAnnotationAction.SUBMIT_FEEDBACK ? (
+          <Redirect to={`${match.path}/${FEEDBACK_RELATIVE_URL}`} />
         ) : (
           <AnnotationContainer />
         )}
@@ -46,7 +55,14 @@ const AnnotatorRouter: React.FC = () => {
       <Route path={`${match.path}/${INFO_RELATIVE_URL}`}>
         <AnnotationInfo />
       </Route>
-      <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />
+      <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
+        {requiredUserAction !== UserAnnotationAction.SUBMIT_FEEDBACK ? (
+          redirectToDefault
+        ) : (
+          <AnnotationFeedback />
+        )}
+      </Route>
+      {redirectToDefault}
     </Switch>
   );
 };

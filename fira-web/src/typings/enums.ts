@@ -50,3 +50,15 @@ export const RateLevels: RateLevelType[] = [
     buttonColor: '#73FFC3',
   },
 ];
+
+export enum UserAnnotationAction {
+  ANNOTATE = 'ANNOTATE',
+  SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
+}
+
+export enum FeedbackScore {
+  VERY_GOOD = 'VERY_GOOD',
+  GOOD = 'GOOD',
+  DECENT = 'DECENT',
+  DONT_LIKE_IT = 'DONT_LIKE_IT',
+}
