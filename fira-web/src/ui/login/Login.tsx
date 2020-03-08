@@ -42,7 +42,10 @@ const Login = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.headline}>Fira</h1>
+      <div className={styles.headline}>
+        <h1>Fira</h1>
+        <span>Fine-grained Relevance Annotation</span>
+      </div>
       <div className={styles.inputArea}>
         <span className={styles.inputHeadline}>Log in</span>
         <Formik

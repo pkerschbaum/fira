@@ -20,6 +20,11 @@
 
 .headline {
   text-align: center;
+  margin: calc(var(--margin-xxlarge) / 2) 0;
+}
+
+.headline > h1 {
+  margin: 0 0 var(--margin-xxsmall) 0;
 }
 
 .inputHeadline {
