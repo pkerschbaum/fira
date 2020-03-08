@@ -5,10 +5,9 @@ import * as d3 from 'd3';
 import { AppLogger } from '../logger/app-logger.service';
 import * as config from '../config';
 import { isEmpty } from '../util/strings';
-import { ImportStatus } from '../typings/commons';
+import { JudgementMode, ImportStatus } from '../typings/enums';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import { JudgementMode } from '../judgements/judgements.types';
 
 const COLUMN_USER_ID = 'user_id';
 const COLUMN_DOCUMENT_ID = 'doc_id';

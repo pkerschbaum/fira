@@ -1,6 +1,7 @@
 import { IsNumber, IsDefined, IsEnum, IsArray, ArrayUnique } from 'class-validator';
 
-import { RelevanceLevel, SaveJudgement } from '../judgements.types';
+import { SaveJudgement } from '../judgements.types';
+import { RelevanceLevel } from '../../typings/enums';
 
 export class SaveJudgementRequestDto implements SaveJudgement {
   @IsEnum(RelevanceLevel)

@@ -6,7 +6,7 @@ import generate = require('nanoid/generate');
 import { Repository } from 'typeorm';
 
 import { AuthResponse, ImportUserResponse, ImportUserRequest } from './identity-management.types';
-import { ImportStatus } from '../typings/commons';
+import { ImportStatus } from '../typings/enums';
 import * as config from '../config';
 import { AppLogger } from '../logger/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
@@ -60,10 +60,7 @@ export class IdentityManagementService {
   ): Promise<ImportUserResponse[]> {
     return Promise.all(
       users.map(async user => {
-        const password = generate(
-          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-          8,
-        );
+        const password = generate('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
 
         try {
           if ((await this.userRepository.findByIds([user.id])).length > 0) {

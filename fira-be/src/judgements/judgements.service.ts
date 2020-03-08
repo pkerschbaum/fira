@@ -4,20 +4,18 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { Connection, EntityManager, LessThan, MoreThan } from 'typeorm';
+import { Connection, EntityManager, MoreThan } from 'typeorm';
 import moment = require('moment');
 import d3 = require('d3');
 
 import {
   PreloadJudgement,
-  JudgementStatus,
   SaveJudgement,
   CountResult,
   PreloadJudgementResponse,
   ExportJudgement,
-  JudgementMode,
-  UserAnnotationAction,
 } from './judgements.types';
+import { JudgementMode, JudgementStatus, UserAnnotationAction } from '../typings/enums';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
 import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.entity';

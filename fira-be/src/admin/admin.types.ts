@@ -1,5 +1,4 @@
-import { ImportStatus } from '../typings/commons';
-import { JudgementMode } from '../judgements/judgements.types';
+import { JudgementMode, ImportStatus } from '../typings/enums';
 
 export type ImportDocumentsReq = {
   readonly documents: ImportAsset[];

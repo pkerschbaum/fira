@@ -1,7 +1,7 @@
 import { IsInt, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 
 import { UpdateConfig } from '../admin.types';
-import { JudgementMode } from '../../judgements/judgements.types';
+import { JudgementMode } from '../../typings/enums';
 
 export class UpdateConfigReqDto implements UpdateConfig {
   @IsOptional()

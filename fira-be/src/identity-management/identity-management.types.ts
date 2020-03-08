@@ -1,4 +1,4 @@
-import { ImportStatus } from '../typings/commons';
+import { ImportStatus } from '../typings/enums';
 
 export type AuthResponse = {
   accessToken: string;

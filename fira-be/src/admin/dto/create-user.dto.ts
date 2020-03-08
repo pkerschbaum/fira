@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../typings/commons';
+import { ImportStatus } from '../../typings/enums';
 import {
   ImportUserResponse,
   ImportUsersResponse,

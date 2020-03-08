@@ -1,3 +1,4 @@
+// fira-be & fira-web shared (duplicated) enums
 export enum JudgementMode {
   PLAIN_RELEVANCE_SCORING = 'PLAIN_RELEVANCE_SCORING',
   SCORING_AND_SELECT_SPANS = 'SCORING_AND_SELECT_SPANS',
@@ -11,6 +12,19 @@ export enum RelevanceLevel {
   MISLEADING_ANSWER = '-1_MISLEADING_ANSWER',
 }
 
+export enum UserAnnotationAction {
+  ANNOTATE = 'ANNOTATE',
+  SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
+}
+
+export enum FeedbackScore {
+  VERY_GOOD = 'VERY_GOOD',
+  GOOD = 'GOOD',
+  DECENT = 'DECENT',
+  DONT_LIKE_IT = 'DONT_LIKE_IT',
+}
+
+// fira-web exclusive enums
 export type RateLevelType = {
   readonly text: string;
   readonly relevanceLevel: RelevanceLevel;
@@ -50,15 +64,3 @@ export const RateLevels: RateLevelType[] = [
     buttonColor: '#73FFC3',
   },
 ];
-
-export enum UserAnnotationAction {
-  ANNOTATE = 'ANNOTATE',
-  SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
-}
-
-export enum FeedbackScore {
-  VERY_GOOD = 'VERY_GOOD',
-  GOOD = 'GOOD',
-  DECENT = 'DECENT',
-  DONT_LIKE_IT = 'DONT_LIKE_IT',
-}

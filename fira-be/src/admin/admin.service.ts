@@ -9,7 +9,7 @@ import {
   ImportJudgementPairResult,
   UpdateConfig,
 } from './admin.types';
-import { ImportStatus } from '../typings/commons';
+import { ImportStatus } from '../typings/enums';
 import { Document, DocumentVersion } from './entity/document.entity';
 import { Query, QueryVersion } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';

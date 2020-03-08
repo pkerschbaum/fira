@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, Check, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-import { JudgementMode } from '../../judgements/judgements.types';
+import { JudgementMode } from '../../typings/enums';
 
 const nameOfUniqueColumn = 'id';
 const uniqueValue = 1;

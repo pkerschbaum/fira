@@ -1,3 +1,5 @@
+import { JudgementMode, UserAnnotationAction, RelevanceLevel } from '../typings/enums';
+
 export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
@@ -41,26 +43,3 @@ export type ExportJudgement = {
   readonly queryId: number;
   readonly userId: string;
 };
-
-export enum JudgementStatus {
-  TO_JUDGE = 'TO_JUDGE',
-  JUDGED = 'JUDGED',
-}
-
-export enum RelevanceLevel {
-  NOT_RELEVANT = '0_NOT_RELEVANT',
-  TOPIC_RELEVANT_DOES_NOT_ANSWER = '1_TOPIC_RELEVANT_DOES_NOT_ANSWER',
-  GOOD_ANSWER = '2_GOOD_ANSWER',
-  PERFECT_ANSWER = '3_PERFECT_ANSWER',
-  MISLEADING_ANSWER = '-1_MISLEADING_ANSWER',
-}
-
-export enum JudgementMode {
-  PLAIN_RELEVANCE_SCORING = 'PLAIN_RELEVANCE_SCORING',
-  SCORING_AND_SELECT_SPANS = 'SCORING_AND_SELECT_SPANS',
-}
-
-export enum UserAnnotationAction {
-  ANNOTATE = 'ANNOTATE',
-  SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
-}
