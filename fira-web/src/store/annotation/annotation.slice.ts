@@ -107,13 +107,22 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         pair => pair.id === state.currentJudgementPairId,
       );
       if (currentJudgementPair!.currentAnnotationStart === undefined) {
+        // the start of an annotation range was selected --> just save the index
         currentJudgementPair!.currentAnnotationStart = action.payload.annotationPartIndex;
       } else {
+        // the end of an annotation range was selected --> save the annotated range
         const start = currentJudgementPair!.currentAnnotationStart;
         const end = action.payload.annotationPartIndex;
         const actualStart = start < end ? start : end;
         const actualEnd = end > start ? end : start;
 
+        // edge case: it's possible that the user selected start/end so that it overlaps
+        // another range which got previously selected. Remove such ranges
+        currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
+          range => !(range.start >= actualStart && range.end <= actualEnd),
+        );
+
+        // then, add new range to the annotated ranges, and clear current annotation start
         currentJudgementPair!.annotatedRanges.push({
           start: actualStart,
           end: actualEnd,
