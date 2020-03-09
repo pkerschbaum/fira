@@ -241,13 +241,41 @@ export class JudgementsService {
       const partsAnnotated = judgement.relevancePositions ?? [];
 
       const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
+      let relevanceCharacterRanges = partsAnnotated.map(
+        annotated => partsAvailableCharacterRanges[annotated],
+      );
+
+      if (relevanceCharacterRanges.length > 0) {
+        // sort ascending by start character
+        relevanceCharacterRanges = relevanceCharacterRanges.sort(
+          (a, b) => a.startChar - b.startChar,
+        );
+
+        // build consecutive ranges
+        const consecutiveRanges = [];
+        let currentConsecutiveRange = relevanceCharacterRanges[0];
+        for (let i = 1; i < relevanceCharacterRanges.length; i++) {
+          if (currentConsecutiveRange.endChar + 1 === relevanceCharacterRanges[i].startChar) {
+            // consecutive range. just take the end char
+            currentConsecutiveRange.endChar = relevanceCharacterRanges[i].endChar;
+          } else {
+            // no consecutive range. add current consecutive range to result array and
+            // proceed with next one
+            consecutiveRanges.push(currentConsecutiveRange);
+            currentConsecutiveRange = relevanceCharacterRanges[i];
+          }
+        }
+        // add last consecutive range to result
+        consecutiveRanges.push(currentConsecutiveRange);
+
+        // take consecutive ranges as result
+        relevanceCharacterRanges = consecutiveRanges;
+      }
 
       return {
         id: judgement.id,
         relevanceLevel: judgement.relevanceLevel,
-        relevanceCharacterRanges: partsAnnotated.map(
-          annotated => partsAvailableCharacterRanges[annotated],
-        ),
+        relevanceCharacterRanges,
         rotate: judgement.rotate,
         mode: judgement.mode,
         durationUsedToJudgeMs: judgement.durationUsedToJudgeMs,
