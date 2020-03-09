@@ -49,6 +49,7 @@
 }
 
 .labelActive {
+  opacity: 0.85;
   transform: translateY(-0.5rem) scale(0.75);
 }
 
@@ -68,4 +69,13 @@
 
 .inputActive::placeholder {
   opacity: 1;
+}
+
+.select {
+  height: 100%;
+  padding-top: 12px;
+  margin: 0.625rem 0.75rem 0.625rem 0.5rem;
+  border: none;
+  outline: none;
+  background-color: transparent;
 }

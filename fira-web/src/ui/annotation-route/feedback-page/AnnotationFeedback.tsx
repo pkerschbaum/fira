@@ -1,12 +1,33 @@
 import React from 'react';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form, Field, FieldHookConfig, useField } from 'formik';
 
 import styles from './AnnotationFeedback.module.css';
 import Button from '../../elements/Button';
+import FloatingInput from '../../elements/FloatingInput';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { FeedbackScore } from '../../../typings/enums';
 import { SubmitFeedback } from '../../../typings/fira-be-typings';
+
+const Select: React.FC<{ label: string } & FieldHookConfig<any> &
+  React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>> = ({
+  label,
+  ...props
+}) => {
+  const [field] = useField(props);
+
+  return (
+    <div>
+      <FloatingInput
+        childType="select"
+        htmlFor={props.id || props.name}
+        label={label}
+        {...field}
+        {...props}
+      />
+    </div>
+  );
+};
 
 const AnnotationFeedback: React.FC = () => {
   async function submitFeedback(feedback: SubmitFeedback) {
@@ -45,13 +66,13 @@ const AnnotationFeedback: React.FC = () => {
         {({ isSubmitting, errors }) => (
           <Form>
             <Field as="textarea" label="Feedback" name="feedbackText" autoComplete="off" />
-            <Field name="feedbackScore" as="select">
+            <Select label="Feedback Score" name="feedbackScore">
               {Object.values(FeedbackScore).map(feedbackScore => (
                 <option key={feedbackScore} value={feedbackScore}>
                   {feedbackScore}
                 </option>
               ))}
-            </Field>
+            </Select>
             {errors.submissionError && errors.submissionError.length > 0 && (
               <ul className={styles.errorList}>
                 <li>

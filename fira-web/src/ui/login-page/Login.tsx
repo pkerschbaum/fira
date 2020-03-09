@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import styles from './Login.module.css';
 import { authStories } from '../../stories/auth.stories';
 import { RootState } from '../../store/store';
-import FloatingTextInput from '../elements/FloatingTextInput';
+import FloatingInput from '../elements/FloatingInput';
 import Button from '../elements/Button';
 
 const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
@@ -16,11 +16,12 @@ const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
 }) => {
   const [field, meta] = useField(props);
 
-  const showError = meta.touched && meta.error;
+  const showError = !!(meta.touched && meta.error);
 
   return (
     <div>
-      <FloatingTextInput
+      <FloatingInput
+        childType="input"
         isError={showError}
         htmlFor={props.id || props.name}
         label={label}

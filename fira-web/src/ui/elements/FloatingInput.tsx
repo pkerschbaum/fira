@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-import styles from './FloatingTextInput.module.css';
+import styles from './FloatingInput.module.css';
 
 type FloatingLabelInputProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
@@ -45,12 +45,17 @@ const FloatingLabel: React.FC<FloatingLabelProps> = ({ active, children, ...prop
   </label>
 );
 
-type FloatingInputProps = {
+type FloatingInputBoxProps = {
   active: boolean;
   inputRef: React.RefObject<HTMLInputElement>;
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
-const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, inputRef, ...props }) => (
+const FloatingInputBox: React.FC<FloatingInputBoxProps> = ({
+  children,
+  active,
+  inputRef,
+  ...props
+}) => (
   <input
     {...props}
     ref={inputRef}
@@ -61,16 +66,22 @@ const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, inputRe
   </input>
 );
 
-const FloatingTextInput: React.FC<any> = ({
-  id,
-  label,
-  type,
-  className,
-  isError,
-  value,
-  ...otherProps
-}) => {
-  const [active, setActive] = useState(!!value && value.length > 0);
+type FloatingSelectProps = React.DetailedHTMLProps<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  HTMLSelectElement
+>;
+
+const FloatingSelect: React.FC<FloatingSelectProps> = ({ children, ...props }) => (
+  <select {...props} onBlur={props.onBlur} className={`${props.className} ${styles.select}`}>
+    {children}
+  </select>
+);
+
+const FloatingInput: React.FC<{ [prop: string]: any } & {
+  isError?: boolean;
+  childType: 'input' | 'select';
+}> = ({ id, label, type, className, isError, value, childType, ...otherProps }) => {
+  const [active, setActive] = useState(childType !== 'input' || (!!value && value.length > 0));
   const inputRef = useRef<HTMLInputElement>(null);
 
   function onFocus(event: any) {
@@ -89,7 +100,9 @@ const FloatingTextInput: React.FC<any> = ({
   }
 
   function onContainerClick() {
-    inputRef.current!.focus();
+    if (childType === 'input') {
+      inputRef.current!.focus();
+    }
   }
 
   return (
@@ -102,18 +115,22 @@ const FloatingTextInput: React.FC<any> = ({
         <FloatingLabel htmlFor={id} active={active}>
           {label}
         </FloatingLabel>
-        <FloatingInput
-          {...otherProps}
-          active={active}
-          id={id}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          inputRef={inputRef}
-          type={type}
-        />
+        {childType === 'input' ? (
+          <FloatingInputBox
+            {...otherProps}
+            active={active}
+            id={id}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            inputRef={inputRef}
+            type={type}
+          />
+        ) : (
+          <FloatingSelect {...otherProps}>{otherProps.children}</FloatingSelect>
+        )}
       </FloatingLabelInputContainer>
     </FloatingLabelInput>
   );
 };
 
-export default FloatingTextInput;
+export default FloatingInput;
