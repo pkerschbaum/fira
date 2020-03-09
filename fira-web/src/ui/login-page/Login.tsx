@@ -1,38 +1,13 @@
 import React from 'react';
-import { Formik, Form, useField, FieldHookConfig } from 'formik';
 import { Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import styles from './Login.module.css';
+import Form from '../elements/forms/Form';
 import { authStories } from '../../stories/auth.stories';
 import { RootState } from '../../store/store';
-import FloatingInput from '../elements/FloatingInput';
-import Button from '../elements/Button';
 
-const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
-  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> = ({
-  label,
-  ...props
-}) => {
-  const [field, meta] = useField(props);
-
-  const showError = !!(meta.touched && meta.error);
-
-  return (
-    <div>
-      <FloatingInput
-        childType="input"
-        isError={showError}
-        htmlFor={props.id || props.name}
-        label={label}
-        {...field}
-        {...props}
-      />
-    </div>
-  );
-};
-
-const Login = () => {
+const Login: React.FC = () => {
   const user = useSelector((state: RootState) => state.user);
   const loggedIn = !!user;
 
@@ -48,8 +23,9 @@ const Login = () => {
       </div>
       <div className={styles.inputArea}>
         <span className={styles.inputHeadline}>Log in</span>
-        <Formik
-          initialValues={{ username: '', password: '', loginError: '' }}
+
+        <Form
+          initialValues={{ username: '', password: '' }}
           validate={values => {
             const errors: any = {};
             if (!values.username) {
@@ -60,64 +36,39 @@ const Login = () => {
             }
             return errors;
           }}
-          onSubmit={async (values, { setSubmitting, setErrors }) => {
+          onSubmit={async (values, { setErrors }) => {
             try {
               await authStories.login(values.username, values.password);
               // omit setSubmitting here because if login was successful, it will redirect and thus unmount the component
             } catch (e) {
               if (typeof e.getStatus === 'function' && e.getStatus() === 401) {
-                setErrors({ loginError: `Credentials invalid.` });
-              } else if (
-                (typeof e.message === 'string' && /Network Error/i.test(e.message)) ||
-                e.code === 'ECONNABORTED'
-              ) {
-                setErrors({ loginError: `Network error. Please make sure to be online.` });
-              } else {
-                setErrors({ loginError: `Unexpected error occured during login.` });
+                setErrors({ formError: `Credentials invalid.` } as any);
               }
-              setSubmitting(false);
+              throw e;
             }
           }}
-        >
-          {({ isSubmitting, errors }) => (
-            <Form>
-              <div className={styles.inputContainer}>
-                <TextInput
-                  type="text"
-                  label="Username"
-                  name="username"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
-                <div className={styles.inputDivider} />
-                <TextInput
-                  type="password"
-                  label="Password"
-                  name="password"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                />
-              </div>
-              {errors.loginError && errors.loginError.length > 0 && (
-                <ul className={styles.errorList}>
-                  <li>
-                    <span>{errors.loginError}</span>
-                  </li>
-                </ul>
-              )}
-              <Button
-                buttonType="primary"
-                type="submit"
-                disabled={isSubmitting}
-                isLoading={isSubmitting}
-              >
-                Continue
-              </Button>
-            </Form>
-          )}
-        </Formik>
+          elements={[
+            {
+              elementType: 'input',
+              label: 'Username',
+              htmlProps: {
+                name: 'username',
+                autoCorrect: 'off',
+                autoCapitalize: 'off',
+              },
+            },
+            {
+              elementType: 'input',
+              label: 'Password',
+              htmlProps: {
+                name: 'password',
+                autoComplete: 'off',
+                autoCorrect: 'off',
+                autoCapitalize: 'off',
+              },
+            },
+          ]}
+        />
       </div>
     </div>
   );

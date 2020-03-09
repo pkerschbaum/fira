@@ -65,6 +65,8 @@ export class KeycloakClient {
         throw new UnauthorizedException('credentials invalid');
       } else if (e.response?.status === 403) {
         throw new ForbiddenException();
+      } else if (e.response?.status === 400 && e.response?.data?.error === 'invalid_grant') {
+        throw new UnauthorizedException('invalid token');
       }
       throw e;
     }
