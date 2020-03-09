@@ -4,15 +4,15 @@ import { Formik, Form, Field } from 'formik';
 import styles from './AnnotationFeedback.module.css';
 import Button from '../../elements/Button';
 import LoadingIndicator from '../../elements/LoadingIndicator';
-import { annotatorsService } from '../../../annotators/annotators.service';
-import { judgementsService } from '../../../judgements/judgements.service';
+import { annotatorStories } from '../../../stories/annotator.stories';
+import { judgementStories } from '../../../stories/judgement.stories';
 import { FeedbackScore } from '../../../typings/enums';
 import { SubmitFeedback } from '../../../typings/fira-be-typings';
 
 const AnnotationFeedback: React.FC = () => {
   async function submitFeedback(feedback: SubmitFeedback) {
-    await annotatorsService.submitFeedback(feedback);
-    await judgementsService.preloadJudgements();
+    await annotatorStories.submitFeedback(feedback);
+    await judgementStories.preloadJudgements();
   }
 
   return (

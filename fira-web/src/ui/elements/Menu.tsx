@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Manager, Reference, Popper } from 'react-popper';
-import { useHistory } from 'react-router-dom';
 
 import styles from './Menu.module.css';
 import Button from './Button';
 import { useOnViewportClick } from '../util/events.hooks';
 import { useUserActions } from '../../store/user/user.hooks';
-import { INFO_RELATIVE_URL } from '../App';
+import { useRouting } from '../annotation-route/AnnotationRouter';
 
 const MenuButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
   ({ onClick }, ref) => (
@@ -24,14 +23,14 @@ const Menu: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   useOnViewportClick(() => setShowMenu(false));
   const userActions = useUserActions();
-  const history = useHistory();
+  const annotationRouting = useRouting();
 
   function onLogout() {
     userActions.logout();
   }
 
   function onShowInfoPage() {
-    history.push(INFO_RELATIVE_URL);
+    annotationRouting.routeToInfoPage();
   }
 
   function toggleShowMenu() {

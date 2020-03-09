@@ -4,7 +4,7 @@ import { Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import styles from './Login.module.css';
-import { authService } from '../../auth/auth.service';
+import { authStories } from '../../stories/auth.stories';
 import { RootState } from '../../store/store';
 import FloatingTextInput from '../elements/FloatingTextInput';
 import LoadingIndicator from '../elements/LoadingIndicator';
@@ -62,7 +62,7 @@ const Login = () => {
           }}
           onSubmit={async (values, { setSubmitting, setErrors }) => {
             try {
-              await authService.login(values.username, values.password);
+              await authStories.login(values.username, values.password);
               // omit setSubmitting here because if login was successful, it will redirect and thus unmount the component
             } catch (e) {
               if (typeof e.getStatus === 'function' && e.getStatus() === 401) {

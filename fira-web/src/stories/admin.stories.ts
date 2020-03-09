@@ -5,7 +5,7 @@ import { UpdateConfig } from '../typings/fira-be-typings';
 
 const logger = createLogger('admin.service');
 
-export const adminService = {
+export const adminStories = {
   exportJudgements: async () => {
     logger.info(`executing export of judgements...`);
 

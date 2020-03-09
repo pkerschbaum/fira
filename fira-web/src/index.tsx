@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import './index.css';
-import App from './ui/App';
+import App from './App';
 import { store } from './store/store';
 import * as serviceWorker from './serviceWorker';
 import { executeBootScripts } from './boot/boot';
@@ -19,7 +19,7 @@ const renderApp = () =>
   );
 
 if (process.env.NODE_ENV !== 'production' && (module as any).hot) {
-  (module as any).hot.accept('./ui/App', renderApp);
+  (module as any).hot.accept('./App', renderApp);
 }
 
 renderApp();

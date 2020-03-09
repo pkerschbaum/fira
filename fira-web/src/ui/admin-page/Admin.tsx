@@ -4,7 +4,7 @@ import { Formik, Form, Field } from 'formik';
 import styles from './Admin.module.css';
 import { Statistic } from '../../typings/fira-be-typings';
 import { JudgementMode } from '../../typings/enums';
-import { adminService } from '../../admin/admin.service';
+import { adminStories } from '../../stories/admin.stories';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
 import LoadingIndicator from '../elements/LoadingIndicator';
@@ -15,7 +15,7 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     async function fetchStatisticsAndUpdate() {
-      updateStatistics((await adminService.getStatistics()).statistics);
+      updateStatistics((await adminStories.getStatistics()).statistics);
     }
 
     fetchStatisticsAndUpdate();
@@ -28,7 +28,7 @@ const Admin: React.FC = () => {
           <Button
             className={styles.button}
             buttonType="primary"
-            onClick={adminService.exportJudgements}
+            onClick={adminStories.exportJudgements}
           >
             Export Judgements
           </Button>
@@ -42,7 +42,7 @@ const Admin: React.FC = () => {
           }}
           onSubmit={async (values, { setSubmitting }) => {
             try {
-              await adminService.updateConfig({
+              await adminStories.updateConfig({
                 ...values,
                 rotateDocumentText: values.rotateDocumentText === 'true',
               });

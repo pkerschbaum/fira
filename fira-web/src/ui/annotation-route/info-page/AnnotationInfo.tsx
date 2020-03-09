@@ -1,16 +1,15 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 
 import styles from './AnnotationInfo.module.css';
 import Button from '../../elements/Button';
-import { annotatorsService } from '../../../annotators/annotators.service';
-import { ANNOTATE_RELATIVE_URL } from '../../App';
+import { annotatorStories } from '../../../stories/annotator.stories';
+import { useRouting } from '../AnnotationRouter';
 
 import infoPage01 from './info-page-01.png';
 import infoPage02 from './info-page-02.png';
 
 const AnnotationInfo: React.FC = () => {
-  const history = useHistory();
+  const annotationRouting = useRouting();
 
   const content = [
     {
@@ -34,8 +33,8 @@ const AnnotationInfo: React.FC = () => {
   ] as const;
 
   function onAcknowledge() {
-    annotatorsService.acknowledgeInfoPage();
-    history.push(ANNOTATE_RELATIVE_URL);
+    annotatorStories.acknowledgeInfoPage();
+    annotationRouting.routeToAnnotatePage();
   }
 
   return (

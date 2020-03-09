@@ -6,7 +6,7 @@ import { SubmitFeedback } from '../typings/fira-be-typings';
 
 const logger = createLogger('annotators.service');
 
-export const annotatorsService = {
+export const annotatorStories = {
   acknowledgeInfoPage: () => {
     logger.info(`executing acknowledgement of info page...`);
 

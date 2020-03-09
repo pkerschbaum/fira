@@ -9,7 +9,7 @@ import { RelevanceLevel, RateLevels } from '../typings/enums';
 
 const logger = createLogger('judgements.service');
 
-export const judgementsService = {
+export const judgementStories = {
   preloadJudgements: async () => {
     logger.info(`executing preload judgements...`);
 
@@ -36,7 +36,7 @@ export const judgementsService = {
       // if the chosen rate level does not require annotation, or it does and regions are
       // annotated already,
       // immediately submit current judgement and proceed
-      await judgementsService.submitCurrentJudgement();
+      await judgementStories.submitCurrentJudgement();
     }
 
     logger.info(`rate judgement pair succeeded!`);

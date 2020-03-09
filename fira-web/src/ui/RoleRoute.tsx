@@ -3,13 +3,13 @@ import { RouteProps, Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { RootState } from '../store/store';
-import { UserRole } from '../store/user/user.slice';
+import { UserRole } from '../typings/enums';
 
 type PrivateRouteProps = RouteProps & {
   requiredRole: UserRole;
 };
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({ requiredRole, ...rest }) => {
+const RoleRoute: React.FC<PrivateRouteProps> = ({ requiredRole, ...rest }) => {
   const user = useSelector((state: RootState) => state.user);
 
   if (!!user && user?.role === requiredRole) {
@@ -19,4 +19,4 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ requiredRole, ...rest }) =>
   }
 };
 
-export default PrivateRoute;
+export default RoleRoute;

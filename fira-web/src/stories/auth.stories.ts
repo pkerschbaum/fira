@@ -5,7 +5,7 @@ import { actions as userActions } from '../store/user/user.slice';
 
 const logger = createLogger('auth.service');
 
-export const authService = {
+export const authStories = {
   login: async (username: string, password: string) => {
     logger.info(`executing login...`, { username });
 

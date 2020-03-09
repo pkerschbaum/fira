@@ -1,8 +1,8 @@
 import React from 'react';
 
 import styles from './RateButton.module.css';
-import Button from '../elements/Button';
-import { RateLevelType } from '../../typings/enums';
+import Button from '../../elements/Button';
+import { RateLevelType } from '../../../typings/enums';
 
 const RateButton: React.FC<{ rateLevel: RateLevelType; onClick: () => void }> = ({
   rateLevel,

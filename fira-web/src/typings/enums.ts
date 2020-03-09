@@ -25,6 +25,11 @@ export enum FeedbackScore {
 }
 
 // fira-web exclusive enums
+export enum UserRole {
+  ANNOTATOR = 'ANNOTATOR',
+  ADMIN = 'ADMIN',
+}
+
 export type RateLevelType = {
   readonly text: string;
   readonly relevanceLevel: RelevanceLevel;

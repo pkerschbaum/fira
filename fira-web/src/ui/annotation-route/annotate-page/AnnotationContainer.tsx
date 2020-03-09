@@ -1,7 +1,10 @@
 import React from 'react';
 
 import Annotation from './Annotation';
-import { useAnnotationState, useAnnotationActions } from '../../store/annotation/annotation.hooks';
+import {
+  useAnnotationState,
+  useAnnotationActions,
+} from '../../../store/annotation/annotation.hooks';
 
 const AnnotationContainer: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();

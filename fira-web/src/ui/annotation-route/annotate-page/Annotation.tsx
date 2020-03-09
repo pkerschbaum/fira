@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 
 import styles from './Annotation.module.css';
-import { RelevanceLevel, RateLevels, JudgementMode } from '../../typings/enums';
-import { judgementsService } from '../../judgements/judgements.service';
-import { noop } from '../../util/functions';
-import Button from '../elements/Button';
-import { useKeyupEvent as useKeyupHandler } from '../util/events.hooks';
+import { RelevanceLevel, RateLevels, JudgementMode } from '../../../typings/enums';
+import { judgementStories } from '../../../stories/judgement.stories';
+import { noop } from '../../../util/functions';
+import Button from '../../elements/Button';
+import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
 import RateButton from './RateButton';
-import { JudgementPair } from '../../store/annotation/annotation.slice';
+import { JudgementPair } from '../../../store/annotation/annotation.slice';
 import AnnotationPart from './AnnotationPart';
-import Menu from '../elements/Menu';
-import Line from '../elements/Line';
+import Menu from '../../elements/Menu';
+import Line from '../../elements/Line';
 
 const Annotation: React.FC<{
   currentJudgementPair: JudgementPair;
@@ -30,7 +30,7 @@ const Annotation: React.FC<{
   );
 
   function createJudgementFn(relevanceLevel: RelevanceLevel) {
-    return () => judgementsService.rateJudgementPair(relevanceLevel);
+    return () => judgementStories.rateJudgementPair(relevanceLevel);
   }
 
   useKeyupHandler({
@@ -140,7 +140,7 @@ const Annotation: React.FC<{
                 buttonType="primary"
                 style={{ width: '60px', height: '50px' }}
                 disabled={currentSelectionNotFinished || annotationIsRequired}
-                onClick={() => judgementsService.submitCurrentJudgement()}
+                onClick={() => judgementStories.submitCurrentJudgement()}
               >
                 Next
               </Button>

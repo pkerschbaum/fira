@@ -2,7 +2,7 @@ import React from 'react';
 import { Manager, Reference, Popper } from 'react-popper';
 
 import styles from './AnnotationPart.module.css';
-import Button from '../elements/Button';
+import Button from '../../elements/Button';
 
 const AnnotationPart: React.FC<{
   text: string;

@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import { browserStorage } from '../../browser-storage/browser-storage';
-import { authService } from '../../auth/auth.service';
+import { authStories } from '../../stories/auth.stories';
 import { createLogger } from '../../logger/logger';
 import { RootStore } from '../store';
 
@@ -48,7 +48,7 @@ export const setupSubscriptions = (store: RootStore) => {
       const refreshToken = currentUser.refreshToken.val;
 
       scheduleId = setTimeout(async () => {
-        await authService.refresh(refreshToken);
+        await authStories.refresh(refreshToken);
       }, timeUntilRefreshMs);
 
       logger.info(`refresh got scheduled, scheduled at: ${timeStampToRefresh.toString()}`);

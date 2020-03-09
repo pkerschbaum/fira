@@ -2,6 +2,7 @@ import { createAction, createReducer } from '@reduxjs/toolkit';
 import * as jwt from 'jsonwebtoken';
 
 import { JwtPayload } from '../../typings/fira-be-typings';
+import { UserRole } from '../../typings/enums';
 
 type UserState = null | {
   readonly accessToken: {
@@ -15,11 +16,6 @@ type UserState = null | {
   readonly acknowledgedInfoPage: boolean;
   readonly role: UserRole;
 };
-
-export enum UserRole {
-  ANNOTATOR = 'ANNOTATOR',
-  ADMIN = 'ADMIN',
-}
 
 type AuthenticatePayload = {
   accessToken: string;

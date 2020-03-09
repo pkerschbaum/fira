@@ -1,8 +1,8 @@
 import { createLogger } from '../../logger/logger';
 import { RootStore } from '../store';
-import { judgementsService } from '../../judgements/judgements.service';
+import { judgementStories } from '../../stories/judgement.stories';
 import { actions as annotationActions, JudgementPairStatus } from '../annotation/annotation.slice';
-import { UserRole } from '../user/user.slice';
+import { UserRole } from '../../typings/enums';
 
 const PRELOAD_JUDGEMENTS_THRESHOLD = 1;
 
@@ -29,7 +29,7 @@ export const setupSubscriptions = (store: RootStore) => {
 
     if (annotationState.remainingToFinish === undefined) {
       logger.info('no judgement pairs got loaded from the server yet --> execute preload...');
-      judgementsService.preloadJudgements();
+      judgementStories.preloadJudgements();
     }
   });
 
@@ -64,7 +64,7 @@ export const setupSubscriptions = (store: RootStore) => {
           'count of preloaded judgement pairs does not fulfill threshold and ' +
             'there are remaining judgements to preload on the server --> execute preload...',
         );
-        judgementsService.preloadJudgements();
+        judgementStories.preloadJudgements();
       }
     },
   };
