@@ -11,13 +11,27 @@
   align-items: center;
 }
 
-.button:hover {
+.typePrimary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.typePrimary:hover {
   filter: brightness(110%);
 }
 
-.typePrimary {
-  background-color: var(--color-primary);
-  color: var(--color-primary-font);
+.typePrimary:disabled {
+  background-color: var(--color-disabled);
+}
+
+.typeSecondary {
+  background-color: white;
+  color: var(--color-primary);
+  border: var(--border-small) solid var(--color-soft);
+}
+
+.typeSecondary:hover {
+  filter: brightness(95%);
 }
 
 .styleBold {
@@ -29,14 +43,13 @@
 .styleNormal {
   height: 35px;
   padding: 0 var(--padding-xxsmall);
+}
+
+.styleNormal * {
   font-size: var(--font-small);
   font-weight: var(--weight-medium);
 }
 
 .animate {
   transform: var(--transform-button);
-}
-
-.button:disabled {
-  background-color: var(--color-disabled);
 }

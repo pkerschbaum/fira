@@ -7,7 +7,6 @@ import { JudgementMode } from '../../typings/enums';
 import { adminStories } from '../../stories/admin.stories';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
-import LoadingIndicator from '../elements/LoadingIndicator';
 import Line from '../elements/Line';
 
 const Admin: React.FC = () => {
@@ -27,10 +26,10 @@ const Admin: React.FC = () => {
         <div className={styles.actionBar}>
           <Button
             className={styles.button}
-            buttonType="primary"
+            buttonType="secondary"
             onClick={adminStories.exportJudgements}
           >
-            Export Judgements
+            <span>Export Judgements</span>
           </Button>
           <Menu />
         </div>
@@ -75,11 +74,12 @@ const Admin: React.FC = () => {
               </div>
               <Button
                 className={styles.button}
-                buttonType="primary"
+                buttonType="secondary"
                 type="submit"
                 disabled={isSubmitting}
+                isLoading={isSubmitting}
               >
-                {!isSubmitting ? 'Update Config' : <LoadingIndicator />}
+                Update Config
               </Button>
             </Form>
           )}

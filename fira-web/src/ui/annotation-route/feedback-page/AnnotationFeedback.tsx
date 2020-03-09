@@ -3,7 +3,6 @@ import { Formik, Form, Field } from 'formik';
 
 import styles from './AnnotationFeedback.module.css';
 import Button from '../../elements/Button';
-import LoadingIndicator from '../../elements/LoadingIndicator';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { FeedbackScore } from '../../../typings/enums';
@@ -60,8 +59,13 @@ const AnnotationFeedback: React.FC = () => {
                 </li>
               </ul>
             )}
-            <Button buttonType="primary" type="submit" disabled={isSubmitting}>
-              {!isSubmitting ? 'Continue' : <LoadingIndicator />}
+            <Button
+              buttonType="primary"
+              type="submit"
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
+            >
+              Continue
             </Button>
           </Form>
         )}

@@ -7,7 +7,6 @@ import styles from './Login.module.css';
 import { authStories } from '../../stories/auth.stories';
 import { RootState } from '../../store/store';
 import FloatingTextInput from '../elements/FloatingTextInput';
-import LoadingIndicator from '../elements/LoadingIndicator';
 import Button from '../elements/Button';
 
 const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
@@ -107,8 +106,14 @@ const Login = () => {
                   </li>
                 </ul>
               )}
-              <Button buttonStyle="bold" buttonType="primary" type="submit" disabled={isSubmitting}>
-                {!isSubmitting ? <span>Continue</span> : <LoadingIndicator />}
+              <Button
+                buttonStyle="bold"
+                buttonType="primary"
+                type="submit"
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+              >
+                Continue
               </Button>
             </Form>
           )}
