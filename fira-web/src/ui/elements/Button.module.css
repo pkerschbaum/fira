@@ -12,7 +12,7 @@
 }
 
 .typePrimary {
-  height: 50px;
+  height: 45px;
   padding: 0 var(--padding-xxxsmall);
   background-color: var(--color-primary);
   color: white;
