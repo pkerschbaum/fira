@@ -38,8 +38,8 @@ const AnnotationFeedback: React.FC = () => {
           },
           {
             elementType: 'textarea',
-            label: 'Feedback',
             htmlProps: {
+              placeholder: 'Do you want to add something?',
               name: 'feedbackText',
               autoComplete: 'off',
             },

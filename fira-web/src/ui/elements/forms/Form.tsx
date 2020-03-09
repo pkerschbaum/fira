@@ -1,5 +1,5 @@
 import React from 'react';
-import { Formik, FieldHookConfig, useField, FormikValues, Form as FormikForm, Field } from 'formik';
+import { Formik, FieldHookConfig, useField, FormikValues, Form as FormikForm } from 'formik';
 
 import styles from './Form.module.css';
 import Button from '../Button';
@@ -25,6 +25,19 @@ const TextInput: React.FC<{ label: string } & FieldHookConfig<HTMLInputElement> 
         {...field}
         {...props}
       />
+    </div>
+  );
+};
+
+const Textarea: React.FC<FieldHookConfig<HTMLTextAreaElement> &
+  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>> = ({
+  ...props
+}) => {
+  const [field] = useField(props);
+
+  return (
+    <div>
+      <FloatingInput childType="textarea" htmlFor={props.id || props.name} {...field} {...props} />
     </div>
   );
 };
@@ -62,7 +75,6 @@ type InputElement = {
 
 type TextareaElement = {
   readonly elementType: 'textarea';
-  readonly label: string;
   readonly htmlProps: FieldHookConfig<HTMLTextAreaElement> &
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
 };
@@ -126,7 +138,7 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
                     {el.childElements}
                   </Select>
                 ) : el.elementType === 'textarea' ? (
-                  <Field as="textarea" label="Feedback" {...el.htmlProps} />
+                  <Textarea key={idx} {...el.htmlProps} />
                 ) : (
                   assertUnreachable(el)
                 );
