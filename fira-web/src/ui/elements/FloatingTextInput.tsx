@@ -8,7 +8,7 @@ type FloatingLabelInputProps = React.DetailedHTMLProps<
 >;
 
 const FloatingLabelInput: React.FC<FloatingLabelInputProps> = ({ children, ...props }) => (
-  <div {...props} className={`${props.className} ${styles.floatingLabelInput}`}>
+  <div {...props} className={`${props.className} ${styles.labelInput}`}>
     {children}
   </div>
 );
@@ -18,11 +18,15 @@ type FloatingLabelInputContainerProps = React.DetailedHTMLProps<
   HTMLDivElement
 >;
 
-const FloatingLabelInputContainer: React.FC<FloatingLabelInputContainerProps> = ({
-  children,
-  ...props
-}) => (
-  <div {...props} className={`${props.className} ${styles.floatingLabelInputContainer}`}>
+const FloatingLabelInputContainer: React.FC<{
+  isError?: boolean;
+} & FloatingLabelInputContainerProps> = ({ isError, children, ...props }) => (
+  <div
+    {...props}
+    className={`${props.className} ${isError && styles.inputContainerError} ${
+      styles.inputContainer
+    }`}
+  >
     {children}
   </div>
 );
@@ -35,9 +39,7 @@ type FloatingLabelProps = { active: boolean } & React.DetailedHTMLProps<
 const FloatingLabel: React.FC<FloatingLabelProps> = ({ active, children, ...props }) => (
   <label
     {...props}
-    className={`${props.className} ${!!active && styles.floatingLabelActive} ${
-      styles.floatingLabel
-    }`}
+    className={`${props.className} ${!!active && styles.labelActive} ${styles.label}`}
   >
     {children}
   </label>
@@ -53,15 +55,21 @@ const FloatingInput: React.FC<FloatingInputProps> = ({ children, active, inputRe
     {...props}
     ref={inputRef}
     onBlur={props.onBlur}
-    className={`${props.className} ${!!active && styles.floatingInputActive} ${
-      styles.floatingInput
-    }`}
+    className={`${props.className} ${!!active && styles.inputActive} ${styles.input}`}
   >
     {children}
   </input>
 );
 
-const FloatingTextInput: React.FC<any> = ({ id, label, type, className, value, ...otherProps }) => {
+const FloatingTextInput: React.FC<any> = ({
+  id,
+  label,
+  type,
+  className,
+  isError,
+  value,
+  ...otherProps
+}) => {
   const [active, setActive] = useState(!!value && value.length > 0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -86,7 +94,11 @@ const FloatingTextInput: React.FC<any> = ({ id, label, type, className, value, .
 
   return (
     <FloatingLabelInput>
-      <FloatingLabelInputContainer onClick={onContainerClick} className={className}>
+      <FloatingLabelInputContainer
+        onClick={onContainerClick}
+        isError={isError}
+        className={className}
+      >
         <FloatingLabel htmlFor={id} active={active}>
           {label}
         </FloatingLabel>

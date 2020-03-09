@@ -52,30 +52,6 @@
   border: 0;
 }
 
-.inputField {
-  border-radius: var(--border-radius-normal);
-}
-
-.inputField:focus-within {
-  border: var(--border-xlarge) solid var(--color-dense);
-  margin-top: calc(var(--border-xlarge) * -1);
-  margin-bottom: calc(var(--border-xlarge) * -1);
-  margin-left: calc(var(--border-xlarge) * -1);
-  margin-right: calc(var(--border-xlarge) * -1);
-}
-
-.inputFieldError {
-  font-weight: var(--weight-heavy);
-}
-
-.inputFieldError:focus-within {
-  border-color: var(--color-error);
-}
-
-.inputFieldError > label {
-  color: var(--color-error);
-}
-
 .errorList {
   margin: var(--margin-medium) 0 0 0;
   color: var(--color-error);

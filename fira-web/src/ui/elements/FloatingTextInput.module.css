@@ -1,16 +1,37 @@
-.floatingLabelInput {
+.labelInput {
   width: 100%;
 }
 
-.floatingLabelInputContainer {
+.inputContainer {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   position: relative;
   height: 3.5rem;
+  border-radius: var(--border-radius-normal);
 }
 
-.floatingLabel {
+.inputContainer:focus-within {
+  border: var(--border-xlarge) solid var(--color-dense);
+  margin-top: calc(var(--border-xlarge) * -1);
+  margin-bottom: calc(var(--border-xlarge) * -1);
+  margin-left: calc(var(--border-xlarge) * -1);
+  margin-right: calc(var(--border-xlarge) * -1);
+}
+
+.inputContainerError {
+  font-weight: var(--weight-heavy);
+}
+
+.inputContainerError:focus-within {
+  border-color: var(--color-error);
+}
+
+.inputContainerError > label {
+  color: var(--color-error);
+}
+
+.label {
   padding: 0;
   margin: 0;
   border: 0;
@@ -27,11 +48,11 @@
   transform: none;
 }
 
-.floatingLabelActive {
+.labelActive {
   transform: translateY(-0.5rem) scale(0.75);
 }
 
-.floatingInput {
+.input {
   padding: 0;
   margin: 1.625rem 0.75rem 0.625rem 0.75rem;
   border: none;
@@ -39,12 +60,12 @@
   background-color: transparent;
 }
 
-.floatingInput::placeholder {
+.input::placeholder {
   color: var(--color-soft);
   opacity: 0;
   transition: opacity 0.2s cubic-bezier(0.6, 0.04, 0.98, 0.335);
 }
 
-.floatingInputActive::placeholder {
+.inputActive::placeholder {
   opacity: 1;
 }

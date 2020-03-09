@@ -21,7 +21,7 @@ const TextInput: React.FC<{ label: string } & FieldHookConfig<any> &
   return (
     <div>
       <FloatingTextInput
-        className={`${styles.inputField} ${showError && styles.inputFieldError}`}
+        isError={showError}
         htmlFor={props.id || props.name}
         label={label}
         {...field}
