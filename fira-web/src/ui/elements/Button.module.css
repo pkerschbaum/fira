@@ -47,6 +47,22 @@
   filter: brightness(95%);
 }
 
+.typeTertiary {
+  height: 35px;
+  padding: 0 var(--padding-xxsmall);
+  background-color: white;
+  color: var(--color-primary);
+}
+
+.typeTertiary * {
+  font-size: var(--font-small);
+  font-weight: var(--weight-normal);
+}
+
+.typeTertiary:hover {
+  filter: brightness(95%);
+}
+
 .animate {
   transform: var(--transform-button);
 }

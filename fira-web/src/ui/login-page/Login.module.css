@@ -33,10 +33,6 @@
   margin-bottom: var(--margin-medium);
 }
 
-.inputArea > form > button {
-  margin-top: var(--margin-medium);
-}
-
 .inputContainer {
   border: var(--border-small) solid var(--color-soft);
   border-radius: var(--border-radius-normal);

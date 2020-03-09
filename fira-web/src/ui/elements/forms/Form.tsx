@@ -142,10 +142,14 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
                 ) : (
                   assertUnreachable(el)
                 );
+
+              const isLastElem = idx === elements.length - 1;
+
               return (
                 <>
                   {childElem}
-                  <div className={styles.inputDivider} />
+                  {/* omit divider for last element */}
+                  {isLastElem ? null : <div className={styles.inputDivider} />}
                 </>
               );
             })}
@@ -158,6 +162,7 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
             </ul>
           )}
           <Button
+            className={styles.button}
             buttonType="primary"
             type="submit"
             disabled={isSubmitting}

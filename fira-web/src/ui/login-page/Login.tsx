@@ -59,7 +59,7 @@ const Login: React.FC = () => {
             },
             {
               elementType: 'input',
-              label: 'Password',
+              label: 'Login-Code',
               htmlProps: {
                 name: 'password',
                 autoComplete: 'off',

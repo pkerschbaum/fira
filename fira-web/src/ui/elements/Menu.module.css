@@ -7,7 +7,3 @@
   background-color: white;
   padding: 0;
 }
-
-.menuButton:hover {
-  background: var(--color-ui-element-highlight);
-}

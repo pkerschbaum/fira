@@ -1,0 +1,80 @@
+@font-face {
+    font-family: 'SelawikBold';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/2e5d0806a42e99bb23fa352f0a11c8fa/SelawikBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+      }
+
+@font-face {
+    font-family: 'SelawikLight';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/4b936248161727bf293ca4d796e34908/SelawikLight.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+@font-face {
+    font-family: 'SelawikRegular';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/c0c37a1ee819be05ebad9ed599be9fd3/SelawikRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+@font-face {
+    font-family: 'SelawikSemibold';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/e2b8a9a7fb3a9b840765094f2b413b5a/SelawikSemibold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+@font-face {
+    font-family: 'SelawikSemilight';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/b3a62850ef4e907d244369bdd5c23bfc/SelawikSemilight.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+ /* The following rules are deprecated. */ 
+
+@font-face {
+    font-family: 'Selawik';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/2e5d0806a42e99bb23fa352f0a11c8fa/SelawikBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+      }
+
+
+
+@font-face {
+    font-family: 'Selawik';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/4b936248161727bf293ca4d796e34908/SelawikLight.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+
+
+@font-face {
+    font-family: 'Selawik';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/c0c37a1ee819be05ebad9ed599be9fd3/SelawikRegular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+
+
+@font-face {
+    font-family: 'Selawik';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/e2b8a9a7fb3a9b840765094f2b413b5a/SelawikSemibold.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+
+
+
+@font-face {
+    font-family: 'Selawik';
+        src: url('/assets/fonts/selawik/41b0397ec935aff78c7208f351e09092/b3a62850ef4e907d244369bdd5c23bfc/SelawikSemilight.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+      }
+

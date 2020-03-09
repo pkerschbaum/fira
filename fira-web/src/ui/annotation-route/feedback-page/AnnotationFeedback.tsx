@@ -7,6 +7,13 @@ import { judgementStories } from '../../../stories/judgement.stories';
 import { FeedbackScore } from '../../../typings/enums';
 import { SubmitFeedback } from '../../../typings/fira-be-typings';
 
+const FEEDBACK_SCORE_TEXTS = {
+  [FeedbackScore.VERY_GOOD]: 'Very good',
+  [FeedbackScore.GOOD]: 'Good',
+  [FeedbackScore.DECENT]: 'Decent',
+  [FeedbackScore.DONT_LIKE_IT]: `Don't like it`,
+} as const;
+
 const AnnotationFeedback: React.FC = () => {
   async function submitFeedback(feedback: SubmitFeedback) {
     await annotatorStories.submitFeedback(feedback);
@@ -16,6 +23,11 @@ const AnnotationFeedback: React.FC = () => {
   return (
     <div className={styles.container}>
       <span className={styles.headline}>Feedback</span>
+      <div>
+        How did you like to work with Fira so far?
+        <br />
+        We kindly ask you to take a minute to provide some feedback!
+      </div>
       <Form
         initialValues={{
           feedbackScore: FeedbackScore.VERY_GOOD,
@@ -28,10 +40,10 @@ const AnnotationFeedback: React.FC = () => {
         elements={[
           {
             elementType: 'select',
-            label: 'Feedback Score',
+            label: 'Rating',
             childElements: Object.values(FeedbackScore).map(feedbackScore => (
               <option key={feedbackScore} value={feedbackScore}>
-                {feedbackScore}
+                {FEEDBACK_SCORE_TEXTS[feedbackScore]}
               </option>
             )),
             htmlProps: { name: 'feedbackScore' },

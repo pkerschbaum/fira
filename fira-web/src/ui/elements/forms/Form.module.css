@@ -24,3 +24,7 @@
 .errorList > li > span {
   padding-left: var(--padding-xxxsmall);
 }
+
+.button {
+  margin-top: var(--margin-medium);
+}

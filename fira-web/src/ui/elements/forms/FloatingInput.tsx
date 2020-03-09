@@ -60,7 +60,6 @@ const FloatingInputBox: React.FC<FloatingInputBoxProps> = ({
   <input
     {...props}
     ref={inputRef}
-    onBlur={props.onBlur}
     className={`${props.className} ${!!active && styles.inputActive} ${styles.input}`}
   >
     {children}
@@ -72,12 +71,7 @@ type FloatingTextareaProps = {
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
 
 const FloatingTextarea: React.FC<FloatingTextareaProps> = ({ children, textareaRef, ...props }) => (
-  <textarea
-    {...props}
-    ref={textareaRef}
-    onBlur={props.onBlur}
-    className={`${props.className} ${styles.textarea}`}
-  >
+  <textarea {...props} ref={textareaRef} className={`${props.className} ${styles.textarea}`}>
     {children}
   </textarea>
 );
@@ -88,7 +82,7 @@ type FloatingSelectProps = React.DetailedHTMLProps<
 >;
 
 const FloatingSelect: React.FC<FloatingSelectProps> = ({ children, ...props }) => (
-  <select {...props} onBlur={props.onBlur} className={`${props.className} ${styles.select}`}>
+  <select {...props} className={`${props.className} ${styles.select}`}>
     {children}
   </select>
 );

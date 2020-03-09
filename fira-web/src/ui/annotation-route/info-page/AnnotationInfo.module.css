@@ -1,7 +1,10 @@
 .container {
+  margin: 0 auto;
+
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  max-width: 400px;
 }
 
 .container > * {
@@ -21,5 +24,4 @@
 .infoImage {
   border: 1px solid black;
   width: 100%;
-  max-width: 400px;
 }

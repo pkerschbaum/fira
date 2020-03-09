@@ -9,7 +9,7 @@ import { useRouting } from '../annotation-route/AnnotationRouter';
 
 const MenuButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
   ({ onClick }, ref) => (
-    <Button ref={ref} className={styles.menuButton} onClick={onClick}>
+    <Button ref={ref} buttonType="tertiary" className={styles.menuButton} onClick={onClick}>
       {/* https://material.io/resources/icons/?icon=more_vert&style=baseline */}
       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
         <path d="M0 0h24v24H0z" fill="none" />
@@ -46,7 +46,7 @@ const Menu: React.FC = () => {
   ) : (
     <Manager>
       <Reference>{({ ref }) => createMenuButton(ref)}</Reference>
-      <Popper placement="bottom-start">
+      <Popper placement="bottom-end">
         {({ ref, style, placement }) => (
           <div ref={ref} style={style} data-placement={placement}>
             <Button onClick={onShowInfoPage}>Go to Info Page</Button>
