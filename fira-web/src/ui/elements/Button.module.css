@@ -12,8 +12,14 @@
 }
 
 .typePrimary {
+  height: 50px;
+  padding: 0 var(--padding-xxxsmall);
   background-color: var(--color-primary);
   color: white;
+}
+
+.typePrimary * {
+  font-weight: var(--weight-heavy);
 }
 
 .typePrimary:hover {
@@ -25,29 +31,20 @@
 }
 
 .typeSecondary {
+  height: 35px;
+  padding: 0 var(--padding-xxsmall);
   background-color: white;
   color: var(--color-primary);
   border: var(--border-small) solid var(--color-soft);
 }
 
+.typeSecondary * {
+  font-size: var(--font-small);
+  font-weight: var(--weight-normal);
+}
+
 .typeSecondary:hover {
   filter: brightness(95%);
-}
-
-.styleBold {
-  height: 50px;
-  padding: 0 var(--padding-xxxsmall);
-  font-weight: var(--weight-large);
-}
-
-.styleNormal {
-  height: 35px;
-  padding: 0 var(--padding-xxsmall);
-}
-
-.styleNormal * {
-  font-size: var(--font-small);
-  font-weight: var(--weight-medium);
 }
 
 .animate {

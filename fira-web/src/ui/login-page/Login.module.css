@@ -20,7 +20,7 @@
 
 .headline {
   text-align: center;
-  margin: calc(var(--margin-xxlarge) / 2) 0;
+  margin: calc(var(--margin-xlarge) / 2) 0;
 }
 
 .headline > h1 {
@@ -29,7 +29,7 @@
 
 .inputHeadline {
   text-align: center;
-  font-weight: var(--weight-xlarge);
+  font-weight: var(--weight-heavy);
   margin-bottom: var(--margin-medium);
 }
 
@@ -65,7 +65,7 @@
 }
 
 .inputFieldError {
-  font-weight: var(--weight-xlarge);
+  font-weight: var(--weight-heavy);
 }
 
 .inputFieldError:focus-within {

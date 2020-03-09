@@ -6,11 +6,10 @@ import LoadingIndicator from './LoadingIndicator';
 const Button = React.forwardRef<
   HTMLButtonElement,
   {
-    buttonStyle?: 'bold' | 'normal';
     buttonType?: 'primary' | 'secondary';
     isLoading?: boolean;
   } & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
->(({ children, buttonStyle = 'normal', buttonType = 'secondary', isLoading, ...props }, ref) => {
+>(({ children, buttonType = 'secondary', isLoading, ...props }, ref) => {
   const [animate, setAnimate] = useState(false);
 
   function animateStart() {
@@ -42,8 +41,8 @@ const Button = React.forwardRef<
       onTransitionEnd={onTransitionEnd}
       ref={ref}
       className={`${props.className} ${styles.button} ${animate && styles.animate} ${
-        buttonStyle === 'normal' ? styles.styleNormal : styles.styleBold
-      } ${buttonType === 'primary' ? styles.typePrimary : styles.typeSecondary}`}
+        buttonType === 'primary' ? styles.typePrimary : styles.typeSecondary
+      }`}
     >
       <div className={styles.conditionalRenderContainer}>
         {!isLoading ? (

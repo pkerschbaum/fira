@@ -59,12 +59,7 @@ const AnnotationFeedback: React.FC = () => {
                 </li>
               </ul>
             )}
-            <Button
-              buttonType="primary"
-              type="submit"
-              disabled={isSubmitting}
-              isLoading={isSubmitting}
-            >
+            <Button type="submit" disabled={isSubmitting} isLoading={isSubmitting}>
               Continue
             </Button>
           </Form>

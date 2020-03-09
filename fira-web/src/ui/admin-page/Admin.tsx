@@ -24,11 +24,7 @@ const Admin: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.adminArea}>
         <div className={styles.actionBar}>
-          <Button
-            className={styles.button}
-            buttonType="secondary"
-            onClick={adminStories.exportJudgements}
-          >
+          <Button className={styles.button} onClick={adminStories.exportJudgements}>
             <span>Export Judgements</span>
           </Button>
           <Menu />
@@ -74,7 +70,6 @@ const Admin: React.FC = () => {
               </div>
               <Button
                 className={styles.button}
-                buttonType="secondary"
                 type="submit"
                 disabled={isSubmitting}
                 isLoading={isSubmitting}

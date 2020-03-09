@@ -47,9 +47,7 @@ const AnnotationInfo: React.FC = () => {
           <img key={idx} className={styles.infoImage} src={entry.content} alt={entry.alt} />
         ),
       )}
-      <Button buttonType="primary" onClick={onAcknowledge}>
-        Continue
-      </Button>
+      <Button onClick={onAcknowledge}>Continue</Button>
     </div>
   );
 };

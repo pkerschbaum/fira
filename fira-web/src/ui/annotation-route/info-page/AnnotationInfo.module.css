@@ -14,7 +14,7 @@
 
 .headline {
   text-align: center;
-  font-weight: var(--weight-xlarge);
+  font-weight: var(--weight-heavy);
   margin-bottom: var(--margin-medium);
 }
 

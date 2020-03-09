@@ -35,9 +35,8 @@
   --font-small: 0.875rem;
   --font-xxxlarge: 2rem;
 
-  --weight-xlarge: 800;
-  --weight-large: 600;
-  --weight-medium: 400;
+  --weight-heavy: 700;
+  --weight-normal: 400;
 
   /* ### BORDERS ### */
   --border-small: 0.0625rem;
@@ -48,13 +47,13 @@
   --margin-xxsmall: 0.5rem;
   --margin-xsmall: 0.75rem;
   --margin-medium: 1rem;
-  --margin-xxlarge: 1.625rem;
+  --margin-xlarge: 2rem;
+  --margin-xxlarge: 3rem;
   --padding-xxxsmall: 0.25rem;
   --padding-xxsmall: 0.5rem;
-  --padding-xsmall: 0.75rem;
-  --padding-small: 0.875rem;
   --padding-medium: 1rem;
-  --padding-xlarge: 1.5rem;
+  --padding-xlarge: 2rem;
+  --padding-xxlarge: 3rem;
 
   /* ### SPECIAL VARIABLES ### */
   --transform-button: scale(0.96);

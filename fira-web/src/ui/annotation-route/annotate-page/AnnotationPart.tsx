@@ -59,11 +59,7 @@ const AnnotationPart: React.FC<{
       <Popper placement="top">
         {({ ref, style, placement }) => (
           <div ref={ref} style={style} data-placement={placement}>
-            <Button
-              buttonType="primary"
-              className={styles.annotatePartTooltipButton}
-              onClick={onTooltipClick}
-            >
+            <Button className={styles.annotatePartTooltipButton} onClick={onTooltipClick}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"

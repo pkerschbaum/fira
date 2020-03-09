@@ -107,7 +107,6 @@ const Login = () => {
                 </ul>
               )}
               <Button
-                buttonStyle="bold"
                 buttonType="primary"
                 type="submit"
                 disabled={isSubmitting}
