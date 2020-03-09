@@ -11,24 +11,40 @@
 
   background-color: white;
 
+  /* ### COLORS ### */
   --color-primary: #4d606e;
+  --color-primary-font: white;
   --color-error: rgb(193, 53, 21);
   --color-disabled: #9b9b9b;
   --color-dense: #1d1d1d;
   --color-soft: #9b9b9b;
   --color-ui-element-highlight: #cccccc;
 
+  --color-ratelevel-misleading-answer: #ff7e61;
+  --color-ratelevel-not-relevant: #ebb25b;
+  --color-ratelevel-topic-relevant-does-not-answer: #fff498;
+  --color-ratelevel-good-answer: #a1e880;
+  --color-ratelevel-perfect-answer: #73ffc3;
+
+  --color-annotation-allowed-highlight: hsla(120, 73%, 75%, 50%);
+  --color-annotation-range-start: hsla(0, 79%, 72%, 50%);
+  --color-annotation-is-in-range: lightgreen;
+  --color-annotation-progress-bar: lightgreen;
+
+  /* ### FONT SIZES AND WEIGHTS ### */
+  --font-small: 0.875rem;
+  --font-xxxlarge: 2rem;
+
   --weight-xlarge: 800;
   --weight-large: 600;
   --weight-medium: 400;
 
-  --font-small: 0.875rem;
-  --font-xxxlarge: 2rem;
-
+  /* ### BORDERS ### */
   --border-small: 0.0625rem;
   --border-xlarge: 0.15rem;
   --border-radius-normal: 0.5rem;
 
+  /* ### SIZING ### */
   --margin-xxsmall: 0.5rem;
   --margin-xsmall: 0.75rem;
   --margin-medium: 1rem;
@@ -40,8 +56,8 @@
   --padding-medium: 1rem;
   --padding-xlarge: 1.5rem;
 
+  /* ### SPECIAL VARIABLES ### */
   --transform-button: scale(0.96);
-
   --narrow-content-area-width: 32.5rem;
 }
 

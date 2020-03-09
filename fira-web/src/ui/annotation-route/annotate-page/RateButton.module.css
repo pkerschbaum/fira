@@ -7,3 +7,23 @@
   height: 50px;
   color: var(--color-dense);
 }
+
+.misleadingAnswer {
+  background: var(--color-ratelevel-misleading-answer);
+}
+
+.notRelevant {
+  background: var(--color-ratelevel-not-relevant);
+}
+
+.topicRelevantDoesNotAnswer {
+  background: var(--color-ratelevel-topic-relevant-does-not-answer);
+}
+
+.goodAnswer {
+  background: var(--color-ratelevel-good-answer);
+}
+
+.perfectAnswer {
+  background: var(--color-ratelevel-perfect-answer);
+}

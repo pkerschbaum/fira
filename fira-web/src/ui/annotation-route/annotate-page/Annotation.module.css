@@ -1,5 +1,5 @@
 .progressBar {
-  background-color: lightgreen;
+  background-color: var(--color-annotation-progress-bar);
   height: 0.5rem;
   margin: -8px 0 0 -8px;
 }

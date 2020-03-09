@@ -2,7 +2,15 @@ import React from 'react';
 
 import styles from './RateButton.module.css';
 import Button from '../../elements/Button';
-import { RateLevelType } from '../../../typings/enums';
+import { RateLevelType, RelevanceLevel } from '../../../typings/enums';
+
+const RATE_LEVEL_STYLES = {
+  [RelevanceLevel.MISLEADING_ANSWER]: styles.misleadingAnswer,
+  [RelevanceLevel.NOT_RELEVANT]: styles.notRelevant,
+  [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: styles.topicRelevantDoesNotAnswer,
+  [RelevanceLevel.GOOD_ANSWER]: styles.goodAnswer,
+  [RelevanceLevel.PERFECT_ANSWER]: styles.perfectAnswer,
+} as const;
 
 const RateButton: React.FC<{ rateLevel: RateLevelType; onClick: () => void }> = ({
   rateLevel,
@@ -11,10 +19,7 @@ const RateButton: React.FC<{ rateLevel: RateLevelType; onClick: () => void }> = 
   return (
     <div className={styles.container}>
       <Button
-        style={{
-          background: rateLevel.buttonColor,
-        }}
-        className={styles.button}
+        className={`${styles.button} ${RATE_LEVEL_STYLES[rateLevel.relevanceLevel]}`}
         onClick={onClick}
       >
         {rateLevel.text}

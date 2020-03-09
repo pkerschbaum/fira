@@ -6,16 +6,16 @@
 }
 
 .rangeStart {
-  background-color: hsla(0, 79%, 72%, 50%);
+  background-color: var(--color-annotation-range-start);
 }
 
 .isInRange {
-  background-color: lightgreen;
+  background-color: var(--color-annotation-is-in-range);
   cursor: pointer;
 }
 
 .annotationAllowedOnPart:hover:not(.rangeStart):not(.isInRange) {
-  background-color: hsla(120, 73%, 75%, 50%);
+  background-color: var(--color-annotation-allowed-highlight);
 }
 
 /* mobile devices, touch only */
