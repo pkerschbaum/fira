@@ -19,6 +19,7 @@
   --color-dense: #1d1d1d;
   --color-soft: #9b9b9b;
   --color-ui-element-highlight: #cccccc;
+  --color-destructive: rgb(193, 53, 21);
 
   --color-ratelevel-misleading-answer: #ff7e61;
   --color-ratelevel-not-relevant: #ebb25b;
