@@ -21,7 +21,7 @@ export class Judgement {
   @Column({ enum: RelevanceLevel, nullable: true })
   relevanceLevel: RelevanceLevel;
   @Column({ type: 'numeric', array: true, nullable: true })
-  relevancePositions: number[];
+  relevancePositions: number[] | null;
   @Column({ nullable: false })
   rotate: boolean;
   @Column({ enum: JudgementMode, nullable: false })

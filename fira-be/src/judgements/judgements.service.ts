@@ -183,7 +183,9 @@ export class JudgementsService {
         // if all parameters are equal, return status OK, otherwise CONFLICT
         if (
           dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
-          dbJudgement.relevancePositions.length !== judgementData.relevancePositions.length ||
+          (dbJudgement.relevancePositions === null &&
+            judgementData.relevancePositions.length === 0) ||
+          dbJudgement.relevancePositions?.length !== judgementData.relevancePositions.length ||
           dbJudgement.relevancePositions.some(
             (position1, index) => judgementData.relevancePositions[index] !== position1,
           ) ||
@@ -207,15 +209,19 @@ export class JudgementsService {
       judgements.map(judgement => {
         // build string for ranges, e.g. '0-4;6-9'
         let relevanceCharacterRanges = '';
-        for (const range of judgement.relevanceCharacterRanges) {
-          relevanceCharacterRanges += `${range.startChar}-${range.endChar}`;
-          relevanceCharacterRanges += ';';
+        if (judgement.relevanceCharacterRanges.length === 0) {
+          relevanceCharacterRanges = '<no ranges selected>';
+        } else {
+          for (const range of judgement.relevanceCharacterRanges) {
+            relevanceCharacterRanges += `${range.startChar}-${range.endChar}`;
+            relevanceCharacterRanges += ';';
+          }
+          // remove last semicolon
+          relevanceCharacterRanges = relevanceCharacterRanges.substr(
+            0,
+            relevanceCharacterRanges.length - 1,
+          );
         }
-        // remove last semicolon
-        relevanceCharacterRanges = relevanceCharacterRanges.substr(
-          0,
-          relevanceCharacterRanges.length - 1,
-        );
 
         return {
           ...judgement,
@@ -232,7 +238,7 @@ export class JudgementsService {
 
     return allJudgements.map(judgement => {
       const partsAvailable = judgement.document.annotateParts;
-      const partsAnnotated = judgement.relevancePositions;
+      const partsAnnotated = judgement.relevancePositions ?? [];
 
       const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
 
