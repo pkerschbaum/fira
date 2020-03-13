@@ -29,9 +29,18 @@
 
 .annotationArea {
   overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
   /* add a little bit of vertical padding because otherwise chrome shows the scrollbar, 
      even if it is not necessary... */
   padding: 0.5px 0;
+}
+
+/* add whitespace to last row of document text (https://stackoverflow.com/a/34816625/1700319) */
+.annotationArea::after {
+  content: '';
+  flex-grow: 9999999;
 }
 
 .footer {

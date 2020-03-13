@@ -3,6 +3,7 @@
   padding: 1px 0;
   transition: box-shadow 0.2s ease 0s, background-color 0.1s ease 0s, padding 0.3s ease-in-out;
   user-select: none;
+  flex-grow: 0;
 }
 
 .rangeStart {
@@ -27,4 +28,8 @@
 
 .annotatePartTooltipButton > *:first-child {
   padding-right: 4px;
+}
+
+.placeholder {
+  flex-grow: 1;
 }

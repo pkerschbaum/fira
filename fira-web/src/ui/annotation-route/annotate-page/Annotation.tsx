@@ -75,11 +75,14 @@ const Annotation: React.FC<{
         </div>
         <Line orientation="horizontal" />
         <div key={currentJudgementPair.id} className={styles.annotationArea}>
-          {currentJudgementPair.docAnnotationParts.map((annotationPart, i) => {
+          {currentJudgementPair.docAnnotationParts.map((annotationPart, partIdx) => {
             // determine if part is in one of the selected ranges
-            const isInSelectedRange = currentJudgementPair.annotatedRanges.some(
-              range => range.start <= i && range.end >= i,
+            const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
+              range => range.start <= partIdx && range.end >= partIdx,
             );
+            const isInAnnotatedRange = !!correspondingAnnotatedRange;
+            const isLastInAnnotatedRange =
+              !!correspondingAnnotatedRange && partIdx === correspondingAnnotatedRange.end;
 
             /*
              * annotation of a part is allowed if
@@ -90,29 +93,65 @@ const Annotation: React.FC<{
             const canAnnotatePart =
               currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
               annotationPart !== ' ' &&
-              !isInSelectedRange;
+              !isInAnnotatedRange;
 
+            /*
+             * now render two things:
+             * - the main annotation part which shows the actual text.
+             * - a second annotation part which is only a placeholder. This placeholder will
+             *   use the horizontal space remaining in the line of text. Essentially, this
+             *   placeholder creates a justified layout for the text (i.e. a "Blocksatz" layout,
+             *   as it is called in german)
+             *
+             * Why use a placeholder, instead of just spreading out the parts via the parent container (e.g.,
+             * justify-content: space-between)? Well, imagine the user annotated a range containing of multiple words.
+             * Then, we want to highlight the entire range, e.g. with a background color.
+             * If we would let the parent container take care of spreading out the text parts, there would be empty space
+             * in between which is not highlighted like the text. So we need something which we can apply styles onto.
+             * The placeholders enable to apply styles on them, e.g. give them the same green background color like the
+             * annotated text parts.
+             */
             return (
-              <AnnotationPart
-                key={i}
-                text={annotationPart}
-                isRangeStart={currentJudgementPair.currentAnnotationStart === i}
-                isInSelectedRange={isInSelectedRange}
-                showTooltip={tooltipAnnotatePartIndex === i}
-                annotationIsAllowedOnPart={canAnnotatePart}
-                annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
-                onPartClick={
-                  canAnnotatePart
-                    ? () => selectRangeStartEnd({ annotationPartIndex: i })
-                    : isInSelectedRange
-                    ? () => setTooltipAnnotatePartIndex(i)
-                    : noop
-                }
-                onTooltipClick={() => {
-                  deleteRange({ annotationPartIndex: i });
-                  hideTooltip();
-                }}
-              />
+              <>
+                <AnnotationPart
+                  key={partIdx}
+                  text={annotationPart}
+                  isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
+                  isInSelectedRange={isInAnnotatedRange}
+                  showTooltip={tooltipAnnotatePartIndex === partIdx}
+                  annotationIsAllowedOnPart={canAnnotatePart}
+                  annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
+                  onPartClick={
+                    canAnnotatePart
+                      ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
+                      : isInAnnotatedRange
+                      ? () => setTooltipAnnotatePartIndex(partIdx)
+                      : noop
+                  }
+                  onTooltipClick={() => {
+                    deleteRange({ annotationPartIndex: partIdx });
+                    hideTooltip();
+                  }}
+                />
+                <AnnotationPart
+                  key={'placeholder' + partIdx}
+                  text=""
+                  isInSelectedRange={isInAnnotatedRange && !isLastInAnnotatedRange}
+                  annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
+                  isPlaceholder={true}
+                  onPartClick={
+                    canAnnotatePart
+                      ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
+                      : isInAnnotatedRange
+                      ? () => setTooltipAnnotatePartIndex(partIdx)
+                      : noop
+                  }
+                  onTooltipClick={() => {
+                    deleteRange({ annotationPartIndex: partIdx });
+                    hideTooltip();
+                  }}
+                />
+              </>
             );
           })}
         </div>

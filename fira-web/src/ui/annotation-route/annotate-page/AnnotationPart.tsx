@@ -6,20 +6,22 @@ import Button from '../../elements/Button';
 
 const AnnotationPart: React.FC<{
   text: string;
-  isRangeStart: boolean;
+  isRangeStart?: boolean;
   isInSelectedRange: boolean;
-  showTooltip: boolean;
-  annotationIsAllowedOnPart: boolean;
+  showTooltip?: boolean;
+  annotationIsAllowedOnPart?: boolean;
   annotationIsAllowedInGeneral: boolean;
+  isPlaceholder?: boolean;
   onPartClick: () => void;
   onTooltipClick: () => void;
 }> = ({
   text,
-  isRangeStart,
+  isRangeStart = false,
   isInSelectedRange,
-  showTooltip,
-  annotationIsAllowedOnPart,
+  showTooltip = false,
+  annotationIsAllowedOnPart = false,
   annotationIsAllowedInGeneral,
+  isPlaceholder = false,
   onPartClick,
   onTooltipClick,
 }) => {
@@ -39,13 +41,15 @@ const AnnotationPart: React.FC<{
     ? styles.annotationAllowedInGeneral
     : '';
 
+  const placeholderStyle = isPlaceholder ? styles.placeholder : '';
+
   const annotatePartSpan = (ref?: any) => (
     <span
       ref={ref}
       onClick={onPartClick}
       className={`${styles.annotatePart} ${currentRangeStartStyle} ${
         !!isInSelectedRange ? styles.isInRange : ''
-      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle}`}
+      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle} ${placeholderStyle}`}
     >
       {textToShow}
     </span>
