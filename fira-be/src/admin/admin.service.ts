@@ -27,10 +27,10 @@ export class AdminService {
     private readonly configRepository: Repository<Config>,
   ) {}
 
-  public importDocuments = (documents: ImportAsset[]): Promise<ImportResult[]> => {
-    return Promise.all(
-      documents.map(
-        this.persistenceService.wrapInTransaction(async (transactionalEntityManager, document) => {
+  public importDocuments = this.persistenceService.wrapInTransaction(
+    (transactionalEntityManager, documents: ImportAsset[]): Promise<ImportResult[]> => {
+      return Promise.all(
+        documents.map(async document => {
           try {
             let dbDocument = await transactionalEntityManager.findOne(Document, document.id);
             if (!dbDocument) {
@@ -63,14 +63,14 @@ export class AdminService {
             };
           }
         }),
-      ),
-    );
-  };
+      );
+    },
+  );
 
-  public importQueries = (queries: ImportAsset[]): Promise<ImportResult[]> => {
-    return Promise.all(
-      queries.map(
-        this.persistenceService.wrapInTransaction(async (transactionalEntityManager, query) => {
+  public importQueries = this.persistenceService.wrapInTransaction(
+    async (transactionalEntityManager, queries: ImportAsset[]): Promise<ImportResult[]> => {
+      return Promise.all(
+        queries.map(async query => {
           try {
             let dbQuery = await transactionalEntityManager.findOne(Query, query.id);
             if (!dbQuery) {
@@ -100,9 +100,9 @@ export class AdminService {
             };
           }
         }),
-      ),
-    );
-  };
+      );
+    },
+  );
 
   public importJudgementPairs = this.persistenceService.wrapInTransaction(
     async (

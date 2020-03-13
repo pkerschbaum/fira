@@ -4,6 +4,7 @@ import { Connection, EntityManager } from 'typeorm';
 import { AppLogger } from '../logger/app-logger.service';
 
 const MAX_ATTEMPTS = 5;
+const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
 
 @Injectable()
 export class PersistenceService {
@@ -20,11 +21,12 @@ export class PersistenceService {
             return cb(transactionalEntityManager, ...args);
           });
         } catch (e) {
-          if (attemptNumber >= MAX_ATTEMPTS) {
+          if (e.code !== POSTGRES_SERIALIZATION_FAILURE_CODE || attemptNumber >= MAX_ATTEMPTS) {
             throw e;
           }
           this.appLogger.debug(
-            `transaction failed, retrying... attemptNumber of last attempt was: ${attemptNumber}`,
+            `transaction failed due to serialization failure, retrying...` +
+              ` attemptNumber of last attempt was: ${attemptNumber}`,
           );
           attemptNumber++;
         }
