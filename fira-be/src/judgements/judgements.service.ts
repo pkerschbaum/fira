@@ -8,6 +8,7 @@ import { Connection, EntityManager, MoreThan } from 'typeorm';
 import moment = require('moment');
 import d3 = require('d3');
 
+import { PersistenceService } from '../persistence/persistence.service';
 import {
   PreloadJudgement,
   SaveJudgement,
@@ -31,12 +32,16 @@ import { Statistic } from '../admin/admin.types';
 
 @Injectable()
 export class JudgementsService {
-  constructor(private readonly connection: Connection, private readonly appLogger: AppLogger) {
+  constructor(
+    private readonly connection: Connection,
+    private readonly appLogger: AppLogger,
+    private readonly persistenceService: PersistenceService,
+  ) {
     this.appLogger.setContext('JudgementsService');
   }
 
-  public async preloadJudgements(userId: string): Promise<PreloadJudgementResponse> {
-    return this.connection.transaction('SERIALIZABLE', async transactionalEntityManager => {
+  public preloadJudgements = this.persistenceService.wrapInTransaction(
+    async (transactionalEntityManager, userId: string): Promise<PreloadJudgementResponse> => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
       const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
@@ -134,15 +139,16 @@ export class JudgementsService {
         remainingToFinish,
         requiredUserAction,
       };
-    });
-  }
+    },
+  );
 
-  public async saveJudgement(
-    userId: string,
-    judgementId: number,
-    judgementData: SaveJudgement,
-  ): Promise<void> {
-    return this.connection.transaction(async transactionalEntityManager => {
+  public saveJudgement = this.persistenceService.wrapInTransaction(
+    async (
+      transactionalEntityManager,
+      userId: string,
+      judgementId: number,
+      judgementData: SaveJudgement,
+    ): Promise<void> => {
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbJudgement = await transactionalEntityManager.findOne(Judgement, {
         where: { user, id: judgementId },
@@ -199,8 +205,8 @@ export class JudgementsService {
         // exhaustive check
         assertUnreachable(dbJudgement.status);
       }
-    });
-  }
+    },
+  );
 
   public exportJudgementsTsv: () => Promise<string> = async () => {
     const judgements = await this.exportJudgements();

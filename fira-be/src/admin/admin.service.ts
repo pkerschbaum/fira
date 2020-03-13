@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 
+import { PersistenceService } from '../persistence/persistence.service';
 import {
   ImportAsset,
   ImportResult,
@@ -21,14 +22,15 @@ import { assetUtil } from './asset.util';
 export class AdminService {
   constructor(
     private readonly connection: Connection,
+    private readonly persistenceService: PersistenceService,
     @InjectRepository(Config)
     private readonly configRepository: Repository<Config>,
   ) {}
 
-  public importDocuments: (documents: ImportAsset[]) => Promise<ImportResult[]> = documents => {
+  public importDocuments = (documents: ImportAsset[]): Promise<ImportResult[]> => {
     return Promise.all(
-      documents.map(async document => {
-        return this.connection.transaction(async transactionalEntityManager => {
+      documents.map(
+        this.persistenceService.wrapInTransaction(async (transactionalEntityManager, document) => {
           try {
             let dbDocument = await transactionalEntityManager.findOne(Document, document.id);
             if (!dbDocument) {
@@ -60,15 +62,15 @@ export class AdminService {
               error: e.toString(),
             };
           }
-        });
-      }),
+        }),
+      ),
     );
   };
 
-  public importQueries: (queries: ImportAsset[]) => Promise<ImportResult[]> = queries => {
+  public importQueries = (queries: ImportAsset[]): Promise<ImportResult[]> => {
     return Promise.all(
-      queries.map(async query => {
-        return this.connection.transaction(async transactionalEntityManager => {
+      queries.map(
+        this.persistenceService.wrapInTransaction(async (transactionalEntityManager, query) => {
           try {
             let dbQuery = await transactionalEntityManager.findOne(Query, query.id);
             if (!dbQuery) {
@@ -97,15 +99,16 @@ export class AdminService {
               error: e.toString(),
             };
           }
-        });
-      }),
+        }),
+      ),
     );
   };
 
-  public importJudgementPairs: (
-    judgementPairs: ImportJudgementPair[],
-  ) => Promise<ImportJudgementPairResult[]> = judgementPairs => {
-    return this.connection.transaction(async transactionalEntityManager => {
+  public importJudgementPairs = this.persistenceService.wrapInTransaction(
+    async (
+      transactionalEntityManager,
+      judgementPairs: ImportJudgementPair[],
+    ): Promise<ImportJudgementPairResult[]> => {
       // delete previos pairs
       await transactionalEntityManager
         .createQueryBuilder()
@@ -152,8 +155,8 @@ export class AdminService {
           }
         }),
       );
-    });
-  };
+    },
+  );
 
   public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
     const dbEntry = new Config();

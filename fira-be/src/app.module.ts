@@ -18,6 +18,7 @@ import { JudgementPair } from './admin/entity/judgement-pair.entity';
 import { Feedback } from './feedback/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { PersistenceModule } from './persistence/persistence.module';
 import * as config from './config';
 
 @Module({
@@ -46,6 +47,7 @@ import * as config from './config';
     AdminModule,
     JudgementsModule,
     FeedbackModule,
+    PersistenceModule,
   ],
   controllers: [],
   providers: [],
