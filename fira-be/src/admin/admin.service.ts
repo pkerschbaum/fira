@@ -109,7 +109,7 @@ export class AdminService {
       transactionalEntityManager,
       judgementPairs: ImportJudgementPair[],
     ): Promise<ImportJudgementPairResult[]> => {
-      // delete previos pairs
+      // delete previous pairs
       await transactionalEntityManager
         .createQueryBuilder()
         .delete()

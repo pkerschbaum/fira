@@ -14,25 +14,37 @@ const USER_CREDENTIALS = [
     username: 'user02',
     password: 'xBcVjkZy',
   },
+  {
+    username: 'user03',
+    password: 'aOcFzMmO',
+  },
 ];
 
 function responseToStr(res) {
+  let data;
+  if (!!res.body) {
+    try {
+      data = res.json();
+    } catch (e) {
+      data = res.body;
+    }
+  }
   return JSON.stringify({
     status: res.status,
-    data: !!res.body ? res.json() : undefined,
+    data,
   });
 }
 
 export const options = {
-  vus: 2,
-  iterations: 30,
+  vus: 3,
+  iterations: 90,
 };
 
 export default function() {
   const results = {};
 
   group('login', function() {
-    const payload = JSON.stringify(USER_CREDENTIALS[__VU - 1]);
+    const payload = JSON.stringify(USER_CREDENTIALS[__ITER % 3]);
 
     const res = http.post(`${FIRA_BE_BASE}/auth/v1/login`, payload, { headers: DEFAULT_HEADERS });
     if (
