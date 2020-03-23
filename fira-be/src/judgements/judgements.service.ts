@@ -53,10 +53,10 @@ export class JudgementsService {
 
       // compute some statistics for this user
       const currentOpenJudgements = judgementsOfUser.filter(
-        judgement => judgement.status === JudgementStatus.TO_JUDGE,
+        (judgement) => judgement.status === JudgementStatus.TO_JUDGE,
       );
       const currentFinishedJudgements = judgementsOfUser.filter(
-        judgement => judgement.status === JudgementStatus.JUDGED,
+        (judgement) => judgement.status === JudgementStatus.JUDGED,
       );
 
       const remainingToFinish = dbConfig.annotationTargetPerUser - currentFinishedJudgements.length;
@@ -108,7 +108,7 @@ export class JudgementsService {
         .select(`DISTINCT judgement_pair.${COLUMN_PRIORITY}`, 'priority')
         .getRawMany();
 
-      const priorities = result.map(obj => obj.priority).sort((a, b) => b - a); // sort priority descending
+      const priorities = result.map((obj) => obj.priority).sort((a, b) => b - a); // sort priority descending
 
       let targetFactor = 1;
       while (remainingJudgementsToPreload > 0) {
@@ -164,7 +164,7 @@ export class JudgementsService {
         if (
           judgementData.relevancePositions.length > dbJudgement.document.annotateParts.length ||
           judgementData.relevancePositions.some(
-            position => position >= dbJudgement.document.annotateParts.length || position < 0,
+            (position) => position >= dbJudgement.document.annotateParts.length || position < 0,
           )
         ) {
           throw new BadRequestException(
@@ -212,7 +212,7 @@ export class JudgementsService {
     const judgements = await this.exportJudgements();
 
     return d3.tsvFormat(
-      judgements.map(judgement => {
+      judgements.map((judgement) => {
         // build string for ranges, e.g. '0-4;6-9'
         let relevanceCharacterRanges = '';
         if (judgement.relevanceCharacterRanges.length === 0) {
@@ -242,13 +242,13 @@ export class JudgementsService {
       .getRepository(Judgement)
       .find({ where: { status: JudgementStatus.JUDGED } });
 
-    return allJudgements.map(judgement => {
+    return allJudgements.map((judgement) => {
       const partsAvailable = judgement.document.annotateParts;
       const partsAnnotated = judgement.relevancePositions ?? [];
 
       const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
       let relevanceCharacterRanges = partsAnnotated.map(
-        annotated => partsAvailableCharacterRanges[annotated],
+        (annotated) => partsAvailableCharacterRanges[annotated],
       );
 
       if (relevanceCharacterRanges.length > 0) {
@@ -364,11 +364,7 @@ export class JudgementsService {
       .createQueryBuilder('j')
       .where({
         status: JudgementStatus.JUDGED,
-        judgedAt: MoreThan(
-          moment()
-            .subtract(24, 'hours')
-            .toDate(),
-        ),
+        judgedAt: MoreThan(moment().subtract(24, 'hours').toDate()),
       })
       .getCount();
 
@@ -435,7 +431,7 @@ async function getCandidatesByPriority(
         'j',
         'j.document_document = jp.document_id AND j.query_query = jp.query_id',
       )
-      .where(qb => {
+      .where((qb) => {
         return `jp.priority = ${priority} AND NOT EXISTS ${qb
           .subQuery()
           .select(`1`)
@@ -482,14 +478,14 @@ async function persistPairs(
       ...elem,
       count: Number(elem.count),
     }));
-    const countRotate = rotateStats.find(elem => elem.rotate === true)?.count ?? 0;
-    const countNoRotate = rotateStats.find(elem => elem.rotate === false)?.count ?? 0;
+    const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
+    const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
     rotate = countRotate < countNoRotate;
   }
 
   // gather data and persist judgements
   await Promise.all(
-    pairs.map(async pair => {
+    pairs.map(async (pair) => {
       const dbDocument = await entityManager.findOneOrFail(Document, pair.document_id);
       const dbQuery = await entityManager.findOneOrFail(Query, pair.query_id);
       const dbDocumentVersion = await assetUtil.findCurrentDocumentVersion(
@@ -513,7 +509,7 @@ async function persistPairs(
 
 function mapJudgementsToResponse(openJudgements: Judgement[]) {
   return openJudgements
-    .map(openJudgement => {
+    .map((openJudgement) => {
       // rotate text (annotation parts), if requested to do so
       let annotationParts = openJudgement.document.annotateParts;
       if (openJudgement.rotate) {

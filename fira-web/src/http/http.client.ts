@@ -271,5 +271,5 @@ export const httpClient = {
 };
 
 function timeout(ms: number) {
-  return new Promise(res => setTimeout(res, ms));
+  return new Promise((res) => setTimeout(res, ms));
 }

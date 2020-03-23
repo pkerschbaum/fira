@@ -40,9 +40,9 @@ export async function importInitialData({
     logger,
     assetType: 'users',
     getCountFn: imService.getCountOfUsers,
-    tsvSkipFn: entry => !entry[COLUMN_USER_ID] || isEmpty(entry[COLUMN_USER_ID]),
-    tsvMapFn: entry => ({ id: entry[COLUMN_USER_ID] }),
-    importFn: async assetsParsed => {
+    tsvSkipFn: (entry) => !entry[COLUMN_USER_ID] || isEmpty(entry[COLUMN_USER_ID]),
+    tsvMapFn: (entry) => ({ id: entry[COLUMN_USER_ID] }),
+    importFn: async (assetsParsed) => {
       const { accessToken } = await imService.login(
         config.keycloak.adminCredentials.username,
         config.keycloak.adminCredentials.password,
@@ -61,7 +61,7 @@ export async function importInitialData({
     assetType: 'documents',
     getCountFn: adminService.getCountOfDocuments,
     tsvSkipFn: isDocumentIdMissing,
-    tsvMapFn: entry => ({
+    tsvMapFn: (entry) => ({
       id: Number(entry[COLUMN_DOCUMENT_ID]),
       text: entry[COLUMN_DOCUMENT_TEXT],
     }),
@@ -75,7 +75,7 @@ export async function importInitialData({
     assetType: 'queries',
     getCountFn: adminService.getCountOfQueries,
     tsvSkipFn: isQueryIdMissing,
-    tsvMapFn: entry => ({
+    tsvMapFn: (entry) => ({
       id: Number(entry[COLUMN_QUERY_ID]),
       text: entry[COLUMN_QUERY_TEXT],
     }),
@@ -88,8 +88,8 @@ export async function importInitialData({
     logger,
     assetType: 'judgement-pairs',
     getCountFn: adminService.getCountOfJudgPairs,
-    tsvSkipFn: entry => isDocumentIdMissing(entry) || isQueryIdMissing(entry),
-    tsvMapFn: entry => ({
+    tsvSkipFn: (entry) => isDocumentIdMissing(entry) || isQueryIdMissing(entry),
+    tsvMapFn: (entry) => ({
       queryId: Number(entry[COLUMN_QUERY_ID]),
       documentId: Number(entry[COLUMN_DOCUMENT_ID]),
       priority: Number(entry[COLUMN_PRIORITY]),
@@ -110,7 +110,7 @@ export async function importInitialData({
     assetType: 'config',
     getCountFn: adminService.getCountOfConfig,
     tsvSkipFn: () => false, // don't skip anything
-    tsvMapFn: entry => {
+    tsvMapFn: (entry) => {
       const judgementModeStr = entry[COLUMN_JUDGEMENT_MODE];
       if (!Object.values(JudgementMode).includes(judgementModeStr)) {
         throw new Error(`${COLUMN_JUDGEMENT_MODE} has an invalid value`);
@@ -124,7 +124,7 @@ export async function importInitialData({
         annotationTargetToRequireFeedback: Number(entry[COLUMN_ANNO_TARGET_TO_REQUIRE_FEEDBACK]),
       };
     },
-    importFn: configs => adminService.updateConfig(configs[0]),
+    importFn: (configs) => adminService.updateConfig(configs[0]),
   });
 }
 
@@ -196,13 +196,13 @@ function tsvParse(
 ) {
   return d3
     .tsvParse(tsv)
-    .filter(entry => !skipFn(entry))
+    .filter((entry) => !skipFn(entry))
     .map(mapFn);
 }
 
 function abortOnFailedImport(logger: AppLogger, importResults: ImportResult[]) {
   const failedImport = importResults.find(
-    importResult => importResult.status === ImportStatus.ERROR,
+    (importResult) => importResult.status === ImportStatus.ERROR,
   );
   if (failedImport) {
     logger.error(

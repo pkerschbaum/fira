@@ -17,7 +17,7 @@ export class PersistenceService {
       while (true) {
         let attemptNumber = 1;
         try {
-          return await this.connection.transaction('SERIALIZABLE', transactionalEntityManager => {
+          return await this.connection.transaction('SERIALIZABLE', (transactionalEntityManager) => {
             return cb(transactionalEntityManager, ...args);
           });
         } catch (e) {

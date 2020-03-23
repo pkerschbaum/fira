@@ -20,7 +20,7 @@ export class Document {
 
 @Entity()
 export class DocumentVersion {
-  @ManyToOne(type => Document, {
+  @ManyToOne((type) => Document, {
     eager: true,
     cascade: ['insert'],
     onDelete: 'RESTRICT',

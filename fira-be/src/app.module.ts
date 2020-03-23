@@ -63,7 +63,7 @@ export class AppModule implements OnModuleInit {
 }
 
 function registerOutgoingHttpInterceptor(axiosInstance: AxiosInstance, appLogger: AppLogger) {
-  axiosInstance.interceptors.request.use(request => {
+  axiosInstance.interceptors.request.use((request) => {
     try {
       const requestId = nanoid();
       (request as any).requestId = requestId;
@@ -78,7 +78,7 @@ function registerOutgoingHttpInterceptor(axiosInstance: AxiosInstance, appLogger
     return request;
   });
 
-  axiosInstance.interceptors.response.use(response => {
+  axiosInstance.interceptors.response.use((response) => {
     try {
       const requestId = (response.config as any).requestId;
       appLogger.log(`[RESPONSE] [${requestId}] ${response.status}`);

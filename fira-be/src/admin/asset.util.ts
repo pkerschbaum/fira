@@ -1,29 +1,15 @@
 import { EntityManager } from 'typeorm';
 
-import {
-  Document,
-  DocumentVersion,
-  COLUMN_DOCUMENT_VERSION,
-} from './entity/document.entity';
-import {
-  Query,
-  QueryVersion,
-  COLUMN_QUERY_VERSION,
-} from './entity/query.entity';
+import { Document, DocumentVersion, COLUMN_DOCUMENT_VERSION } from './entity/document.entity';
+import { Query, QueryVersion, COLUMN_QUERY_VERSION } from './entity/query.entity';
 
 export const assetUtil = {
-  findMaxDocumentVersion: async (
-    dbDocument: Document,
-    entityManager: EntityManager,
-  ) => {
+  findMaxDocumentVersion: async (dbDocument: Document, entityManager: EntityManager) => {
     const {
       maxVersionNumber,
     }: { maxVersionNumber: number } = await entityManager
       .createQueryBuilder(DocumentVersion, 'document_version')
-      .select(
-        `MAX(document_version.${COLUMN_DOCUMENT_VERSION})`,
-        'maxVersionNumber',
-      )
+      .select(`MAX(document_version.${COLUMN_DOCUMENT_VERSION})`, 'maxVersionNumber')
       .where({ document: dbDocument })
       .getRawOne();
     return maxVersionNumber;
@@ -45,10 +31,7 @@ export const assetUtil = {
     dbDocument: Document,
     entityManager: EntityManager,
   ): Promise<DocumentVersion> => {
-    const currentVersion = await assetUtil.findMaxDocumentVersion(
-      dbDocument,
-      entityManager,
-    );
+    const currentVersion = await assetUtil.findMaxDocumentVersion(dbDocument, entityManager);
     return entityManager.findOneOrFail(DocumentVersion, {
       document: dbDocument,
       version: currentVersion,
@@ -59,10 +42,7 @@ export const assetUtil = {
     dbQuery: Query,
     entityManager: EntityManager,
   ): Promise<QueryVersion> => {
-    const currentVersion = await assetUtil.findMaxQueryVersion(
-      dbQuery,
-      entityManager,
-    );
+    const currentVersion = await assetUtil.findMaxQueryVersion(dbQuery, entityManager);
     return entityManager.findOneOrFail(QueryVersion, {
       query: dbQuery,
       version: currentVersion,

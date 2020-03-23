@@ -31,13 +31,13 @@ const DEFAULT_ACKNOWLEDGED_INFO_PAGE = false;
 const authenticate = createAction<AuthenticatePayload>('AUTHENTICATED');
 const acknowledgeInfoPage = createAction<AckInfoPagePayload>('ACKNOWLEDGED_INFO_PAGE');
 const logout = createAction<void>('LOGGED_OUT');
-const reducer = createReducer(INITIAL_STATE, builder =>
+const reducer = createReducer(INITIAL_STATE, (builder) =>
   builder
     .addCase(authenticate, (state, action) => {
       const accessTokenJwtPayload = jwt.decode(action.payload.accessToken) as JwtPayload;
       const refreshTokenJwtPayload = jwt.decode(action.payload.refreshToken) as JwtPayload;
       const isAdmin = !!accessTokenJwtPayload.resource_access?.['realm-management']?.roles?.some(
-        role => role === 'manage-users',
+        (role) => role === 'manage-users',
       );
 
       const acknowledgedInfoPage = state?.acknowledgedInfoPage ?? DEFAULT_ACKNOWLEDGED_INFO_PAGE;

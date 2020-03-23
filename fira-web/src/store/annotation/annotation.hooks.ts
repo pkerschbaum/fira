@@ -9,7 +9,7 @@ export const useAnnotationActions = () => useActionsWithDispatch(actions);
 export const useAnnotationState = () => {
   const pairsSuccessfullySent = useSelector((state: RootState) =>
     state.annotation.judgementPairs.filter(
-      pair => pair.status === JudgementPairStatus.SEND_SUCCESS,
+      (pair) => pair.status === JudgementPairStatus.SEND_SUCCESS,
     ),
   );
 
@@ -25,7 +25,7 @@ export const useAnnotationState = () => {
   });
   const currentJudgementPair = useSelector((state: RootState) =>
     state.annotation.judgementPairs.find(
-      pair => pair.id === state.annotation.currentJudgementPairId,
+      (pair) => pair.id === state.annotation.currentJudgementPairId,
     ),
   );
   const requiredUserAction = useSelector((state: RootState) => state.annotation.requiredUserAction);

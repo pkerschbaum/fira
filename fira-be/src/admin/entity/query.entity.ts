@@ -1,4 +1,11 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 const DEFAULT_VERSION = 1;
 export const COLUMN_QUERY_VERSION = 'query_version';
@@ -13,7 +20,7 @@ export class Query {
 
 @Entity()
 export class QueryVersion {
-  @ManyToOne(type => Query, {
+  @ManyToOne((type) => Query, {
     eager: true,
     cascade: ['insert'],
     onDelete: 'RESTRICT',

@@ -40,18 +40,18 @@ export const setupSubscriptions = (store: RootStore) => {
    * - or all (local) judgement pairs are completed and thus we want the final state from the server
    */
   const retrieveJudgPairsSubscription: MemoizedSubscription = {
-    memoizeOnValue: subscribedStore => subscribedStore.getState().annotation.judgementPairs,
-    listener: subscribedStore => {
+    memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
+    listener: (subscribedStore) => {
       const annotationState = subscribedStore.getState().annotation;
 
       const countOfAllJudgementPairs = annotationState.judgementPairs.length;
       const countOfOpenJudgementPairs = annotationState.judgementPairs.filter(
-        pair =>
+        (pair) =>
           pair.status === JudgementPairStatus.TO_JUDGE ||
           pair.status === JudgementPairStatus.SEND_PENDING,
       ).length;
       const countOfCompletedJudgementPairs = annotationState.judgementPairs.filter(
-        pair => pair.status === JudgementPairStatus.SEND_SUCCESS,
+        (pair) => pair.status === JudgementPairStatus.SEND_SUCCESS,
       ).length;
       if (
         annotationState.remainingToFinish !== undefined &&
@@ -72,12 +72,14 @@ export const setupSubscriptions = (store: RootStore) => {
 
   // set new currently selected judgement pair if list of judgement pairs changes
   const setNextSelectedPairSubscription: MemoizedSubscription = {
-    memoizeOnValue: subscribedStore => subscribedStore.getState().annotation.judgementPairs,
-    listener: subscribedStore => {
+    memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
+    listener: (subscribedStore) => {
       const judgePairsOfStore = subscribedStore.getState().annotation.judgementPairs;
 
       // select first pair which neither gets currently sent to the server nor was already sent to the server
-      const nextPair = judgePairsOfStore.find(pair => pair.status === JudgementPairStatus.TO_JUDGE);
+      const nextPair = judgePairsOfStore.find(
+        (pair) => pair.status === JudgementPairStatus.TO_JUDGE,
+      );
       subscribedStore.dispatch(annotationActions.selectJudgementPair(nextPair));
     },
   };

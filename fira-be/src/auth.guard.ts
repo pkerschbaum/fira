@@ -16,9 +16,7 @@ const verify = util.promisify(jwt.verify);
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    private readonly identityMgmtService: IdentityManagementService,
-  ) {}
+  constructor(private readonly identityMgmtService: IdentityManagementService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // extract JWT token from request
@@ -39,9 +37,7 @@ export class AuthGuard implements CanActivate {
       jwtPayload = (await verify(accessToken, publicKey)) as JwtPayload;
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
-        throw new UnauthorizedException(
-          `token expired, expired at: ${e.expiredAt}`,
-        );
+        throw new UnauthorizedException(`token expired, expired at: ${e.expiredAt}`);
       }
       throw new UnauthorizedException(`token not valid, error: ${e}`);
     }

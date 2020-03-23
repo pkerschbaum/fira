@@ -59,7 +59,7 @@ export class IdentityManagementService {
     users: Array<ImportUserRequest>,
   ): Promise<ImportUserResponse[]> {
     return Promise.all(
-      users.map(async user => {
+      users.map(async (user) => {
         const password = generate('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
 
         try {

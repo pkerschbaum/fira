@@ -7,7 +7,7 @@ export const COLUMN_PRIORITY = 'priority';
 
 @Entity()
 export class JudgementPair {
-  @ManyToOne(type => Document, {
+  @ManyToOne((type) => Document, {
     eager: true,
     cascade: false,
     onDelete: 'RESTRICT',
@@ -15,7 +15,7 @@ export class JudgementPair {
     nullable: false,
   })
   document: Document;
-  @ManyToOne(type => Query, {
+  @ManyToOne((type) => Query, {
     eager: true,
     cascade: false,
     onDelete: 'RESTRICT',

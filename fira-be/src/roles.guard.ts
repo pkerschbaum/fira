@@ -24,10 +24,7 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.get<DecoratorElems[]>(
-      'roles',
-      context.getClass(),
-    );
+    const requiredRoles = this.reflector.get<DecoratorElems[]>('roles', context.getClass());
 
     // if no roles are required (i.e., decorator is absent for the route), allow access
     if (!requiredRoles) {
@@ -52,17 +49,15 @@ export class RolesGuard implements CanActivate {
       jwtPayload = (await verify(accessToken, publicKey)) as JwtPayload;
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
-        throw new UnauthorizedException(
-          `token expired, expired at: ${e.expiredAt}`,
-        );
+        throw new UnauthorizedException(`token expired, expired at: ${e.expiredAt}`);
       }
       throw new UnauthorizedException(`token not valid, error: ${e}`);
     }
 
     // check if one of the roles supplied by the decorator is present in the token
-    return requiredRoles.some(requiredRole => {
+    return requiredRoles.some((requiredRole) => {
       return jwtPayload.resource_access?.[requiredRole.category]?.roles?.some(
-        actualRole => actualRole === requiredRole.role,
+        (actualRole) => actualRole === requiredRole.role,
       );
     });
   }

@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== 'production' && (module as any).hot) {
 }
 
 const subscriptions = [setupUserSubscriptions, setupAnnotationSubscriptions];
-subscriptions.forEach(subscription => subscription(store));
+subscriptions.forEach((subscription) => subscription(store));
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type RootStore = typeof store;

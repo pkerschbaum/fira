@@ -30,7 +30,7 @@ export class AdminService {
   public importDocuments = this.persistenceService.wrapInTransaction(
     (transactionalEntityManager, documents: ImportAsset[]): Promise<ImportResult[]> => {
       return Promise.all(
-        documents.map(async document => {
+        documents.map(async (document) => {
           try {
             let dbDocument = await transactionalEntityManager.findOne(Document, document.id);
             if (!dbDocument) {
@@ -48,7 +48,7 @@ export class AdminService {
             dbEntry.text = document.text;
             dbEntry.annotateParts = document.text
               .split(config.application.splitRegex)
-              .filter(part => part !== '');
+              .filter((part) => part !== '');
             if (maxVersionNumber !== undefined && maxVersionNumber !== null) {
               dbEntry.version = maxVersionNumber + 1;
             }
@@ -70,7 +70,7 @@ export class AdminService {
   public importQueries = this.persistenceService.wrapInTransaction(
     async (transactionalEntityManager, queries: ImportAsset[]): Promise<ImportResult[]> => {
       return Promise.all(
-        queries.map(async query => {
+        queries.map(async (query) => {
           try {
             let dbQuery = await transactionalEntityManager.findOne(Query, query.id);
             if (!dbQuery) {
@@ -110,15 +110,11 @@ export class AdminService {
       judgementPairs: ImportJudgementPair[],
     ): Promise<ImportJudgementPairResult[]> => {
       // delete previous pairs
-      await transactionalEntityManager
-        .createQueryBuilder()
-        .delete()
-        .from(JudgementPair)
-        .execute();
+      await transactionalEntityManager.createQueryBuilder().delete().from(JudgementPair).execute();
 
       // insert the new judgement pairs
       return Promise.all(
-        judgementPairs.map(async judgementPair => {
+        judgementPairs.map(async (judgementPair) => {
           try {
             const documentPromise = transactionalEntityManager.findOne(
               Document,
@@ -158,7 +154,7 @@ export class AdminService {
     },
   );
 
-  public updateConfig: (config: UpdateConfig) => Promise<void> = async config => {
+  public updateConfig: (config: UpdateConfig) => Promise<void> = async (config) => {
     const dbEntry = new Config();
     if (config.annotationTargetPerUser !== undefined) {
       dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;

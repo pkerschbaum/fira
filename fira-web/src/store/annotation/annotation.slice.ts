@@ -60,7 +60,7 @@ const deleteRange = createAction<DeleteRangePayload>('RANGE_DELETED');
 const setJudgementStatus = createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET');
 const selectJudgementPair = createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED');
 
-const reducer = createReducer(INITIAL_STATE, builder =>
+const reducer = createReducer(INITIAL_STATE, (builder) =>
   builder
     .addCase(preloadJudgements, (state, action) => {
       state.alreadyFinished = action.payload.alreadyFinished;
@@ -69,8 +69,8 @@ const reducer = createReducer(INITIAL_STATE, builder =>
 
       const judgementPairsReceived = action.payload.judgements;
 
-      state.judgementPairs = judgementPairsReceived.map(judgement => {
-        const localEquivalentPair = state.judgementPairs.find(pair => pair.id === judgement.id);
+      state.judgementPairs = judgementPairsReceived.map((judgement) => {
+        const localEquivalentPair = state.judgementPairs.find((pair) => pair.id === judgement.id);
         if (localEquivalentPair && areJudgementPairsEqual(localEquivalentPair, judgement)) {
           // keep local data of judgement pair
           return {
@@ -91,11 +91,11 @@ const reducer = createReducer(INITIAL_STATE, builder =>
     })
     .addCase(rateJudgementPair, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
-        pair => pair.id === state.currentJudgementPairId,
+        (pair) => pair.id === state.currentJudgementPairId,
       );
       currentJudgementPair!.relevanceLevel = action.payload.relevanceLevel;
       const currentRateLevel = RateLevels.find(
-        rateLevel => rateLevel.relevanceLevel === currentJudgementPair!.relevanceLevel,
+        (rateLevel) => rateLevel.relevanceLevel === currentJudgementPair!.relevanceLevel,
       );
 
       // clear annotated ranges and current annotation start if
@@ -107,7 +107,7 @@ const reducer = createReducer(INITIAL_STATE, builder =>
     })
     .addCase(selectRangeStartEnd, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
-        pair => pair.id === state.currentJudgementPairId,
+        (pair) => pair.id === state.currentJudgementPairId,
       );
       if (currentJudgementPair!.currentAnnotationStart === undefined) {
         // the start of an annotation range was selected --> just save the index
@@ -122,7 +122,7 @@ const reducer = createReducer(INITIAL_STATE, builder =>
         // edge case: it's possible that the user selected start/end so that it overlaps
         // another range which got previously selected. Remove such ranges
         currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
-          range => !(range.start >= actualStart && range.end <= actualEnd),
+          (range) => !(range.start >= actualStart && range.end <= actualEnd),
         );
 
         // then, add new range to the annotated ranges, and clear current annotation start
@@ -135,10 +135,10 @@ const reducer = createReducer(INITIAL_STATE, builder =>
     })
     .addCase(deleteRange, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
-        pair => pair.id === state.currentJudgementPairId,
+        (pair) => pair.id === state.currentJudgementPairId,
       );
       currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
-        range => {
+        (range) => {
           return !(
             action.payload.annotationPartIndex >= range.start &&
             action.payload.annotationPartIndex <= range.end
@@ -147,7 +147,7 @@ const reducer = createReducer(INITIAL_STATE, builder =>
       );
     })
     .addCase(setJudgementStatus, (state, action) => {
-      const judgementPair = state.judgementPairs.find(pair => pair.id === action.payload.id);
+      const judgementPair = state.judgementPairs.find((pair) => pair.id === action.payload.id);
       judgementPair!.status = action.payload.status;
     })
     .addCase(selectJudgementPair, (state, action) => {
