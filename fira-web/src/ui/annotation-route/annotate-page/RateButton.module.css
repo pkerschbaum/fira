@@ -45,6 +45,10 @@
   align-items: center;
 }
 
+.button:hover {
+  cursor: pointer;
+}
+
 .button > div {
   color: white;
 }

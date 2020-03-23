@@ -165,11 +165,11 @@ const Annotation: React.FC<{
         </div>
         <div className={styles.footer}>
           {ratingRequired ? (
-            RateLevels.map(rateButton => (
+            RateLevels.map(rateLevel => (
               <RateButton
-                key={rateButton.relevanceLevel}
-                rateLevel={rateButton}
-                onClick={createJudgementFn(rateButton.relevanceLevel)}
+                key={rateLevel.relevanceLevel}
+                rateLevel={rateLevel}
+                onClick={createJudgementFn(rateLevel.relevanceLevel)}
               />
             ))
           ) : (
