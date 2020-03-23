@@ -5,25 +5,25 @@ import Button from '../../elements/Button';
 import { RateLevelType, RelevanceLevel } from '../../../typings/enums';
 
 const RATE_LEVEL_DATA = {
-  [RelevanceLevel.MISLEADING_ANSWER]: {
-    style: styles.misleadingAnswer,
-    text: 'Misleading Answer',
-    keyboardKey: '1',
-  },
   [RelevanceLevel.NOT_RELEVANT]: {
     style: styles.notRelevant,
-    text: 'Not Relevant',
+    text: 'Wrong',
+    keyboardKey: '1',
+  },
+  [RelevanceLevel.MISLEADING_ANSWER]: {
+    style: styles.misleadingAnswer,
+    text: 'Misleading',
     keyboardKey: '2',
   },
   [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: {
     style: styles.topicRelevantDoesNotAnswer,
-    text: 'Topic Relevant, But Does Not Answer',
+    text: 'Ok',
     keyboardKey: '3',
   },
-  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Good Answer', keyboardKey: '4' },
+  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Good', keyboardKey: '4' },
   [RelevanceLevel.PERFECT_ANSWER]: {
     style: styles.perfectAnswer,
-    text: 'Perfect Answer',
+    text: 'Perfect',
     keyboardKey: '5',
   },
 } as const;

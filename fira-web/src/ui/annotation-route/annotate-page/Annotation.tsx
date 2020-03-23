@@ -34,8 +34,8 @@ const Annotation: React.FC<{
   }
 
   useKeyupHandler({
-    Digit1: createJudgementFn(RelevanceLevel.MISLEADING_ANSWER),
-    Digit2: createJudgementFn(RelevanceLevel.NOT_RELEVANT),
+    Digit1: createJudgementFn(RelevanceLevel.NOT_RELEVANT),
+    Digit2: createJudgementFn(RelevanceLevel.MISLEADING_ANSWER),
     Digit3: createJudgementFn(RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER),
     Digit4: createJudgementFn(RelevanceLevel.GOOD_ANSWER),
     Digit5: createJudgementFn(RelevanceLevel.PERFECT_ANSWER),
@@ -58,6 +58,14 @@ const Annotation: React.FC<{
     annotationIsAllowedInGeneral &&
     !!currentRateLevel?.annotationRequired &&
     currentJudgementPair.annotatedRanges.length === 0;
+  const annotationStatus =
+    currentRateLevel?.relevanceLevel === RelevanceLevel.MISLEADING_ANSWER
+      ? annotationIsRequired
+        ? 'MISLEADING_REGION_REQUIRED'
+        : 'ADDITIONAL_MISLEADING_REGIONS_ALLOWED'
+      : annotationIsRequired
+      ? 'RELEVANT_REGION_REQUIRED'
+      : 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED';
 
   function hideTooltip() {
     setTooltipAnnotatePartIndex(undefined);
@@ -169,10 +177,14 @@ const Annotation: React.FC<{
               <span className={styles.guideText}>
                 {currentSelectionNotFinished ? (
                   <>Finish your selection</>
-                ) : annotationIsRequired ? (
+                ) : annotationStatus === 'RELEVANT_REGION_REQUIRED' ? (
                   <>Please select the relevant regions of the document.</>
-                ) : (
+                ) : annotationStatus === 'MISLEADING_REGION_REQUIRED' ? (
+                  <>Please select the misleading regions of the document.</>
+                ) : annotationStatus === 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED' ? (
                   <>Feel free to add more relevant regions or go to the next judgement pair.</>
+                ) : (
+                  <>Feel free to add more misleading regions or go to the next judgement pair.</>
                 )}
               </span>
               <Button

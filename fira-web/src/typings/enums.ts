@@ -37,16 +37,16 @@ export type RateLevelType = {
 
 export const RateLevels: RateLevelType[] = [
   {
-    relevanceLevel: RelevanceLevel.MISLEADING_ANSWER,
-    annotationRequired: false,
-  },
-  {
     relevanceLevel: RelevanceLevel.NOT_RELEVANT,
     annotationRequired: false,
   },
   {
-    relevanceLevel: RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER,
+    relevanceLevel: RelevanceLevel.MISLEADING_ANSWER,
     annotationRequired: true,
+  },
+  {
+    relevanceLevel: RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER,
+    annotationRequired: false,
   },
   {
     relevanceLevel: RelevanceLevel.GOOD_ANSWER,

@@ -37,7 +37,9 @@
   padding: 0.5px 0;
 }
 
-/* add whitespace to last row of document text (https://stackoverflow.com/a/34816625/1700319) */
+/* add whitespace to last row of document text (https://stackoverflow.com/a/34816625/1700319) 
+   use high flex-grow value so that the element consumes the entire left space of the flex row
+*/
 .annotationArea::after {
   content: '';
   flex-grow: 9999999;
