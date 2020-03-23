@@ -160,10 +160,22 @@ export class JudgementsService {
         );
       }
 
+      // if relevance positions got rotated when sent to the client, then the server has to
+      // revert the rotation
+      let relevancePositions = judgementData.relevancePositions;
+      if (dbJudgement.rotate) {
+        const rotateIndex = dbJudgement.document.annotateParts.length / 2;
+        relevancePositions = relevancePositions.map((relevancePosition) =>
+          relevancePosition >= rotateIndex
+            ? relevancePosition - rotateIndex
+            : relevancePosition + rotateIndex,
+        );
+      }
+
       if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
         if (
-          judgementData.relevancePositions.length > dbJudgement.document.annotateParts.length ||
-          judgementData.relevancePositions.some(
+          relevancePositions.length > dbJudgement.document.annotateParts.length ||
+          relevancePositions.some(
             (position) => position >= dbJudgement.document.annotateParts.length || position < 0,
           )
         ) {
@@ -178,8 +190,8 @@ export class JudgementsService {
 
         dbJudgement.status = JudgementStatus.JUDGED;
         dbJudgement.relevanceLevel = judgementData.relevanceLevel;
-        if (judgementData.relevancePositions.length > 0) {
-          dbJudgement.relevancePositions = judgementData.relevancePositions;
+        if (relevancePositions.length > 0) {
+          dbJudgement.relevancePositions = relevancePositions;
         }
         dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
         dbJudgement.judgedAt = new Date();
@@ -189,11 +201,10 @@ export class JudgementsService {
         // if all parameters are equal, return status OK, otherwise CONFLICT
         if (
           dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
-          (dbJudgement.relevancePositions === null &&
-            judgementData.relevancePositions.length === 0) ||
-          dbJudgement.relevancePositions?.length !== judgementData.relevancePositions.length ||
+          (dbJudgement.relevancePositions === null && relevancePositions.length > 0) ||
+          dbJudgement.relevancePositions?.length !== relevancePositions.length ||
           dbJudgement.relevancePositions.some(
-            (position1, index) => judgementData.relevancePositions[index] !== position1,
+            (position1, index) => relevancePositions[index] !== position1,
           ) ||
           dbJudgement.durationUsedToJudgeMs !== judgementData.durationUsedToJudgeMs
         ) {
@@ -513,9 +524,10 @@ function mapJudgementsToResponse(openJudgements: Judgement[]) {
       // rotate text (annotation parts), if requested to do so
       let annotationParts = openJudgement.document.annotateParts;
       if (openJudgement.rotate) {
+        const rotateIndex = annotationParts.length / 2;
         annotationParts = annotationParts
-          .slice(annotationParts.length / 2, annotationParts.length)
-          .concat(annotationParts.slice(0, annotationParts.length / 2));
+          .slice(rotateIndex, annotationParts.length)
+          .concat(annotationParts.slice(0, rotateIndex));
       }
 
       return {
