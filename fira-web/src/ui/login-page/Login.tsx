@@ -26,7 +26,7 @@ const Login: React.FC = () => {
 
         <Form
           initialValues={{ username: '', password: '' }}
-          validate={values => {
+          validate={(values) => {
             const errors: any = {};
             if (!values.username) {
               errors.username = 'Required';

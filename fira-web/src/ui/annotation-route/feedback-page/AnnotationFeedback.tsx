@@ -33,7 +33,7 @@ const AnnotationFeedback: React.FC = () => {
           feedbackScore: FeedbackScore.VERY_GOOD,
           feedbackText: '',
         }}
-        onSubmit={async values => {
+        onSubmit={async (values) => {
           await submitFeedback({ score: values.feedbackScore, text: values.feedbackText });
           // omit setSubmitting here because if submission was successful, it will redirect and thus unmount the component
         }}
@@ -41,7 +41,7 @@ const AnnotationFeedback: React.FC = () => {
           {
             elementType: 'select',
             label: 'Rating',
-            childElements: Object.values(FeedbackScore).map(feedbackScore => (
+            childElements: Object.values(FeedbackScore).map((feedbackScore) => (
               <option key={feedbackScore} value={feedbackScore}>
                 {FEEDBACK_SCORE_TEXTS[feedbackScore]}
               </option>

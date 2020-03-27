@@ -42,7 +42,7 @@ const Annotation: React.FC<{
   });
 
   const currentRateLevel = RateLevels.find(
-    rateLevel => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
+    (rateLevel) => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
   );
 
   // compute fraction of finished annotation; used for progress bar
@@ -86,7 +86,7 @@ const Annotation: React.FC<{
           {currentJudgementPair.docAnnotationParts.map((annotationPart, partIdx) => {
             // determine if part is in one of the selected ranges
             const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
-              range => range.start <= partIdx && range.end >= partIdx,
+              (range) => range.start <= partIdx && range.end >= partIdx,
             );
             const isInAnnotatedRange = !!correspondingAnnotatedRange;
             const isLastInAnnotatedRange =
@@ -165,7 +165,7 @@ const Annotation: React.FC<{
         </div>
         <div className={styles.footer}>
           {ratingRequired ? (
-            RateLevels.map(rateLevel => (
+            RateLevels.map((rateLevel) => (
               <RateButton
                 key={rateLevel.relevanceLevel}
                 rateLevel={rateLevel}

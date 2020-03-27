@@ -6,11 +6,10 @@ import Button from '../Button';
 import FloatingInput from './FloatingInput';
 import { assertUnreachable } from '../../../util/types.util';
 
-const TextInput: React.FC<{ label: string } & FieldHookConfig<HTMLInputElement> &
-  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> = ({
-  label,
-  ...props
-}) => {
+const TextInput: React.FC<
+  { label: string } & FieldHookConfig<HTMLInputElement> &
+    React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
+> = ({ label, ...props }) => {
   const [field, meta] = useField(props);
 
   const showError = !!(meta.touched && meta.error);
@@ -29,10 +28,10 @@ const TextInput: React.FC<{ label: string } & FieldHookConfig<HTMLInputElement> 
   );
 };
 
-const Textarea: React.FC<FieldHookConfig<HTMLTextAreaElement> &
-  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>> = ({
-  ...props
-}) => {
+const Textarea: React.FC<
+  FieldHookConfig<HTMLTextAreaElement> &
+    React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>
+> = ({ ...props }) => {
   const [field] = useField(props);
 
   return (
@@ -42,11 +41,10 @@ const Textarea: React.FC<FieldHookConfig<HTMLTextAreaElement> &
   );
 };
 
-const Select: React.FC<{ label: string } & FieldHookConfig<HTMLSelectElement> &
-  React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>> = ({
-  label,
-  ...props
-}) => {
+const Select: React.FC<
+  { label: string } & FieldHookConfig<HTMLSelectElement> &
+    React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>
+> = ({ label, ...props }) => {
   const [field] = useField(props);
 
   return (

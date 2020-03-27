@@ -19,9 +19,11 @@ type FloatingLabelInputContainerProps = React.DetailedHTMLProps<
   HTMLDivElement
 >;
 
-const FloatingLabelInputContainer: React.FC<{
-  isError?: boolean;
-} & FloatingLabelInputContainerProps> = ({ isError, children, ...props }) => (
+const FloatingLabelInputContainer: React.FC<
+  {
+    isError?: boolean;
+  } & FloatingLabelInputContainerProps
+> = ({ isError, children, ...props }) => (
   <div
     {...props}
     className={`${props.className} ${isError && styles.inputContainerError} ${
@@ -87,10 +89,12 @@ const FloatingSelect: React.FC<FloatingSelectProps> = ({ children, ...props }) =
   </select>
 );
 
-const FloatingInput: React.FC<{ [prop: string]: any } & {
-  isError?: boolean;
-  childType: 'input' | 'textarea' | 'select';
-}> = ({ id, label, type, className, isError, value, childType, ...otherProps }) => {
+const FloatingInput: React.FC<
+  { [prop: string]: any } & {
+    isError?: boolean;
+    childType: 'input' | 'textarea' | 'select';
+  }
+> = ({ id, label, type, className, isError, value, childType, ...otherProps }) => {
   const [active, setActive] = useState(childType !== 'input' || (!!value && value.length > 0));
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

@@ -34,7 +34,7 @@ const Menu: React.FC = () => {
   }
 
   function toggleShowMenu() {
-    setShowMenu(oldVal => !oldVal);
+    setShowMenu((oldVal) => !oldVal);
   }
 
   function createMenuButton(ref?: React.Ref<HTMLButtonElement>) {
