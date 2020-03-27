@@ -36,28 +36,28 @@ export class IdentityManagementService {
     this.cache = { publicKey: {} };
   }
 
-  public async login(username: string, password: string): Promise<AuthResponse> {
+  public login = async (username: string, password: string): Promise<AuthResponse> => {
     const loginResponse = await this.keycloakClient.login(username, password);
 
     return {
       accessToken: loginResponse.access_token,
       refreshToken: loginResponse.refresh_token,
     };
-  }
+  };
 
-  public async refresh(refreshToken: string): Promise<AuthResponse> {
+  public refresh = async (refreshToken: string): Promise<AuthResponse> => {
     const refreshResponse = await this.keycloakClient.refresh(refreshToken);
 
     return {
       accessToken: refreshResponse.access_token,
       refreshToken: refreshResponse.refresh_token,
     };
-  }
+  };
 
-  public async importUsers(
+  public importUsers = async (
     accessToken: string,
-    users: Array<ImportUserRequest>,
-  ): Promise<ImportUserResponse[]> {
+    users: ImportUserRequest[],
+  ): Promise<ImportUserResponse[]> => {
     return Promise.all(
       users.map(async (user) => {
         const password = generate('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
@@ -90,9 +90,9 @@ export class IdentityManagementService {
         }
       }),
     );
-  }
+  };
 
-  public async loadPublicKey() {
+  public loadPublicKey = async () => {
     try {
       if (
         !this.cache.publicKey.lastFetchedOn ||
@@ -123,9 +123,9 @@ export class IdentityManagementService {
     }
 
     return this.cache.publicKey.val;
-  }
+  };
 
-  public getCountOfUsers: () => Promise<number> = () => {
+  public getCountOfUsers = async (): Promise<number> => {
     return this.userRepository.count();
   };
 }

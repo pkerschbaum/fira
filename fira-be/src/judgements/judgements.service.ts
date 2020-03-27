@@ -219,7 +219,7 @@ export class JudgementsService {
     },
   );
 
-  public exportJudgementsTsv: () => Promise<string> = async () => {
+  public exportJudgementsTsv = async (): Promise<string> => {
     const judgements = await this.exportJudgements();
 
     return d3.tsvFormat(
@@ -248,7 +248,7 @@ export class JudgementsService {
     );
   };
 
-  public exportJudgements: () => Promise<ExportJudgement[]> = async () => {
+  public exportJudgements = async (): Promise<ExportJudgement[]> => {
     const allJudgements = await this.connection
       .getRepository(Judgement)
       .find({ where: { status: JudgementStatus.JUDGED } });
@@ -304,7 +304,7 @@ export class JudgementsService {
     });
   };
 
-  private async preloadNextJudgements({
+  private preloadNextJudgements = async ({
     priorities,
     targetFactor,
     userId,
@@ -320,7 +320,7 @@ export class JudgementsService {
     remainingJudgementsToPreload: number;
     dbConfig: Config;
     transactionalEntityManager: EntityManager;
-  }): Promise<number> {
+  }): Promise<number> => {
     for (const priority of priorities) {
       if (remainingJudgementsToPreload < 1) {
         // enough open judgements generated
@@ -357,9 +357,9 @@ export class JudgementsService {
     }
 
     return remainingJudgementsToPreload;
-  }
+  };
 
-  public getStatistics: () => Promise<Statistic[]> = async () => {
+  public getStatistics = async (): Promise<Statistic[]> => {
     const dbConfig = await this.connection.getRepository(Config).findOneOrFail();
     const judgementRepository = this.connection.getRepository(Judgement);
 

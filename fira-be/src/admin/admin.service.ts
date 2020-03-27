@@ -154,7 +154,7 @@ export class AdminService {
     },
   );
 
-  public updateConfig: (config: UpdateConfig) => Promise<void> = async (config) => {
+  public updateConfig = async (config: UpdateConfig): Promise<void> => {
     const dbEntry = new Config();
     if (config.annotationTargetPerUser !== undefined) {
       dbEntry.annotationTargetPerUser = config.annotationTargetPerUser;
@@ -174,19 +174,19 @@ export class AdminService {
     await this.configRepository.save(dbEntry);
   };
 
-  public getCountOfDocuments: () => Promise<number> = () => {
+  public getCountOfDocuments = (): Promise<number> => {
     return this.connection.getRepository(Document).count();
   };
 
-  public getCountOfQueries: () => Promise<number> = () => {
+  public getCountOfQueries = (): Promise<number> => {
     return this.connection.getRepository(Query).count();
   };
 
-  public getCountOfJudgPairs: () => Promise<number> = () => {
+  public getCountOfJudgPairs = (): Promise<number> => {
     return this.connection.getRepository(JudgementPair).count();
   };
 
-  public getCountOfConfig: () => Promise<number> = () => {
+  public getCountOfConfig = (): Promise<number> => {
     return this.connection.getRepository(Config).count();
   };
 }
