@@ -56,8 +56,6 @@
 }
 
 .footer {
-  --height-rate-button: 50px;
-
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -97,7 +95,7 @@
   min-height: 20px;
 }
 .annotationArea:empty {
-  min-height: calc(var(--height-rate-button) + var(--margin-xxsmall));
+  min-height: calc(50px + var(--margin-xxsmall));
 }
 .actionBar:empty,
 .annotationArea:empty {
