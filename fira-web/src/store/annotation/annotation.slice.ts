@@ -24,14 +24,14 @@ type AnnotationState = {
   readonly remainingToFinish?: number;
   readonly currentJudgementPairId?: PreloadJudgement['id'];
   readonly currentJudgementPairSelectedOnMs?: number; // unix timestamp
-  readonly requiredUserAction?: UserAnnotationAction;
+  readonly nextUserAction?: UserAnnotationAction;
 };
 
 type PreloadJudgementsPayload = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
-  readonly requiredUserAction: UserAnnotationAction;
+  readonly nextUserAction: UserAnnotationAction;
 };
 
 type RateJudgementPairPayload = {
@@ -65,7 +65,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
     .addCase(preloadJudgements, (state, action) => {
       state.alreadyFinished = action.payload.alreadyFinished;
       state.remainingToFinish = action.payload.remainingToFinish;
-      state.requiredUserAction = action.payload.requiredUserAction;
+      state.nextUserAction = action.payload.nextUserAction;
 
       const judgementPairsReceived = action.payload.judgements;
 

@@ -14,11 +14,9 @@ export function loadStoredUser() {
       storedUser,
     });
     store.dispatch(userActions.authenticate(storedUser));
-    store.dispatch(
-      userActions.acknowledgeInfoPage({
-        acknowledgedInfoPage: storedUser.acknowledgedInfoPage,
-      }),
-    );
+    if (storedUser.acknowledgedInfoPage) {
+      store.dispatch(userActions.acknowledgePage({ page: 'INFO' }));
+    }
   } else {
     logger.info('no stored user found');
   }

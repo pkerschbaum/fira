@@ -15,6 +15,7 @@ export enum RelevanceLevel {
 export enum UserAnnotationAction {
   ANNOTATE = 'ANNOTATE',
   SUBMIT_FEEDBACK = 'SUBMIT_FEEDBACK',
+  EVERY_PAIR_ANNOTATED = 'EVERY_PAIR_ANNOTATED',
 }
 
 export enum FeedbackScore {

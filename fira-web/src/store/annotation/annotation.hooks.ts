@@ -28,12 +28,15 @@ export const useAnnotationState = () => {
       (pair) => pair.id === state.annotation.currentJudgementPairId,
     ),
   );
-  const requiredUserAction = useSelector((state: RootState) => state.annotation.requiredUserAction);
+  const nextUserAction = useSelector((state: RootState) => state.annotation.nextUserAction);
+
+  const annotationDataReceivedFromServer = !!currentJudgementPair;
 
   return {
     remainingToFinish,
     alreadyFinished,
     currentJudgementPair,
-    requiredUserAction,
+    nextUserAction,
+    annotationDataReceivedFromServer,
   };
 };

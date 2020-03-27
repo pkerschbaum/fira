@@ -1,7 +1,9 @@
 .progressBar {
   background-color: var(--color-annotation-progress-bar);
   height: 0.5rem;
-  margin-top: -8px;
+  position: absolute;
+  top: 0;
+  left: 8px;
 }
 
 .container {
@@ -86,8 +88,7 @@
   }
 
   .progressBar {
-    margin-left: -8px;
-    margin-right: -8px;
+    left: 0;
   }
 }
 

@@ -26,7 +26,7 @@ export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   readonly remainingToFinish: number;
   @IsEnum(UserAnnotationAction)
   @IsDefined()
-  readonly requiredUserAction: UserAnnotationAction;
+  readonly nextUserAction: UserAnnotationAction;
 }
 
 class PreloadJudgementDto implements PreloadJudgement {

@@ -1,15 +1,17 @@
 import React from 'react';
 import { Switch, Route, Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 
-import AnnotationContainer from './annotate-page/AnnotationContainer';
+import Annotation from './annotate-page/Annotation';
 import AnnotationInfo from './info-page/AnnotationInfo';
 import AnnotationFeedback from './feedback-page/AnnotationFeedback';
+import AnnotationFinished from './finished-page/AnnotationFinished';
 import { useUserState } from '../../store/user/user.hooks';
 import { useAnnotationState } from '../../store/annotation/annotation.hooks';
 import { UserAnnotationAction } from '../../typings/enums';
 
 const ANNOTATE_RELATIVE_URL = 'annotate';
 const INFO_RELATIVE_URL = 'info';
+const FINISHED_RELATIVE_URL = 'finished';
 const FEEDBACK_RELATIVE_URL = 'feedback';
 
 export function useRouting() {
@@ -27,29 +29,46 @@ export function useRouting() {
 
 const AnnotationRouter: React.FC = () => {
   const match = useRouteMatch();
-  const { userAcknowledgedInfoPage } = useUserState();
-  const { requiredUserAction } = useAnnotationState();
+  const { userAcknowledgedInfoPage, userAcknowledgedFinishedPage } = useUserState();
+  const {
+    remainingToFinish,
+    nextUserAction,
+    annotationDataReceivedFromServer,
+  } = useAnnotationState();
 
   const redirectToDefault = <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />;
 
   return (
     <Switch>
       <Route path={`${match.path}/${ANNOTATE_RELATIVE_URL}`}>
-        {!userAcknowledgedInfoPage ? (
+        {annotationDataReceivedFromServer &&
+        !(remainingToFinish !== undefined && remainingToFinish <= 0) &&
+        !userAcknowledgedInfoPage ? (
           // on this device, the info page was never shown and
           // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${INFO_RELATIVE_URL}`} />
-        ) : requiredUserAction === UserAnnotationAction.SUBMIT_FEEDBACK ? (
+        ) : nextUserAction === UserAnnotationAction.SUBMIT_FEEDBACK ? (
+          // user must submit a feedback
           <Redirect to={`${match.path}/${FEEDBACK_RELATIVE_URL}`} />
+        ) : annotationDataReceivedFromServer &&
+          remainingToFinish !== undefined &&
+          remainingToFinish <= 0 &&
+          !userAcknowledgedFinishedPage ? (
+          // user finished annotation target and did not acknowledge finished page on this device yet
+          // acknowledged by the user --> show page
+          <Redirect to={`${match.path}/${FINISHED_RELATIVE_URL}`} />
         ) : (
-          <AnnotationContainer />
+          <Annotation />
         )}
       </Route>
       <Route path={`${match.path}/${INFO_RELATIVE_URL}`}>
         <AnnotationInfo />
       </Route>
+      <Route path={`${match.path}/${FINISHED_RELATIVE_URL}`}>
+        <AnnotationFinished />
+      </Route>
       <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
-        {requiredUserAction !== UserAnnotationAction.SUBMIT_FEEDBACK ? (
+        {nextUserAction !== UserAnnotationAction.SUBMIT_FEEDBACK ? (
           redirectToDefault
         ) : (
           <AnnotationFeedback />

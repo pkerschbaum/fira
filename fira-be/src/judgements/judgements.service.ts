@@ -50,6 +50,7 @@ export class JudgementsService {
       const countOfFeedbacks = await transactionalEntityManager.count(Feedback, {
         where: { user },
       });
+      const countOfTotalJudgementPairs = await transactionalEntityManager.count(JudgementPair);
 
       // compute some statistics for this user
       const currentOpenJudgements = judgementsOfUser.filter(
@@ -66,38 +67,45 @@ export class JudgementsService {
         dbConfig.annotationTargetPerUser - judgementsOfUser.length <= 0
           ? 0
           : dbConfig.annotationTargetPerUser - judgementsOfUser.length;
-      const maximumToPreload =
-        config.application.judgementsPreloadSize - currentOpenJudgements.length;
       let remainingJudgementsToPreload =
-        remainingUntilTargetMet > maximumToPreload ? maximumToPreload : remainingUntilTargetMet;
+        config.application.judgementsPreloadSize - currentOpenJudgements.length;
+      const annotatedEveryJudgementPair = judgementsOfUser.length >= countOfTotalJudgementPairs;
 
-      // the user has to submit feedback if
-      // - the annotation target for the first feedback is reached and the user hasn't submitted any feedback
-      // - or if the user has reached his annotation target (i.e., has finished his annotations) and
-      //   has not submitted a second feedback yet
-      const requiredUserAction =
-        (remainingUntilFirstFeedbackRequired <= 0 && countOfFeedbacks === 0) ||
-        (remainingToFinish <= 0 && countOfFeedbacks <= 1)
-          ? UserAnnotationAction.SUBMIT_FEEDBACK
-          : UserAnnotationAction.ANNOTATE;
+      /*
+       * determine next action for the user:
+       * - if the user has annotated every possible judgement pair, return EVERY_PAIR_ANNOTATED
+       * - otherwise, if
+       *   - the annotation target for the first feedback is reached and the user hasn't submitted any feedback
+       *   - or if the user has reached his annotation target (i.e., has finished his annotations) and
+       *     has not submitted a second feedback yet
+       *   return SUBMIT_FEEDBACK
+       * - otherwise the user can annotate, return ANNOTATE
+       */
+      const nextUserAction = annotatedEveryJudgementPair
+        ? UserAnnotationAction.EVERY_PAIR_ANNOTATED
+        : (remainingUntilFirstFeedbackRequired <= 0 && countOfFeedbacks === 0) ||
+          (remainingToFinish <= 0 && countOfFeedbacks <= 1)
+        ? UserAnnotationAction.SUBMIT_FEEDBACK
+        : UserAnnotationAction.ANNOTATE;
 
       this.appLogger.log(
         `judgements stats for user: sum=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
           `finished=${currentFinishedJudgements.length}, remainingUntilTargetMet=${remainingUntilTargetMet}, ` +
           `remainingToPreload=${remainingJudgementsToPreload}, countOfFeedbacks=${countOfFeedbacks}, ` +
-          `requiredUserAction=${requiredUserAction}`,
+          `nextUserAction=${nextUserAction}`,
       );
 
-      if (remainingJudgementsToPreload < 1) {
-        // either the user has already completed all annotations,
-        // or there are enough open judgements for him to satisfy his annotation target,
-        // or the preload limit of judgements is met
+      if (
+        remainingJudgementsToPreload < 1 ||
+        nextUserAction === UserAnnotationAction.EVERY_PAIR_ANNOTATED
+      ) {
+        // the preload limit of judgements is met, or there are no judgement pairs remaining for this user to annotate
         // --> do not preload more judgements
         return {
           judgements: mapJudgementsToResponse(currentOpenJudgements),
           alreadyFinished: currentFinishedJudgements.length,
           remainingToFinish,
-          requiredUserAction,
+          nextUserAction,
         };
       }
 
@@ -137,7 +145,7 @@ export class JudgementsService {
         judgements: mapJudgementsToResponse(openJudgements),
         alreadyFinished: currentFinishedJudgements.length,
         remainingToFinish,
-        requiredUserAction,
+        nextUserAction,
       };
     },
   );

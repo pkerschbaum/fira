@@ -33,7 +33,7 @@ const AnnotationInfo: React.FC = () => {
   ] as const;
 
   function onAcknowledge() {
-    annotatorStories.acknowledgeInfoPage();
+    annotatorStories.acknowledgePage('INFO');
     annotationRouting.routeToAnnotatePage();
   }
 

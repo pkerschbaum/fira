@@ -4,7 +4,7 @@ export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
-  readonly requiredUserAction: UserAnnotationAction;
+  readonly nextUserAction: UserAnnotationAction;
 };
 
 export type PreloadJudgement = {

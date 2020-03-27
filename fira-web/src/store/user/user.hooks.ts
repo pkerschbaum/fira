@@ -19,8 +19,11 @@ export function useUserState() {
   const userAcknowledgedInfoPage = useSelector((state: RootState) => {
     return !!state.user?.acknowledgedInfoPage;
   });
+  const userAcknowledgedFinishedPage = useSelector((state: RootState) => {
+    return !!state.user?.acknowledgedFinishedPage;
+  });
 
-  return { userRole, userAcknowledgedInfoPage };
+  return { userRole, userAcknowledgedInfoPage, userAcknowledgedFinishedPage };
 }
 
 export const useUserActions = () => useActionsWithDispatch(actions);

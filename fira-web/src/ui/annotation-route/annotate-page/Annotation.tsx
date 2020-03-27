@@ -7,7 +7,10 @@ import { noop } from '../../../util/functions';
 import Button from '../../elements/Button';
 import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
 import RateButton from './RateButton';
-import { JudgementPair } from '../../../store/annotation/annotation.slice';
+import {
+  useAnnotationState,
+  useAnnotationActions,
+} from '../../../store/annotation/annotation.hooks';
 import AnnotationPart from './AnnotationPart';
 import Menu from '../../elements/Menu';
 import Line from '../../elements/Line';
@@ -23,9 +26,7 @@ const AnnotationShell: React.FC<{
 }> = ({ finishedFraction, hideTooltip, queryComponent, documentComponent, guideComponent }) => {
   return (
     <>
-      {finishedFraction !== undefined && (
-        <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
-      )}
+      <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
       <div className={styles.container} onClickCapture={hideTooltip}>
         <div className={styles.actionBar}>{queryComponent}</div>
         <Line orientation="horizontal" />
@@ -36,19 +37,9 @@ const AnnotationShell: React.FC<{
   );
 };
 
-const Annotation: React.FC<{
-  currentJudgementPair?: JudgementPair;
-  remainingToFinish?: number;
-  alreadyFinished: number;
-  selectRangeStartEnd: ({ annotationPartIndex }: { annotationPartIndex: number }) => void;
-  deleteRange: ({ annotationPartIndex }: { annotationPartIndex: number }) => void;
-}> = ({
-  currentJudgementPair,
-  remainingToFinish,
-  alreadyFinished,
-  selectRangeStartEnd,
-  deleteRange,
-}) => {
+const Annotation: React.FC = () => {
+  const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
+  const { selectRangeStartEnd, deleteRange } = useAnnotationActions();
   const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
@@ -70,10 +61,15 @@ const Annotation: React.FC<{
   );
 
   // compute fraction of finished annotation; used for progress bar
-  const finishedFraction =
-    remainingToFinish === undefined
-      ? 0
-      : (alreadyFinished / (remainingToFinish + alreadyFinished)) * 100;
+  let finishedFraction;
+  if (remainingToFinish === undefined || alreadyFinished === undefined) {
+    finishedFraction = 0;
+  } else {
+    finishedFraction =
+      remainingToFinish === undefined
+        ? 0
+        : (alreadyFinished / (remainingToFinish + alreadyFinished)) * 100;
+  }
 
   if (!currentJudgementPair || remainingToFinish === undefined) {
     return <AnnotationShell finishedFraction={finishedFraction} />;

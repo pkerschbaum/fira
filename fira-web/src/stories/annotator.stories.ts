@@ -7,12 +7,12 @@ import { SubmitFeedback } from '../typings/fira-be-typings';
 const logger = createLogger('annotators.service');
 
 export const annotatorStories = {
-  acknowledgeInfoPage: () => {
-    logger.info(`executing acknowledgement of info page...`);
+  acknowledgePage: (page: 'INFO' | 'FINISHED') => {
+    logger.info(`executing acknowledgement of page...`, { page });
 
-    store.dispatch(userActions.acknowledgeInfoPage({ acknowledgedInfoPage: true }));
+    store.dispatch(userActions.acknowledgePage({ page }));
 
-    logger.info(`acknowledgement of info page succeeded!`);
+    logger.info(`acknowledgement of page succeeded!`);
   },
 
   submitFeedback: async (feedbackData: SubmitFeedback) => {

@@ -2,7 +2,7 @@ import { createLogger } from '../../logger/logger';
 import { RootStore } from '../store';
 import { judgementStories } from '../../stories/judgement.stories';
 import { actions as annotationActions, JudgementPairStatus } from '../annotation/annotation.slice';
-import { UserRole } from '../../typings/enums';
+import { UserRole, UserAnnotationAction } from '../../typings/enums';
 
 const PRELOAD_JUDGEMENTS_THRESHOLD = 1;
 
@@ -33,32 +33,22 @@ export const setupSubscriptions = (store: RootStore) => {
     }
   });
 
-  /*
-   * retrieve judgement pairs from server
-   * - if count of (local) judgement pairs does not fulfill threshold and there are remaining
-   *   judgements to preload from the server
-   * - or all (local) judgement pairs are completed and thus we want the final state from the server
-   */
+  // retrieve judgement pairs from server if count of (local) judgement pairs does not fulfill threshold,
+  // and the user did not annotate every possible judgement pair
   const retrieveJudgPairsSubscription: MemoizedSubscription = {
     memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
     listener: (subscribedStore) => {
       const annotationState = subscribedStore.getState().annotation;
-
-      const countOfAllJudgementPairs = annotationState.judgementPairs.length;
+      const nextUserAction = annotationState.nextUserAction;
       const countOfOpenJudgementPairs = annotationState.judgementPairs.filter(
         (pair) =>
           pair.status === JudgementPairStatus.TO_JUDGE ||
           pair.status === JudgementPairStatus.SEND_PENDING,
       ).length;
-      const countOfCompletedJudgementPairs = annotationState.judgementPairs.filter(
-        (pair) => pair.status === JudgementPairStatus.SEND_SUCCESS,
-      ).length;
       if (
+        nextUserAction !== UserAnnotationAction.EVERY_PAIR_ANNOTATED &&
         annotationState.remainingToFinish !== undefined &&
-        ((countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD &&
-          annotationState.remainingToFinish > countOfAllJudgementPairs) ||
-          (annotationState.remainingToFinish > 0 &&
-            countOfCompletedJudgementPairs === countOfAllJudgementPairs))
+        countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD
       ) {
         logger.info(
           'count of preloaded judgement pairs does not fulfill threshold and ' +
