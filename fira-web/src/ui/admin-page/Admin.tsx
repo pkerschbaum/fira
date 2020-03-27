@@ -18,15 +18,20 @@ const Admin: React.FC = () => {
     }
 
     fetchStatisticsAndUpdate();
-  }, [updateStatistics]);
+  }, []);
 
   return (
     <div className={styles.container}>
       <div className={styles.adminArea}>
         <div className={styles.actionBar}>
-          <Button className={styles.button} onClick={adminStories.exportJudgements}>
-            <span>Export Judgements</span>
-          </Button>
+          <div className={styles.actionButtons}>
+            <Button className={styles.button} onClick={adminStories.exportJudgements}>
+              <span>Export Judgements</span>
+            </Button>
+            <Button className={styles.button} onClick={adminStories.exportFeedback}>
+              <span>Export Feedback</span>
+            </Button>
+          </div>
           <Menu />
         </div>
         <Line orientation="horizontal" />
@@ -53,7 +58,7 @@ const Admin: React.FC = () => {
                 <div>
                   <label htmlFor="judgementMode">Judgement Mode:</label>
                   <Field name="judgementMode" as="select">
-                    {Object.values(JudgementMode).map(judgementMode => (
+                    {Object.values(JudgementMode).map((judgementMode) => (
                       <option key={judgementMode} value={judgementMode}>
                         {judgementMode}
                       </option>
@@ -82,7 +87,7 @@ const Admin: React.FC = () => {
         <Line orientation="horizontal" />
         <div className={styles.statisticsContainer}>
           {statistics &&
-            statistics.map(statistic => (
+            statistics.map((statistic) => (
               <div key={statistic.id} className={styles.statistic}>
                 <div className={styles.statisticValue}>{statistic.value}</div>
                 <div className={styles.statisticLabel}>{statistic.label}</div>

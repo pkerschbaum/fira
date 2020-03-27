@@ -11,6 +11,10 @@
   align-items: center;
 }
 
+.button:hover {
+  cursor: pointer;
+}
+
 .typePrimary {
   height: 45px;
   padding: 0 var(--padding-xxxsmall);

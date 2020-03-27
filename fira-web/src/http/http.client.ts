@@ -235,6 +235,23 @@ export const httpClient = {
     }
   },
 
+  exportFeedback: async (accessToken: string): Promise<string> => {
+    logger.info('executing export of feedback...');
+
+    try {
+      return (
+        await axiosClient.get(`admin/v1/feedback/export/tsv`, {
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
+        })
+      ).data;
+    } catch (e) {
+      logger.error('export of feedback failed!', e);
+      throw e;
+    }
+  },
+
   updateConfig: async (accessToken: string, updateConfigRequest: UpdateConfig): Promise<void> => {
     logger.info('executing update of config...', { updateConfigRequest });
 

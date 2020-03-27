@@ -8,7 +8,8 @@ import { Query, QueryVersion } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
 import { IdentityManagementModule } from '../identity-management/identity-management.module';
-import { JudgementsModule } from 'src/judgements/judgements.module';
+import { JudgementsModule } from '../judgements/judgements.module';
+import { FeedbackModule } from '../feedback/feedback.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { JudgementsModule } from 'src/judgements/judgements.module';
     ]),
     IdentityManagementModule,
     JudgementsModule,
+    FeedbackModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

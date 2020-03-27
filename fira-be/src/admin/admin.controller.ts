@@ -26,6 +26,7 @@ import { UpdateConfigReqDto } from './dto/update-config.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 import { JudgementsService } from '../judgements/judgements.service';
+import { FeedbackService } from '../feedback/feedback.service';
 import { ExportJudgementsResponseDto } from './dto/export-judgements.dto';
 import { StatisticsResponseDto } from './dto/get-statistics.dto';
 
@@ -42,6 +43,7 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly imService: IdentityManagementService,
     private readonly judgementsService: JudgementsService,
+    private readonly feedbackService: FeedbackService,
   ) {}
 
   @Post('v1/import/users')
@@ -96,11 +98,6 @@ export class AdminController {
     await this.adminService.updateConfig(updateConfigReq);
   }
 
-  @Get('v1/judgements/export')
-  async exportJudgements(): Promise<ExportJudgementsResponseDto> {
-    return { judgements: await this.judgementsService.exportJudgements() };
-  }
-
   @Get('v1/judgements/export/tsv')
   @ApiResponse({
     status: 200,
@@ -110,6 +107,17 @@ export class AdminController {
   })
   async exportJudgementsTsv(): Promise<string> {
     return await this.judgementsService.exportJudgementsTsv();
+  }
+
+  @Get('v1/feedback/export/tsv')
+  @ApiResponse({
+    status: 200,
+    content: {
+      'text/tab-separated-values': {},
+    },
+  })
+  async exportFeedbackTsv(): Promise<string> {
+    return await this.feedbackService.exportFeedbackTsv();
   }
 
   @Get('v1/statistics')

@@ -30,6 +30,18 @@
   flex-wrap: wrap;
 }
 
+.actionButtons {
+  display: flex;
+}
+
+.actionButtons > * {
+  margin-left: var(--margin-xxsmall);
+}
+
+.actionButtons > *:first-child {
+  margin-left: 0;
+}
+
 .options {
   display: flex;
   flex-direction: column;

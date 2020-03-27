@@ -15,6 +15,15 @@ export const adminStories = {
     logger.info(`export of judgements succeeded!`, { response });
   },
 
+  exportFeedback: async () => {
+    logger.info(`executing export of feedback...`);
+
+    const response = await httpClient.exportFeedback(store.getState().user!.accessToken.val);
+    saveTsv('feedback.tsv', response);
+
+    logger.info(`export of feedback succeeded!`, { response });
+  },
+
   updateConfig: async (config: UpdateConfig) => {
     logger.info(`executing update of config...`);
 

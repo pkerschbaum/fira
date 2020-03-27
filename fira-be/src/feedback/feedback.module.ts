@@ -8,5 +8,6 @@ import { IdentityManagementModule } from '../identity-management/identity-manage
   imports: [IdentityManagementModule],
   controllers: [FeedbackController],
   providers: [FeedbackService],
+  exports: [FeedbackService],
 })
 export class FeedbackModule {}
