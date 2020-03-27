@@ -5,6 +5,8 @@ import styles from './Admin.module.css';
 import { Statistic } from '../../typings/fira-be-typings';
 import { JudgementMode } from '../../typings/enums';
 import { adminStories } from '../../stories/admin.stories';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
 import Line from '../elements/Line';
@@ -12,13 +14,18 @@ import Line from '../elements/Line';
 const Admin: React.FC = () => {
   const [statistics, updateStatistics] = useState<Statistic[] | undefined>(undefined);
 
+  // TODO improve: if the application starts, and a user is logged in but the access token is expired,
+  // user.subscriptions.ts will asynchronously refresh the token. But the effect fires immediately,
+  // so the fetch of statistics fails. That's why we add the user as a dependency for the effect.
+  // it would be better if the application waits for the successful refresh and only runs the effect afterwards.
+  const user = useSelector((state: RootState) => state.user);
   useEffect(() => {
     async function fetchStatisticsAndUpdate() {
       updateStatistics((await adminStories.getStatistics()).statistics);
     }
 
     fetchStatisticsAndUpdate();
-  }, []);
+  }, [user]);
 
   return (
     <div className={styles.container}>
