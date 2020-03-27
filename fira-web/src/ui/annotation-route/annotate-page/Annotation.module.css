@@ -1,7 +1,7 @@
 .progressBar {
   background-color: var(--color-annotation-progress-bar);
   height: 0.5rem;
-  margin: -8px 0 0 -8px;
+  margin-top: -8px;
 }
 
 .container {
@@ -45,7 +45,7 @@
   flex-grow: 9999999;
 }
 
-.annotationArea.noUserSelectionAllowed * {
+.noUserSelectionAllowed * {
   user-select: none;
 }
 
@@ -54,6 +54,8 @@
 }
 
 .footer {
+  --height-rate-button: 50px;
+
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -81,5 +83,50 @@
   .annotationArea {
     flex-grow: 1;
     user-select: none;
+  }
+
+  .progressBar {
+    margin-left: -8px;
+    margin-right: -8px;
+  }
+}
+
+/* classes for loading state (skeleton animation: https://css-tricks.com/building-skeleton-screens-css-custom-properties/) */
+.actionBar:empty {
+  min-height: 20px;
+}
+.annotationArea:empty {
+  min-height: calc(var(--height-rate-button) + var(--margin-xxsmall));
+}
+.actionBar:empty,
+.annotationArea:empty {
+  position: relative;
+  overflow: hidden;
+  animation: loading 1.5s infinite;
+  background-color: rgb(217, 217, 217);
+  border-radius: var(--border-radius-xsmall);
+}
+
+.actionBar:empty::after,
+.annotationArea:empty::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 2s infinite;
+  content: '';
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }

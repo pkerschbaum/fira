@@ -28,10 +28,7 @@ const AnnotationContainer: React.FC = () => {
     );
   }
 
-  return remainingToFinish === undefined || !currentJudgementPair ? (
-    // TODO implement loading page
-    <div>Loading...</div>
-  ) : (
+  return (
     <Annotation
       currentJudgementPair={currentJudgementPair}
       remainingToFinish={remainingToFinish}

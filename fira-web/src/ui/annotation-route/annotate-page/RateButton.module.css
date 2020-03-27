@@ -31,7 +31,7 @@
 
 /* now apply styles using the color variables */
 .button {
-  height: 50px;
+  height: var(--height-rate-button);
   width: 100%;
   padding: 0;
 
