@@ -32,7 +32,7 @@
   --color-ratelevel-perfect-answer: hsl(106, 67%, 47%);
   --color-ratelevel-perfect-answer-darkened: hsl(106, 67%, 27%);
 
-  --color-annotation-allowed-highlight: hsla(120, 73%, 75%, 50%);
+  --color-annotation-allowed-highlight: #caffca;
   --color-annotation-range-start: hsla(0, 79%, 72%, 50%);
   --color-annotation-is-in-range: lightgreen;
   --color-annotation-progress-bar: lightgreen;

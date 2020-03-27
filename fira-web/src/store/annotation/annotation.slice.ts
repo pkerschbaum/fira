@@ -110,12 +110,24 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         (pair) => pair.id === state.currentJudgementPairId,
       );
       if (currentJudgementPair!.currentAnnotationStart === undefined) {
-        // the start of an annotation range was selected --> just save the index
-        currentJudgementPair!.currentAnnotationStart = action.payload.annotationPartIndex;
+        // the start of an annotation range was selected
+        // if the user selected a whitespace, start the selection at the next word
+        let selectedPartIdx = action.payload.annotationPartIndex;
+        if (currentJudgementPair!.docAnnotationParts[selectedPartIdx] === ' ') {
+          selectedPartIdx++;
+        }
+
+        currentJudgementPair!.currentAnnotationStart = selectedPartIdx;
       } else {
         // the end of an annotation range was selected --> save the annotated range
+        // if the user selected a whitespace, end the selection at the previous word
+        let selectedPartIdx = action.payload.annotationPartIndex;
+        if (currentJudgementPair!.docAnnotationParts[selectedPartIdx] === ' ') {
+          selectedPartIdx--;
+        }
+
         const start = currentJudgementPair!.currentAnnotationStart;
-        const end = action.payload.annotationPartIndex;
+        const end = selectedPartIdx;
         const actualStart = start < end ? start : end;
         const actualEnd = end > start ? end : start;
 

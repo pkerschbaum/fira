@@ -12,6 +12,8 @@ import AnnotationPart from './AnnotationPart';
 import Menu from '../../elements/Menu';
 import Line from '../../elements/Line';
 
+const PLACEHOLDER_PREFIX = 'placeholder_';
+
 const Annotation: React.FC<{
   currentJudgementPair: JudgementPair;
   remainingToFinish: number;
@@ -66,9 +68,70 @@ const Annotation: React.FC<{
       : annotationIsRequired
       ? 'RELEVANT_REGION_REQUIRED'
       : 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED';
+  const userSelectionAllowed = currentJudgementPair.currentAnnotationStart === undefined;
 
   function hideTooltip() {
     setTooltipAnnotatePartIndex(undefined);
+  }
+
+  function annotateOnUserSelect() {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const anchorNode = selection.anchorNode;
+    const focusNode = selection.focusNode;
+    if (!anchorNode || !focusNode) {
+      return;
+    }
+
+    let currentNode: Node | (Node & ParentNode) | null = anchorNode;
+    let anchorIdx: string | undefined;
+    while (currentNode) {
+      if ((currentNode as any).dataset?.idx) {
+        anchorIdx = (currentNode as any).dataset.idx;
+        break;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    if (!anchorIdx) {
+      // no anchor, i.e. start of selection, found
+      // --> stop
+      return;
+    }
+
+    currentNode = focusNode;
+    let focusIdx: string | undefined;
+    while (currentNode) {
+      if ((currentNode as any).dataset?.idx) {
+        focusIdx = (currentNode as any).dataset.idx;
+        break;
+      }
+      currentNode = currentNode.parentNode;
+    }
+    if (!focusIdx) {
+      // no focus, i.e. end of selection, found
+      // --> stop
+      return;
+    }
+
+    // idX got extracted --> remove user selection
+    window.getSelection()?.empty();
+
+    // if one of the placeholder got selected, strip of placeholder prefix
+    anchorIdx = anchorIdx.replace(PLACEHOLDER_PREFIX, '');
+    focusIdx = focusIdx.replace(PLACEHOLDER_PREFIX, '');
+
+    // if anchorIdx and focusIdx are the same, it was likely just a click on an element
+    // --> stop
+    if (anchorIdx === focusIdx) {
+      return;
+    }
+
+    // both anchorIdx and focusIdx found --> add annotation
+    selectRangeStartEnd({ annotationPartIndex: Number(anchorIdx) });
+    selectRangeStartEnd({ annotationPartIndex: Number(focusIdx) });
   }
 
   return (
@@ -82,7 +145,13 @@ const Annotation: React.FC<{
           <Menu />
         </div>
         <Line orientation="horizontal" />
-        <div key={currentJudgementPair.id} className={styles.annotationArea}>
+        <div
+          key={currentJudgementPair.id}
+          className={`${styles.annotationArea} ${
+            !userSelectionAllowed && styles.noUserSelectionAllowed
+          }`}
+          onMouseUp={annotateOnUserSelect}
+        >
           {currentJudgementPair.docAnnotationParts.map((annotationPart, partIdx) => {
             // determine if part is in one of the selected ranges
             const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
@@ -122,6 +191,7 @@ const Annotation: React.FC<{
             return (
               <>
                 <AnnotationPart
+                  idx={`${partIdx}`}
                   key={partIdx}
                   text={annotationPart}
                   isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
@@ -142,7 +212,8 @@ const Annotation: React.FC<{
                   }}
                 />
                 <AnnotationPart
-                  key={'placeholder' + partIdx}
+                  key={`${PLACEHOLDER_PREFIX}${partIdx}`}
+                  idx={`${PLACEHOLDER_PREFIX}${partIdx}`}
                   text=""
                   isInSelectedRange={isInAnnotatedRange && !isLastInAnnotatedRange}
                   annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}

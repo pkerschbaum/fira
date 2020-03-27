@@ -45,6 +45,14 @@
   flex-grow: 9999999;
 }
 
+.annotationArea.noUserSelectionAllowed * {
+  user-select: none;
+}
+
+.annotationArea span::selection {
+  background: var(--color-annotation-allowed-highlight);
+}
+
 .footer {
   display: flex;
   flex-wrap: wrap;
@@ -72,5 +80,6 @@
 
   .annotationArea {
     flex-grow: 1;
+    user-select: none;
   }
 }
