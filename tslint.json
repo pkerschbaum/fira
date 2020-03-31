@@ -16,7 +16,8 @@
     "max-classes-per-file": false,
     "object-literal-key-quotes": [true, "as-needed"],
     "interface-over-type-literal": false,
-    "semicolon": [true, "always", "strict-bound-class-methods"]
+    "semicolon": [true, "always", "strict-bound-class-methods"],
+    "no-shadowed-variable": [false]
   },
   "rulesDirectory": []
 }

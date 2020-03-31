@@ -46,7 +46,7 @@ export const setupSubscriptions = (store: RootStore) => {
           pair.status === JudgementPairStatus.SEND_PENDING,
       ).length;
       if (
-        nextUserAction !== UserAnnotationAction.EVERY_PAIR_ANNOTATED &&
+        nextUserAction === UserAnnotationAction.PAIRS_LEFT_TO_PRELOAD &&
         annotationState.remainingToFinish !== undefined &&
         countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD
       ) {

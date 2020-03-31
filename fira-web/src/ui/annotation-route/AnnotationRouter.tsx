@@ -38,23 +38,29 @@ const AnnotationRouter: React.FC = () => {
 
   const redirectToDefault = <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />;
 
+  const feedbackRequired = nextUserAction === UserAnnotationAction.FEEDBACK_REQUIRED;
+  const showInfoPage =
+    annotationDataReceivedFromServer &&
+    !(remainingToFinish !== undefined && remainingToFinish <= 0) &&
+    !userAcknowledgedInfoPage;
+  const showFinishedPage =
+    annotationDataReceivedFromServer &&
+    remainingToFinish !== undefined &&
+    remainingToFinish <= 0 &&
+    !userAcknowledgedFinishedPage;
+
   return (
     <Switch>
       <Route path={`${match.path}/${ANNOTATE_RELATIVE_URL}`}>
-        {annotationDataReceivedFromServer &&
-        !(remainingToFinish !== undefined && remainingToFinish <= 0) &&
-        !userAcknowledgedInfoPage ? (
+        {showInfoPage ? (
           // on this device, the info page was never shown and
           // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${INFO_RELATIVE_URL}`} />
-        ) : nextUserAction === UserAnnotationAction.SUBMIT_FEEDBACK ? (
+        ) : feedbackRequired ? (
           // user must submit a feedback
           <Redirect to={`${match.path}/${FEEDBACK_RELATIVE_URL}`} />
-        ) : annotationDataReceivedFromServer &&
-          remainingToFinish !== undefined &&
-          remainingToFinish <= 0 &&
-          !userAcknowledgedFinishedPage ? (
-          // user finished annotation target and did not acknowledge finished page on this device yet
+        ) : showFinishedPage ? (
+          // user finished annotation target and the finished page was never shown and
           // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${FINISHED_RELATIVE_URL}`} />
         ) : (
@@ -65,14 +71,10 @@ const AnnotationRouter: React.FC = () => {
         <AnnotationInfo />
       </Route>
       <Route path={`${match.path}/${FINISHED_RELATIVE_URL}`}>
-        <AnnotationFinished />
+        {!showFinishedPage ? redirectToDefault : <AnnotationFinished />}
       </Route>
       <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
-        {nextUserAction !== UserAnnotationAction.SUBMIT_FEEDBACK ? (
-          redirectToDefault
-        ) : (
-          <AnnotationFeedback />
-        )}
+        {!feedbackRequired ? redirectToDefault : <AnnotationFeedback />}
       </Route>
       {redirectToDefault}
     </Switch>
