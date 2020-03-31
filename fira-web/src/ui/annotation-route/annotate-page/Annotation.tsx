@@ -26,7 +26,10 @@ const AnnotationShell: React.FC<{
 }> = ({ finishedFraction, hideTooltip, queryComponent, documentComponent, guideComponent }) => {
   return (
     <>
-      <div style={{ width: `${finishedFraction}%` }} className={styles.progressBar} />
+      <div
+        style={{ '--finished-fraction': `${finishedFraction}%` } as any}
+        className={styles.progressBar}
+      />
       <div className={styles.container} onClickCapture={hideTooltip}>
         <div className={styles.actionBar}>{queryComponent}</div>
         <Line orientation="horizontal" />
@@ -69,6 +72,10 @@ const Annotation: React.FC = () => {
       remainingToFinish === undefined
         ? 0
         : (alreadyFinished / (remainingToFinish + alreadyFinished)) * 100;
+    if (finishedFraction > 100) {
+      // user annotated more than his annotation target --> cap at 100%
+      finishedFraction = 100;
+    }
   }
 
   if (!currentJudgementPair || remainingToFinish === undefined) {
@@ -216,10 +223,9 @@ const Annotation: React.FC = () => {
                * annotated text parts.
                */
               return (
-                <>
+                <React.Fragment key={partIdx}>
                   <AnnotationPart
                     idx={`${partIdx}`}
-                    key={partIdx}
                     text={annotationPart}
                     isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
                     isInSelectedRange={isInAnnotatedRange}
@@ -239,7 +245,6 @@ const Annotation: React.FC = () => {
                     }}
                   />
                   <AnnotationPart
-                    key={`${PLACEHOLDER_PREFIX}${partIdx}`}
                     idx={`${PLACEHOLDER_PREFIX}${partIdx}`}
                     text=""
                     isInSelectedRange={isInAnnotatedRange && !isLastInAnnotatedRange}
@@ -257,7 +262,7 @@ const Annotation: React.FC = () => {
                       hideTooltip();
                     }}
                   />
-                </>
+                </React.Fragment>
               );
             })}
           </div>

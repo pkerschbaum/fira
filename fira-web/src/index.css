@@ -1,16 +1,38 @@
-@import-normalize; /* bring in normalize.css styles */
+/* bring in normalize.css styles */
+@import-normalize;
 
-body {
-  margin: 0;
+/* import fonts */
+@font-face {
+  font-family: 'Selawik Regular';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Selawik Regular'), url('./assets/fonts/selawk.woff') format('woff');
 }
 
-body * {
-  font-family: 'SelawikRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', SegoeUI, 'Roboto',
-    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@font-face {
+  font-family: 'Selawik Light';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Selawik Light'), url('./assets/fonts/selawkl.woff') format('woff');
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+@font-face {
+  font-family: 'Selawik Semilight';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Selawik Semilight'), url('./assets/fonts/selawksl.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Selawik Semibold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Selawik Semibold'), url('./assets/fonts/selawksb.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Selawik Bold';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Selawik Bold'), url('./assets/fonts/selawkb.woff') format('woff');
 }

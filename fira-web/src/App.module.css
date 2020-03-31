@@ -70,6 +70,23 @@
   --narrow-content-area-width: 32.5rem;
 }
 
+/* apply some default styles */
+body {
+  margin: 0;
+}
+
+body * {
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', SegoeUI, 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
 * {
   font-size: 1rem;
 }

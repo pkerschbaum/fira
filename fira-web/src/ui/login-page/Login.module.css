@@ -24,6 +24,7 @@
 }
 
 .headline > h1 {
+  font-family: 'Selawik Regular', var(--font-family);
   margin: 0 0 var(--margin-xxsmall) 0;
 }
 

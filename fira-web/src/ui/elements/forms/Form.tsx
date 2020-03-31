@@ -130,13 +130,13 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
             {elements.map((el, idx) => {
               const childElem =
                 el.elementType === 'input' ? (
-                  <TextInput key={idx} label={el.label} {...el.htmlProps} />
+                  <TextInput label={el.label} {...el.htmlProps} />
                 ) : el.elementType === 'select' ? (
-                  <Select key={idx} label={el.label} {...el.htmlProps}>
+                  <Select label={el.label} {...el.htmlProps}>
                     {el.childElements}
                   </Select>
                 ) : el.elementType === 'textarea' ? (
-                  <Textarea key={idx} {...el.htmlProps} />
+                  <Textarea {...el.htmlProps} />
                 ) : (
                   assertUnreachable(el)
                 );
@@ -144,11 +144,11 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
               const isLastElem = idx === elements.length - 1;
 
               return (
-                <>
+                <React.Fragment key={idx}>
                   {childElem}
                   {/* omit divider for last element */}
                   {isLastElem ? null : <div className={styles.inputDivider} />}
-                </>
+                </React.Fragment>
               );
             })}
           </div>

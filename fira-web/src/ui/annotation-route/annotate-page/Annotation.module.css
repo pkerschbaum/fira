@@ -3,6 +3,7 @@
   height: 0.5rem;
   position: absolute;
   top: 0;
+  width: calc(var(--finished-fraction) - var(--app-container-padding) * 2);
   /* for desktop layouts, set left value to align progress bar with content */
   /* for mobile layouts, see css media queries below */
   left: var(--app-container-padding);
@@ -95,6 +96,7 @@
   .progressBar {
     /* for mobile layouts, stretch progress bar over entire width of screen */
     left: 0;
+    width: var(--finished-fraction);
   }
 }
 
