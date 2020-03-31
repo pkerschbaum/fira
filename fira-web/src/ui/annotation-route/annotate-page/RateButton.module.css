@@ -31,11 +31,11 @@
 
 /* now apply styles using the color variables */
 .button {
-  height: 50px;
+  height: 3.25rem;
   width: 100%;
   padding: 0;
 
-  border: 1px solid var(--darkened-color);
+  border: var(--border-small) solid var(--darkened-color);
   color: var(--color-dense);
   background: var(--bg-color);
 
@@ -53,13 +53,13 @@
   position: absolute;
   top: -1px;
   left: -1px;
-  min-width: 20px;
-  height: 20px;
+  min-width: 1.25rem;
+  height: 1.25rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 8px;
-  border-radius: 12px;
+  margin-right: 0.5rem;
+  border-radius: 0.75rem;
 }
 
 .button > .hotkey {
@@ -73,7 +73,7 @@
   }
 
   .button {
-    height: 40px;
+    height: 2.5rem;
   }
 
   .hotkey {

@@ -125,7 +125,7 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
       }}
     >
       {({ isSubmitting, errors }) => (
-        <FormikForm>
+        <FormikForm className={styles.form}>
           <div className={styles.inputContainer}>
             {elements.map((el, idx) => {
               const childElem =

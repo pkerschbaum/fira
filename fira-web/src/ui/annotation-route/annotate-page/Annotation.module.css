@@ -3,7 +3,9 @@
   height: 0.5rem;
   position: absolute;
   top: 0;
-  left: 8px;
+  /* for desktop layouts, set left value to align progress bar with content */
+  /* for mobile layouts, see css media queries below */
+  left: var(--app-container-padding);
 }
 
 .container {
@@ -74,6 +76,11 @@
   width: 0;
 }
 
+.nextButton {
+  height: 3rem;
+  width: 3.75rem;
+}
+
 /* mobile devices, touch only */
 @media only screen and (pointer: coarse) {
   .container {
@@ -86,16 +93,17 @@
   }
 
   .progressBar {
+    /* for mobile layouts, stretch progress bar over entire width of screen */
     left: 0;
   }
 }
 
 /* classes for loading state (skeleton animation: https://css-tricks.com/building-skeleton-screens-css-custom-properties/) */
 .actionBar:empty {
-  min-height: 20px;
+  min-height: 1.5rem;
 }
 .annotationArea:empty {
-  min-height: calc(50px + var(--margin-xxsmall));
+  min-height: 4rem;
 }
 .actionBar:empty,
 .annotationArea:empty {

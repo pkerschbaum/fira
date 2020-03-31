@@ -22,6 +22,6 @@
 
 .infoImage {
   box-sizing: border-box;
-  border: 1px solid black;
+  border: var(--border-small) solid black;
   width: 100%;
 }

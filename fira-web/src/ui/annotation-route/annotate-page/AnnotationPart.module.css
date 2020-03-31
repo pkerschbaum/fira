@@ -1,5 +1,6 @@
 .annotatePart {
   display: inline-block;
+  /* add a little bit of vertical padding to increase line height */
   padding: 1px 0;
   transition: box-shadow 0.2s ease 0s, background-color 0.1s ease 0s, padding 0.3s ease-in-out;
   flex-grow: 0;
@@ -21,12 +22,12 @@
 /* mobile devices, touch only */
 @media only screen and (pointer: coarse) {
   .annotationAllowedInGeneral {
-    padding: 3px 0;
+    padding: var(--padding-xxxsmall) 0;
   }
 }
 
 .annotatePartTooltipButton > *:first-child {
-  padding-right: 4px;
+  padding-right: var(--padding-xxxsmall);
 }
 
 .placeholder {

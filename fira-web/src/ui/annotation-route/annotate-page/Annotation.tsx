@@ -288,7 +288,7 @@ const Annotation: React.FC = () => {
               </span>
               <Button
                 buttonType="primary"
-                style={{ width: '60px', height: '50px' }}
+                className={styles.nextButton}
                 disabled={currentSelectionNotFinished || annotationIsRequired}
                 onClick={() => judgementStories.submitCurrentJudgement()}
               >

@@ -1,9 +1,9 @@
 .app {
-  --padding: 8px;
-  max-width: calc(600px + var(--padding) * 2);
+  --app-container-padding: var(--padding-xxsmall);
+  max-width: calc(600px + var(--app-container-padding) * 2);
   height: 100%;
   margin: 0 auto; /* horizontal align */
-  padding: var(--padding);
+  padding: var(--app-container-padding);
   box-sizing: border-box;
   overflow: auto;
 
