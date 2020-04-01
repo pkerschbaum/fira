@@ -48,7 +48,7 @@ const Menu: React.FC = () => {
       <Reference>{({ ref }) => createMenuButton(ref)}</Reference>
       <Popper placement="bottom-end">
         {({ ref, style, placement }) => (
-          <div ref={ref} style={style} data-placement={placement}>
+          <div ref={ref} style={style} className={styles.container} data-placement={placement}>
             <Button onClick={onShowInfoPage}>Go to Info Page</Button>
             <Button onClick={onLogout}>Logout</Button>
           </div>

@@ -4,6 +4,8 @@ import { Manager, Reference, Popper } from 'react-popper';
 import styles from './AnnotationPart.module.css';
 import Button from '../../elements/Button';
 
+const WHITESPACE = ' ';
+
 const AnnotationPart: React.FC<{
   idx: string;
   text: string;
@@ -12,7 +14,6 @@ const AnnotationPart: React.FC<{
   showTooltip?: boolean;
   annotationIsAllowedOnPart?: boolean;
   annotationIsAllowedInGeneral: boolean;
-  isPlaceholder?: boolean;
   onPartClick: () => void;
   onTooltipClick: () => void;
 }> = ({
@@ -23,13 +24,9 @@ const AnnotationPart: React.FC<{
   showTooltip = false,
   annotationIsAllowedOnPart = false,
   annotationIsAllowedInGeneral,
-  isPlaceholder = false,
   onPartClick,
   onTooltipClick,
 }) => {
-  // replace blank by fixed-width blank character (otherwise, styles like border/box-shadow don't apply)
-  const textToShow = text.replace(' ', '\u00a0');
-
   // set css class if part is start of the current selected range
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : '';
 
@@ -43,7 +40,7 @@ const AnnotationPart: React.FC<{
     ? styles.annotationAllowedInGeneral
     : '';
 
-  const placeholderStyle = isPlaceholder ? styles.placeholder : '';
+  const whitespaceStyle = text === WHITESPACE ? styles.whitespace : '';
 
   const annotatePartSpan = (ref?: any) => (
     <span
@@ -52,9 +49,9 @@ const AnnotationPart: React.FC<{
       onClick={onPartClick}
       className={`${styles.annotatePart} ${currentRangeStartStyle} ${
         !!isInSelectedRange ? styles.isInRange : ''
-      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle} ${placeholderStyle}`}
+      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle} ${whitespaceStyle}`}
     >
-      {textToShow}
+      {text}
     </span>
   );
 

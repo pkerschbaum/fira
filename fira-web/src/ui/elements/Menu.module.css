@@ -1,3 +1,7 @@
+.container {
+  z-index: 1;
+}
+
 .menuButton {
   width: 2rem;
   height: 2rem;

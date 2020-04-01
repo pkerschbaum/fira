@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 import styles from './Annotation.module.css';
 import { RelevanceLevel, RateLevels, JudgementMode } from '../../../typings/enums';
@@ -12,18 +12,31 @@ import {
   useAnnotationActions,
 } from '../../../store/annotation/annotation.hooks';
 import AnnotationPart from './AnnotationPart';
+import JustifiedText from '../../layouts/JustifiedText';
 import Menu from '../../elements/Menu';
 import Line from '../../elements/Line';
 
-const PLACEHOLDER_PREFIX = 'placeholder_';
+const WHITESPACE = ' ';
 
 const AnnotationShell: React.FC<{
   finishedFraction: number;
   hideTooltip?: () => void;
+  userSelectionAllowed?: boolean;
+  annotateOnUserSelect?: () => void;
   queryComponent?: React.ReactNode;
   documentComponent?: React.ReactNode;
   guideComponent?: React.ReactNode;
-}> = ({ finishedFraction, hideTooltip, queryComponent, documentComponent, guideComponent }) => {
+  documentComponentRef?: React.RefObject<HTMLDivElement>;
+}> = ({
+  finishedFraction,
+  hideTooltip,
+  userSelectionAllowed,
+  annotateOnUserSelect,
+  queryComponent,
+  documentComponent,
+  guideComponent,
+  documentComponentRef,
+}) => {
   return (
     <>
       <div
@@ -33,7 +46,15 @@ const AnnotationShell: React.FC<{
       <div className={styles.container} onClickCapture={hideTooltip}>
         <div className={styles.actionBar}>{queryComponent}</div>
         <Line orientation="horizontal" />
-        <div className={styles.annotationArea}>{documentComponent}</div>
+        <div
+          ref={documentComponentRef}
+          className={`${styles.annotationArea} ${
+            !userSelectionAllowed && styles.noUserSelectionAllowed
+          }`}
+          onMouseUp={annotateOnUserSelect}
+        >
+          {documentComponent}
+        </div>
         <div className={styles.footer}>{guideComponent}</div>
       </div>
     </>
@@ -46,6 +67,7 @@ const Annotation: React.FC = () => {
   const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
+  const documentComponentRef = useRef<HTMLDivElement>(null);
 
   function createJudgementFn(relevanceLevel: RelevanceLevel) {
     return () => judgementStories.rateJudgementPair(relevanceLevel);
@@ -154,10 +176,6 @@ const Annotation: React.FC = () => {
     // idX got extracted --> remove user selection
     window.getSelection()?.empty();
 
-    // if one of the placeholder got selected, strip of placeholder prefix
-    anchorIdx = anchorIdx.replace(PLACEHOLDER_PREFIX, '');
-    focusIdx = focusIdx.replace(PLACEHOLDER_PREFIX, '');
-
     // if anchorIdx and focusIdx are the same, it was likely just a click on an element
     // --> stop
     if (anchorIdx === focusIdx) {
@@ -174,27 +192,25 @@ const Annotation: React.FC = () => {
       <AnnotationShell
         finishedFraction={finishedFraction}
         hideTooltip={hideTooltip}
+        userSelectionAllowed={userSelectionAllowed}
+        annotateOnUserSelect={annotateOnUserSelect}
         queryComponent={
           <>
             <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
             <Menu />
           </>
         }
+        documentComponentRef={documentComponentRef}
         documentComponent={
-          <div
-            key={currentJudgementPair.id}
-            className={`${!userSelectionAllowed && styles.noUserSelectionAllowed}`}
-            onMouseUp={annotateOnUserSelect}
-          >
-            {currentJudgementPair.docAnnotationParts.map((annotationPart, partIdx) => {
+          <JustifiedText
+            text={currentJudgementPair.docAnnotationParts}
+            parentContainerRef={documentComponentRef}
+            createTextNode={({ textPart, partIdx }) => {
               // determine if part is in one of the selected ranges
               const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
                 (range) => range.start <= partIdx && range.end >= partIdx,
               );
               const isInAnnotatedRange = !!correspondingAnnotatedRange;
-              const isLastInAnnotatedRange =
-                !!correspondingAnnotatedRange && partIdx === correspondingAnnotatedRange.end;
-
               /*
                * annotation of a part is allowed if
                * - the corresponding judgement mode is set,
@@ -203,7 +219,7 @@ const Annotation: React.FC = () => {
                */
               const canAnnotatePart =
                 currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
-                annotationPart !== ' ' &&
+                textPart !== WHITESPACE &&
                 !isInAnnotatedRange;
 
               /*
@@ -223,49 +239,30 @@ const Annotation: React.FC = () => {
                * annotated text parts.
                */
               return (
-                <React.Fragment key={partIdx}>
-                  <AnnotationPart
-                    idx={`${partIdx}`}
-                    text={annotationPart}
-                    isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
-                    isInSelectedRange={isInAnnotatedRange}
-                    showTooltip={tooltipAnnotatePartIndex === partIdx}
-                    annotationIsAllowedOnPart={canAnnotatePart}
-                    annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
-                    onPartClick={
-                      canAnnotatePart
-                        ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
-                        : isInAnnotatedRange
-                        ? () => setTooltipAnnotatePartIndex(partIdx)
-                        : noop
-                    }
-                    onTooltipClick={() => {
-                      deleteRange({ annotationPartIndex: partIdx });
-                      hideTooltip();
-                    }}
-                  />
-                  <AnnotationPart
-                    idx={`${PLACEHOLDER_PREFIX}${partIdx}`}
-                    text=""
-                    isInSelectedRange={isInAnnotatedRange && !isLastInAnnotatedRange}
-                    annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
-                    isPlaceholder={true}
-                    onPartClick={
-                      canAnnotatePart
-                        ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
-                        : isInAnnotatedRange
-                        ? () => setTooltipAnnotatePartIndex(partIdx)
-                        : noop
-                    }
-                    onTooltipClick={() => {
-                      deleteRange({ annotationPartIndex: partIdx });
-                      hideTooltip();
-                    }}
-                  />
-                </React.Fragment>
+                <AnnotationPart
+                  key={partIdx}
+                  idx={`${partIdx}`}
+                  text={textPart}
+                  isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
+                  isInSelectedRange={isInAnnotatedRange}
+                  showTooltip={tooltipAnnotatePartIndex === partIdx}
+                  annotationIsAllowedOnPart={canAnnotatePart}
+                  annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
+                  onPartClick={
+                    canAnnotatePart
+                      ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
+                      : isInAnnotatedRange
+                      ? () => setTooltipAnnotatePartIndex(partIdx)
+                      : noop
+                  }
+                  onTooltipClick={() => {
+                    deleteRange({ annotationPartIndex: partIdx });
+                    hideTooltip();
+                  }}
+                />
               );
-            })}
-          </div>
+            }}
+          />
         }
         guideComponent={
           ratingRequired ? (

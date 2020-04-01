@@ -30,6 +30,6 @@
   padding-right: var(--padding-xxxsmall);
 }
 
-.placeholder {
+.whitespace {
   flex-grow: 1;
 }
