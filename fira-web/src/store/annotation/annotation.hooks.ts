@@ -4,6 +4,11 @@ import { actions, JudgementPairStatus } from './annotation.slice';
 import { RootState } from '../store';
 import { useActionsWithDispatch } from '../util/actions.util';
 
+export const annotationComputations = {
+  annotationDataReceivedFromServer: (state: RootState) =>
+    state.annotation.remainingToFinish !== undefined,
+};
+
 export const useAnnotationActions = () => useActionsWithDispatch(actions);
 
 export const useAnnotationState = () => {
@@ -12,31 +17,42 @@ export const useAnnotationState = () => {
       (pair) => pair.status === JudgementPairStatus.SEND_SUCCESS,
     ),
   );
-
-  const remainingToFinish = useSelector((state: RootState) => {
-    return state.annotation.remainingToFinish === undefined
-      ? undefined
-      : state.annotation.remainingToFinish - pairsSuccessfullySent.length;
-  });
-  const alreadyFinished = useSelector((state: RootState) => {
-    return state.annotation.alreadyFinished === undefined
-      ? undefined
-      : state.annotation.alreadyFinished + pairsSuccessfullySent.length;
-  });
   const currentJudgementPair = useSelector((state: RootState) =>
     state.annotation.judgementPairs.find(
       (pair) => pair.id === state.annotation.currentJudgementPairId,
     ),
   );
-  const nextUserAction = useSelector((state: RootState) => state.annotation.nextUserAction);
 
-  const annotationDataReceivedFromServer = !!currentJudgementPair;
+  const annotationDataReceivedFromServer = useSelector(
+    annotationComputations.annotationDataReceivedFromServer,
+  );
+  const remainingToFinish = useSelector((state: RootState) =>
+    !annotationDataReceivedFromServer
+      ? undefined
+      : state.annotation.remainingToFinish! - pairsSuccessfullySent.length,
+  );
+  const remainingUntilFirstFeedbackRequired = useSelector((state: RootState) =>
+    !annotationDataReceivedFromServer
+      ? undefined
+      : state.annotation.remainingUntilFirstFeedbackRequired! - pairsSuccessfullySent.length,
+  );
+  const countOfFeedbacks = useSelector((state: RootState) => state.annotation.countOfFeedbacks);
+  const countOfNotPreloadedPairs = useSelector(
+    (state: RootState) => state.annotation.countOfNotPreloadedPairs,
+  );
+  const alreadyFinished = useSelector((state: RootState) =>
+    !annotationDataReceivedFromServer
+      ? undefined
+      : state.annotation.alreadyFinished! + pairsSuccessfullySent.length,
+  );
 
   return {
+    annotationDataReceivedFromServer,
     remainingToFinish,
+    remainingUntilFirstFeedbackRequired,
+    countOfFeedbacks,
+    countOfNotPreloadedPairs,
     alreadyFinished,
     currentJudgementPair,
-    nextUserAction,
-    annotationDataReceivedFromServer,
   };
 };

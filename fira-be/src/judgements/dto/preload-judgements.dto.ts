@@ -11,7 +11,7 @@ import {
 import { Type } from 'class-transformer';
 
 import { PreloadJudgement, PreloadJudgementResponse } from '../judgements.types';
-import { JudgementMode, UserAnnotationAction } from '../../typings/enums';
+import { JudgementMode } from '../../typings/enums';
 
 export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ArrayMinSize(1)
@@ -24,9 +24,15 @@ export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @IsInt()
   @IsDefined()
   readonly remainingToFinish: number;
-  @IsEnum(UserAnnotationAction)
+  @IsInt()
   @IsDefined()
-  readonly nextUserAction: UserAnnotationAction;
+  readonly remainingUntilFirstFeedbackRequired: number;
+  @IsInt()
+  @IsDefined()
+  readonly countOfFeedbacks: number;
+  @IsInt()
+  @IsDefined()
+  readonly countOfNotPreloadedPairs: number;
 }
 
 class PreloadJudgementDto implements PreloadJudgement {

@@ -1,10 +1,12 @@
-import { JudgementMode, UserAnnotationAction, RelevanceLevel } from '../typings/enums';
+import { JudgementMode, RelevanceLevel } from '../typings/enums';
 
 export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
-  readonly nextUserAction: UserAnnotationAction;
+  readonly remainingUntilFirstFeedbackRequired: number;
+  readonly countOfFeedbacks: number;
+  readonly countOfNotPreloadedPairs: number;
 };
 
 export type PreloadJudgement = {

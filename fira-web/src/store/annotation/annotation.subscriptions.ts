@@ -2,17 +2,16 @@ import { createLogger } from '../../logger/logger';
 import { RootStore } from '../store';
 import { judgementStories } from '../../stories/judgement.stories';
 import { actions as annotationActions, JudgementPairStatus } from '../annotation/annotation.slice';
-import { UserRole, UserAnnotationAction } from '../../typings/enums';
+import { UserRole } from '../../typings/enums';
+import { annotationComputations } from './annotation.hooks';
 
 const PRELOAD_JUDGEMENTS_THRESHOLD = 1;
 
 const logger = createLogger('annotation.subscriptions');
 
 export const setupSubscriptions = (store: RootStore) => {
-  // if no judgement pairs got loaded from the server yet, preload pairs
+  // if no judgement pairs got loaded from the server yet, execute initial preload of judgement pairs
   store.subscribe(() => {
-    const annotationState = store.getState().annotation;
-
     const user = store.getState().user;
     if (!user || !user.accessToken) {
       logger.info(
@@ -27,7 +26,7 @@ export const setupSubscriptions = (store: RootStore) => {
       return;
     }
 
-    if (annotationState.remainingToFinish === undefined) {
+    if (!annotationComputations.annotationDataReceivedFromServer(store.getState())) {
       logger.info('no judgement pairs got loaded from the server yet --> execute preload...');
       judgementStories.preloadJudgements();
     }
@@ -39,22 +38,24 @@ export const setupSubscriptions = (store: RootStore) => {
     memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
     listener: (subscribedStore) => {
       const annotationState = subscribedStore.getState().annotation;
-      const nextUserAction = annotationState.nextUserAction;
-      const countOfOpenJudgementPairs = annotationState.judgementPairs.filter(
-        (pair) =>
-          pair.status === JudgementPairStatus.TO_JUDGE ||
-          pair.status === JudgementPairStatus.SEND_PENDING,
-      ).length;
-      if (
-        nextUserAction === UserAnnotationAction.PAIRS_LEFT_TO_PRELOAD &&
-        annotationState.remainingToFinish !== undefined &&
-        countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD
-      ) {
-        logger.info(
-          'count of preloaded judgement pairs does not fulfill threshold and ' +
-            'there are remaining judgements to preload on the server --> execute preload...',
-        );
-        judgementStories.preloadJudgements();
+
+      if (annotationComputations.annotationDataReceivedFromServer(subscribedStore.getState())) {
+        const countOfOpenJudgementPairs = annotationState.judgementPairs.filter(
+          (pair) =>
+            pair.status === JudgementPairStatus.TO_JUDGE ||
+            pair.status === JudgementPairStatus.SEND_PENDING,
+        ).length;
+        const countOfNotPreloadedPairs = annotationState.countOfNotPreloadedPairs!;
+        if (
+          countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD &&
+          countOfNotPreloadedPairs > 0
+        ) {
+          logger.info(
+            'count of preloaded judgement pairs does not fulfill threshold and ' +
+              'there are remaining judgements to preload on the server --> execute preload...',
+          );
+          judgementStories.preloadJudgements();
+        }
       }
     },
   };

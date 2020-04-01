@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 
 import { PreloadJudgement } from '../../typings/fira-be-typings';
-import { RelevanceLevel, RateLevels, UserAnnotationAction } from '../../typings/enums';
+import { RelevanceLevel, RateLevels } from '../../typings/enums';
 import { actions as userActions } from '../user/user.slice';
 
 export enum JudgementPairStatus {
@@ -22,16 +22,20 @@ type AnnotationState = {
   readonly judgementPairs: JudgementPair[];
   readonly alreadyFinished?: number;
   readonly remainingToFinish?: number;
+  readonly remainingUntilFirstFeedbackRequired?: number;
+  readonly countOfFeedbacks?: number;
+  readonly countOfNotPreloadedPairs?: number;
   readonly currentJudgementPairId?: PreloadJudgement['id'];
   readonly currentJudgementPairSelectedOnMs?: number; // unix timestamp
-  readonly nextUserAction?: UserAnnotationAction;
 };
 
 type PreloadJudgementsPayload = {
   readonly judgements: PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
-  readonly nextUserAction: UserAnnotationAction;
+  readonly remainingUntilFirstFeedbackRequired: number;
+  readonly countOfFeedbacks: number;
+  readonly countOfNotPreloadedPairs: number;
 };
 
 type RateJudgementPairPayload = {
@@ -65,7 +69,10 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
     .addCase(preloadJudgements, (state, action) => {
       state.alreadyFinished = action.payload.alreadyFinished;
       state.remainingToFinish = action.payload.remainingToFinish;
-      state.nextUserAction = action.payload.nextUserAction;
+      state.remainingUntilFirstFeedbackRequired =
+        action.payload.remainingUntilFirstFeedbackRequired;
+      state.countOfFeedbacks = action.payload.countOfFeedbacks;
+      state.countOfNotPreloadedPairs = action.payload.countOfNotPreloadedPairs;
 
       const judgementPairsReceived = action.payload.judgements;
 
