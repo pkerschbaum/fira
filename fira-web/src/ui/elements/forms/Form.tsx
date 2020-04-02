@@ -119,7 +119,9 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
             setErrors({ formError: `Network error. Please make sure to be online.` } as any);
           } else {
             setErrors({ formError: `Unexpected error occured.` } as any);
+            throw e;
           }
+        } finally {
           setSubmitting(false);
         }
       }}

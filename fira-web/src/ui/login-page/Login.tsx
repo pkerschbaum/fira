@@ -43,8 +43,9 @@ const Login: React.FC = () => {
             } catch (e) {
               if (typeof e.getStatus === 'function' && e.getStatus() === 401) {
                 setErrors({ formError: `Credentials invalid.` } as any);
+              } else {
+                throw e;
               }
-              throw e;
             }
           }}
           elements={[
