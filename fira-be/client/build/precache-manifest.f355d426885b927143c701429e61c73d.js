@@ -1,23 +1,23 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "064e2e5dd21b452ac9b118edfb895a60",
+    "revision": "2634d4362e9ec905a1afc00370c3203d",
     "url": "/fira-trec/index.html"
   },
   {
-    "revision": "82a9c03c5465edf2c9f0",
-    "url": "/fira-trec/static/css/main.88ec4a9e.chunk.css"
+    "revision": "abf1e47347a5d19a0ad0",
+    "url": "/fira-trec/static/css/main.daf74715.chunk.css"
   },
   {
-    "revision": "d7a217d4172b7110133f",
-    "url": "/fira-trec/static/js/2.2aae4a4a.chunk.js"
+    "revision": "9dfd1f4632d4e955d9a8",
+    "url": "/fira-trec/static/js/2.4fff177e.chunk.js"
   },
   {
     "revision": "1599112f5867042ef505091e0fb03a4e",
-    "url": "/fira-trec/static/js/2.2aae4a4a.chunk.js.LICENSE.txt"
+    "url": "/fira-trec/static/js/2.4fff177e.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "82a9c03c5465edf2c9f0",
-    "url": "/fira-trec/static/js/main.f024fbc4.chunk.js"
+    "revision": "abf1e47347a5d19a0ad0",
+    "url": "/fira-trec/static/js/main.d0901223.chunk.js"
   },
   {
     "revision": "d60bb90c685dc823dc56",

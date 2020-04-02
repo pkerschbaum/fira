@@ -7,7 +7,7 @@ import NamingStrategies = require('typeorm-naming-strategies');
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
 export const application = {
-  version: '0.5.0',
+  version: '0.6.0',
   port: 80,
   rateLimit: {
     windowMs: 10 * 60 * 1000, // 10 minutes
