@@ -60,7 +60,7 @@ FIRA_HOMEPAGE=https://my-domain/path-of-app
 
 Run `docker-compose up -d --build` on the docker host. This will launch all services of the application necessary to operate in production. One can inspect the logs with `docker-compose logs -f`.
 
-_Note:_ the option `--build` will rebuild the docker images every time the application is started. This will avoid old images used by docker, and the Dockerfiles are structured in a way so that docker will re-use caches as much as possible, thus the rebuild will take as little time as needed.
+_Note:_ the option `--build` will rebuild the docker images every time the application is started. This will avoid old images being used by docker, and the Dockerfiles are structured in a way so that docker will re-use caches as much as possible, thus the rebuild will take as little time as needed.
 
 ### #4: Inspect the file containing the imported users
 
