@@ -9,6 +9,7 @@ services:
       - backend
     depends_on:
       - keycloak
+      - postgres_fira
     environment:
       - DB_ADDR=postgres_fira
       - DB_USER=${FIRA_DB_USER}
