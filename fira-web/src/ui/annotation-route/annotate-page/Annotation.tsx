@@ -63,7 +63,7 @@ const AnnotationShell: React.FC<{
 
 const Annotation: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
-  const { selectRangeStartEnd, deleteRange } = useAnnotationActions();
+  const { selectRange, deleteRange } = useAnnotationActions();
   const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
@@ -183,8 +183,13 @@ const Annotation: React.FC = () => {
     }
 
     // both anchorIdx and focusIdx found --> add annotation
-    selectRangeStartEnd({ annotationPartIndex: Number(anchorIdx) });
-    selectRangeStartEnd({ annotationPartIndex: Number(focusIdx) });
+    selectRange({
+      selection: {
+        type: 'ENTIRE_RANGE',
+        partStartIndex: Number(anchorIdx),
+        partEndIndex: Number(focusIdx),
+      },
+    });
   }
 
   return (
@@ -250,7 +255,10 @@ const Annotation: React.FC = () => {
                   annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
                   onPartClick={
                     canAnnotatePart
-                      ? () => selectRangeStartEnd({ annotationPartIndex: partIdx })
+                      ? () =>
+                          selectRange({
+                            selection: { type: 'START_OR_END', annotationPartIndex: partIdx },
+                          })
                       : isInAnnotatedRange
                       ? () => setTooltipAnnotatePartIndex(partIdx)
                       : noop
