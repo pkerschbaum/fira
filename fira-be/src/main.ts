@@ -31,7 +31,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('fira backend')
     .setDescription('The fira backend API description')
-    .setVersion('0.4.0')
+    .setVersion(config.application.version)
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
