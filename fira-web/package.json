@@ -48,6 +48,7 @@
     ]
   },
   "proxy": "http://localhost",
+  "homepage": "https://ir-group.ec.tuwien.ac.at/fira-trec",
   "browserslist": {
     "production": [
       ">0.2%",
