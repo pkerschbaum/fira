@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+import * as path from 'path';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import NamingStrategies = require('typeorm-naming-strategies');
 
@@ -14,9 +15,11 @@ export const application = {
   },
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
-  homepage: {
-    path: (process.env.FIRA_HOMEPAGE && URL_REGEX.exec(process.env.FIRA_HOMEPAGE)![5]) ?? '',
+  urlPaths: {
+    web: (process.env.FIRA_HOMEPAGE && URL_REGEX.exec(process.env.FIRA_HOMEPAGE)![5]) ?? '',
+    api: '/api',
   },
+  staticSourcesPath: path.join(__dirname, '..', 'client', 'build'),
 } as const;
 
 export const database: TypeOrmModuleOptions = {

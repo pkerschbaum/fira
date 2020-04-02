@@ -5,6 +5,7 @@ import { AxiosInstance } from 'axios';
 import nanoid = require('nanoid');
 import * as path from 'path';
 
+import * as config from './config';
 import { LoggerModule } from './logger/app-logger.module';
 import { AppLogger } from './logger/app-logger.service';
 import { AuthModule } from './auth/auth.module';
@@ -19,15 +20,14 @@ import { Feedback } from './feedback/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { PersistenceModule } from './persistence/persistence.module';
-import * as config from './config';
 
 @Module({
   imports: [
     HttpModule,
     LoggerModule,
     ServeStaticModule.forRoot({
-      rootPath: path.join(__dirname, '..', 'client', 'build'),
-      serveRoot: config.application.homepage.path,
+      rootPath: config.application.staticSourcesPath,
+      serveRoot: config.application.urlPaths.web,
       renderPath: `./*`,
     }),
     TypeOrmModule.forRoot({

@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "d63d2cf239bd91ba4f2544366cf6a4ad",
+    "revision": "064e2e5dd21b452ac9b118edfb895a60",
     "url": "/fira-trec/index.html"
   },
   {
-    "revision": "6eddd9ef1c81ba83b129",
+    "revision": "82a9c03c5465edf2c9f0",
     "url": "/fira-trec/static/css/main.88ec4a9e.chunk.css"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/fira-trec/static/js/2.2aae4a4a.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "6eddd9ef1c81ba83b129",
-    "url": "/fira-trec/static/js/main.8feb2402.chunk.js"
+    "revision": "82a9c03c5465edf2c9f0",
+    "url": "/fira-trec/static/js/main.f024fbc4.chunk.js"
   },
   {
     "revision": "d60bb90c685dc823dc56",

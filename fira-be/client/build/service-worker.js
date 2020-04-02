@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/fira-trec/precache-manifest.f2cb482d7b05edc4692b2cb8b92b75be.js"
+  "/fira-trec/precache-manifest.30cfb489a255c3c2d7701f4ba0adf22a.js"
 );
 
 self.addEventListener('message', (event) => {
