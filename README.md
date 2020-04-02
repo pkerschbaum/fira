@@ -58,7 +58,9 @@ FIRA_HOMEPAGE=https://my-domain/path-of-app
 
 ### #3: Run the application
 
-Run `docker-compose up -d` on the docker host. This will launch all services of the application necessary to operate in production. One can inspect the logs with `docker-compose logs -f`.
+Run `docker-compose up -d --build` on the docker host. This will launch all services of the application necessary to operate in production. One can inspect the logs with `docker-compose logs -f`.
+
+_Note:_ the option `--build` will rebuild the docker images every time the application is started. This will avoid old images used by docker, and the Dockerfiles are structured in a way so that docker will re-use caches as much as possible, thus the rebuild will take as little time as needed.
 
 ### #4: Inspect the file containing the imported users
 
@@ -77,28 +79,17 @@ docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "$PWD:$PWD" \
     -w="$PWD" \
-    docker/compose:latest up -d
+    docker/compose:latest up -d --build
 ```
 
 ## Development
 
-Run the application with `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d`.
+Run the application with [`./scripts/fira-dev-up.sh`](./scripts/fira-dev-up.sh).
 This will launch not only the essential services, but also PgAdmin to inspect the contents of the Postgres Databases.
 Further, all services normally not exposed from the docker network (e.g. keycloak, postgres database servers) will get exposed to the host system.
 This allows to connect the local instance of the fira backend to the services running in docker.  
 You can even run this command if the application was bootstrapped via the command for the production environment; only the admin tools will get additionally started.
 
-The PgAdmin Web UI is available at <http://localhost:8079> (or whatever port set with `PGADMIN_PUBLIC_PORT`). To add the Fira database server, follow these steps:
+The PgAdmin Web UI is available at <http://localhost:8079> (or whatever port set with `PGADMIN_PUBLIC_PORT`). The Fira database is automatically added to PgAdmin. You only have to enter the password set with `FIRA_DB_PASSWORD` when connecting.
 
-1. Object -> Create -> Server...
-1. Tab General:
-   - Name: `fira`
-1. Tab Connection:
-   - Host name/address: `postgres_fira`
-     - Hint: if you experience problems connecting to the database docker container, try that: <https://medium.com/@samichkhachkhi/localhost-postgres-docker-connection-refused-using-pgadmin-a27b91de7342>
-   - Port: Value of `FIRA_DATABASE_PUBLIC_PORT`
-   - Username: Value of `FIRA_DB_USER`
-   - Password: Value of `FIRA_DB_PASSWORD`
-
-Keep in mind that for viewing logs (`docker-compose logs`), viewing the running containers (`docker-compose ps`) or stopping the application (`docker-compose down`), one has to use the same docker-compose.yml files as used for starting the application.  
-So the command to view logs would be e.g. `docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs`.
+The [`scripts`](./scripts/) folder contains more useful scripts to interact with the docker environment.
