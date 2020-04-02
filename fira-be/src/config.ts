@@ -9,7 +9,7 @@ export const application = {
     max: 500, // limit each IP to 200 requests per windowMs
   },
   judgementsPreloadSize: 3,
-  splitRegex: /([ .\-,]+)/g,
+  splitRegex: /([ .\-,;]+?)/g,
 } as const;
 
 export const database: TypeOrmModuleOptions = {
