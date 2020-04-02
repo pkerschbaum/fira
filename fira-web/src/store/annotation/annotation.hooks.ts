@@ -17,11 +17,20 @@ export const useAnnotationState = () => {
       (pair) => pair.status === JudgementPairStatus.SEND_SUCCESS,
     ),
   );
+  const pairsCurrentlySending = useSelector((state: RootState) =>
+    state.annotation.judgementPairs.filter(
+      (pair) => pair.status === JudgementPairStatus.SEND_PENDING,
+    ),
+  );
+  const pairsToJudge = useSelector((state: RootState) =>
+    state.annotation.judgementPairs.filter((pair) => pair.status === JudgementPairStatus.TO_JUDGE),
+  );
   const currentJudgementPair = useSelector((state: RootState) =>
     state.annotation.judgementPairs.find(
       (pair) => pair.id === state.annotation.currentJudgementPairId,
     ),
   );
+  const pairsJudged = pairsSuccessfullySent.concat(pairsCurrentlySending);
 
   const annotationDataReceivedFromServer = useSelector(
     annotationComputations.annotationDataReceivedFromServer,
@@ -29,12 +38,12 @@ export const useAnnotationState = () => {
   const remainingToFinish = useSelector((state: RootState) =>
     !annotationDataReceivedFromServer
       ? undefined
-      : state.annotation.remainingToFinish! - pairsSuccessfullySent.length,
+      : state.annotation.remainingToFinish! - pairsJudged.length,
   );
   const remainingUntilFirstFeedbackRequired = useSelector((state: RootState) =>
     !annotationDataReceivedFromServer
       ? undefined
-      : state.annotation.remainingUntilFirstFeedbackRequired! - pairsSuccessfullySent.length,
+      : state.annotation.remainingUntilFirstFeedbackRequired! - pairsJudged.length,
   );
   const countOfFeedbacks = useSelector((state: RootState) => state.annotation.countOfFeedbacks);
   const countOfNotPreloadedPairs = useSelector(
@@ -43,7 +52,7 @@ export const useAnnotationState = () => {
   const alreadyFinished = useSelector((state: RootState) =>
     !annotationDataReceivedFromServer
       ? undefined
-      : state.annotation.alreadyFinished! + pairsSuccessfullySent.length,
+      : state.annotation.alreadyFinished! + pairsJudged.length,
   );
 
   return {
@@ -52,6 +61,7 @@ export const useAnnotationState = () => {
     remainingUntilFirstFeedbackRequired,
     countOfFeedbacks,
     countOfNotPreloadedPairs,
+    pairsToJudge,
     alreadyFinished,
     currentJudgementPair,
   };

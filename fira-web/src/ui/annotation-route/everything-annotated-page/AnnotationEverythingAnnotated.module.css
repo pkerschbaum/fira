@@ -1,0 +1,28 @@
+.container {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.container > * {
+  margin: calc(var(--margin-medium) / 2) 0;
+}
+
+.container > *:first-child {
+  margin-top: var(--margin-xsmall);
+}
+
+.headline {
+  font-size: var(--font-xxxlarge);
+  font-weight: var(--weight-heavy);
+}
+
+/* mobile devices, touch only */
+@media only screen and (pointer: coarse) {
+  .container {
+    flex-grow: 1;
+  }
+}

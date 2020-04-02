@@ -5,14 +5,16 @@ import Annotation from './annotate-page/Annotation';
 import AnnotationInfo from './info-page/AnnotationInfo';
 import AnnotationFeedback from './feedback-page/AnnotationFeedback';
 import AnnotationFinished from './finished-page/AnnotationFinished';
+import AnnotationEverythingAnnotated from './everything-annotated-page/AnnotationEverythingAnnotated';
 import { useUserState } from '../../store/user/user.hooks';
 import { useAnnotationState } from '../../store/annotation/annotation.hooks';
 import { assertUnreachable } from '../../util/types.util';
 
 const ANNOTATE_RELATIVE_URL = 'annotate';
 const INFO_RELATIVE_URL = 'info';
-const FINISHED_RELATIVE_URL = 'finished';
 const FEEDBACK_RELATIVE_URL = 'feedback';
+const FINISHED_RELATIVE_URL = 'finished';
+const EVERYTHING_ANNOTATED_RELATIVE_URL = 'everything-finished';
 
 export function useRouting() {
   const history = useHistory();
@@ -35,6 +37,8 @@ const AnnotationRouter: React.FC = () => {
     remainingUntilFirstFeedbackRequired,
     countOfFeedbacks,
     annotationDataReceivedFromServer,
+    countOfNotPreloadedPairs,
+    pairsToJudge,
   } = useAnnotationState();
 
   const redirectToDefault = <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />;
@@ -48,6 +52,8 @@ const AnnotationRouter: React.FC = () => {
     ? 'FEEDBACK_PAGE'
     : remainingToFinish! <= 0 && !userAcknowledgedFinishedPage
     ? 'FINISHED_PAGE'
+    : countOfNotPreloadedPairs! <= 0 && pairsToJudge.length === 0
+    ? 'EVERYTHING_ANNOTATED_PAGE'
     : 'ANNOTATION_PAGE';
 
   return (
@@ -64,6 +70,8 @@ const AnnotationRouter: React.FC = () => {
           // user finished annotation target and the finished page was never shown and
           // acknowledged by the user --> show page
           <Redirect to={`${match.path}/${FINISHED_RELATIVE_URL}`} />
+        ) : pageToShow === 'EVERYTHING_ANNOTATED_PAGE' ? (
+          <Redirect to={`${match.path}/${EVERYTHING_ANNOTATED_RELATIVE_URL}`} />
         ) : pageToShow === 'ANNOTATION_PAGE' ? (
           <Annotation />
         ) : (
@@ -73,11 +81,18 @@ const AnnotationRouter: React.FC = () => {
       <Route path={`${match.path}/${INFO_RELATIVE_URL}`}>
         <AnnotationInfo />
       </Route>
+      <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
+        {pageToShow !== 'FEEDBACK_PAGE' ? redirectToDefault : <AnnotationFeedback />}
+      </Route>
       <Route path={`${match.path}/${FINISHED_RELATIVE_URL}`}>
         {pageToShow !== 'FINISHED_PAGE' ? redirectToDefault : <AnnotationFinished />}
       </Route>
-      <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
-        {pageToShow !== 'FEEDBACK_PAGE' ? redirectToDefault : <AnnotationFeedback />}
+      <Route path={`${match.path}/${EVERYTHING_ANNOTATED_RELATIVE_URL}`}>
+        {pageToShow !== 'EVERYTHING_ANNOTATED_PAGE' ? (
+          redirectToDefault
+        ) : (
+          <AnnotationEverythingAnnotated />
+        )}
       </Route>
       {redirectToDefault}
     </Switch>
