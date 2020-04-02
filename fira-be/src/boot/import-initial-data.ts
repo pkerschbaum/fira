@@ -56,13 +56,13 @@ export async function importInitialData({
 
   /* --- DOCUMENTS --- */
 
-  await importAsset<{ id: number; text: string }>({
+  await importAsset<{ id: string; text: string }>({
     logger,
     assetType: 'documents',
     getCountFn: adminService.getCountOfDocuments,
     tsvSkipFn: isDocumentIdMissing,
     tsvMapFn: (entry) => ({
-      id: Number(entry[COLUMN_DOCUMENT_ID]),
+      id: entry[COLUMN_DOCUMENT_ID].trim(),
       text: entry[COLUMN_DOCUMENT_TEXT],
     }),
     importFn: adminService.importDocuments,
@@ -70,13 +70,13 @@ export async function importInitialData({
 
   /* --- QUERIES --- */
 
-  await importAsset<{ id: number; text: string }>({
+  await importAsset<{ id: string; text: string }>({
     logger,
     assetType: 'queries',
     getCountFn: adminService.getCountOfQueries,
     tsvSkipFn: isQueryIdMissing,
     tsvMapFn: (entry) => ({
-      id: Number(entry[COLUMN_QUERY_ID]),
+      id: entry[COLUMN_QUERY_ID].trim(),
       text: entry[COLUMN_QUERY_TEXT],
     }),
     importFn: adminService.importQueries,
@@ -84,14 +84,14 @@ export async function importInitialData({
 
   /* --- JUDGEMENT-PAIRS --- */
 
-  await importAsset<{ documentId: number; queryId: number; priority: number }>({
+  await importAsset<{ queryId: string; documentId: string; priority: number }>({
     logger,
     assetType: 'judgement-pairs',
     getCountFn: adminService.getCountOfJudgPairs,
     tsvSkipFn: (entry) => isDocumentIdMissing(entry) || isQueryIdMissing(entry),
     tsvMapFn: (entry) => ({
-      queryId: Number(entry[COLUMN_QUERY_ID]),
-      documentId: Number(entry[COLUMN_DOCUMENT_ID]),
+      queryId: entry[COLUMN_QUERY_ID].trim(),
+      documentId: entry[COLUMN_DOCUMENT_ID].trim(),
       priority: Number(entry[COLUMN_PRIORITY]),
     }),
     importFn: adminService.importJudgementPairs,

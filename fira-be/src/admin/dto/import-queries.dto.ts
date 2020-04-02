@@ -23,7 +23,7 @@ export class ImportQueriesReqDto implements ImportQueriesReq {
 class ImportQuery implements ImportAsset {
   @IsNumber()
   @IsDefined()
-  readonly id: number;
+  readonly id: string;
   @IsString()
   @IsNotEmpty()
   readonly text: string;
@@ -39,7 +39,7 @@ export class ImportQueriesRespDto implements ImportQueriesResp {
 class ImportQueryResult implements ImportResult {
   @IsNumber()
   @IsDefined()
-  readonly id: number;
+  readonly id: string;
   @IsString()
   @IsNotEmpty()
   @IsEnum(ImportStatus)

@@ -127,7 +127,9 @@ export class AdminService {
                 documentId: judgementPair.documentId,
                 queryId: judgementPair.queryId,
                 status: ImportStatus.ERROR,
-                error: `either the document or the query (or both) could not be found. documentFound=${!!document} queryFound=${!!query}`,
+                error:
+                  `either the document or the query (or both) could not be found. documentFound=${!!document}, queryFound=${!!query},` +
+                  ` documentId=${judgementPair.documentId}, queryId=${judgementPair.queryId}`,
               };
             }
 

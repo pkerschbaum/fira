@@ -23,7 +23,7 @@ export class ImportDocumentsReqDto implements ImportDocumentsReq {
 class ImportDocument implements ImportAsset {
   @IsNumber()
   @IsDefined()
-  readonly id: number;
+  readonly id: string;
   @IsString()
   @IsNotEmpty()
   readonly text: string;
@@ -39,7 +39,7 @@ export class ImportDocumentsRespDto implements ImportDocumentsResp {
 class ImportDocumentResult implements ImportResult {
   @IsNumber()
   @IsDefined()
-  readonly id: number;
+  readonly id: string;
   @IsString()
   @IsNotEmpty()
   @IsEnum(ImportStatus)

@@ -13,7 +13,7 @@ export const COLUMN_DOCUMENT_VERSION = 'document_version';
 @Entity()
 export class Document {
   @PrimaryColumn({ nullable: false })
-  id: number;
+  id: string;
   @CreateDateColumn()
   createdAt: Date;
 }

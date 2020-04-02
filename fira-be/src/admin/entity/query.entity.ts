@@ -13,7 +13,7 @@ export const COLUMN_QUERY_VERSION = 'query_version';
 @Entity()
 export class Query {
   @PrimaryColumn()
-  id: number;
+  id: string;
   @CreateDateColumn()
   createdAt: Date;
 }

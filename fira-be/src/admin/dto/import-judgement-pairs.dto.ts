@@ -28,10 +28,10 @@ export class ImportJudgementPairsReqDto implements ImportJudgementPairsReq {
 class ImportJudgementPairDto implements ImportJudgementPair {
   @IsNumber()
   @IsDefined()
-  readonly documentId: number;
+  readonly documentId: string;
   @IsNumber()
   @IsDefined()
-  readonly queryId: number;
+  readonly queryId: string;
   @IsNumber()
   @IsDefined()
   readonly priority: number;
@@ -47,10 +47,10 @@ export class ImportJudgementPairsRespDto implements ImportJudgementPairsResp {
 class ImportJudgementPairResultDto implements ImportJudgementPairResult {
   @IsNumber()
   @IsDefined()
-  readonly documentId: number;
+  readonly documentId: string;
   @IsNumber()
   @IsDefined()
-  readonly queryId: number;
+  readonly queryId: string;
   @IsString()
   @IsNotEmpty()
   @IsEnum(ImportStatus)

@@ -41,7 +41,7 @@ export type ExportJudgement = {
   readonly mode: JudgementMode;
   readonly durationUsedToJudgeMs: number;
   readonly judgedAtUnixTS: number;
-  readonly documentId: number;
-  readonly queryId: number;
+  readonly documentId: string;
+  readonly queryId: string;
   readonly userId: string;
 };

@@ -32,10 +32,10 @@ class ExportJudgementResponseDto implements ExportJudgement {
   readonly judgedAtUnixTS: number;
   @IsInt()
   @IsDefined()
-  readonly documentId: number;
+  readonly documentId: string;
   @IsInt()
   @IsDefined()
-  readonly queryId: number;
+  readonly queryId: string;
   @IsString()
   @IsNotEmpty()
   readonly userId: string;

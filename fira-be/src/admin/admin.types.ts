@@ -9,7 +9,7 @@ export type ImportQueriesReq = {
 };
 
 export type ImportAsset = {
-  readonly id: number;
+  readonly id: string;
   readonly text: string;
 };
 
@@ -22,7 +22,7 @@ export type ImportQueriesResp = {
 };
 
 export type ImportResult = {
-  readonly id: number;
+  readonly id: string;
   readonly status: ImportStatus;
   readonly error?: string;
 };
@@ -32,8 +32,8 @@ export type ImportJudgementPairsReq = {
 };
 
 export type ImportJudgementPair = {
-  readonly documentId: number;
-  readonly queryId: number;
+  readonly documentId: string;
+  readonly queryId: string;
   readonly priority: number;
 };
 
@@ -42,8 +42,8 @@ export type ImportJudgementPairsResp = {
 };
 
 export type ImportJudgementPairResult = {
-  readonly documentId: number;
-  readonly queryId: number;
+  readonly documentId: string;
+  readonly queryId: string;
   readonly status: ImportStatus;
   readonly error?: string;
 };
