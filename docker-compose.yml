@@ -16,6 +16,7 @@ services:
       - KEYCLOAK_HOST_BASE=keycloak:8080
       - KEYCLOAK_ADMIN_USER=${ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
     volumes:
       - ${FIRA_BE_DATA_DIRECTORY}:/usr/src/app/data
 

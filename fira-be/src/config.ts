@@ -2,6 +2,9 @@ import * as moment from 'moment';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import NamingStrategies = require('typeorm-naming-strategies');
 
+// URL_REGEX taken from https://stackoverflow.com/a/26766402/1700319
+const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
+
 export const application = {
   port: 80,
   rateLimit: {
@@ -10,6 +13,9 @@ export const application = {
   },
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
+  homepage: {
+    path: (process.env.FIRA_HOMEPAGE && URL_REGEX.exec(process.env.FIRA_HOMEPAGE)![5]) ?? '',
+  },
 } as const;
 
 export const database: TypeOrmModuleOptions = {

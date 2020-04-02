@@ -15,6 +15,8 @@ async function bootstrap() {
   const appLogger = await app.resolve(AppLogger);
   appLogger.setContext('Main-Bootstrap');
 
+  app.setGlobalPrefix(config.application.homepage.path);
+
   await importInitialData({
     logger: appLogger,
     imService: app.get(IdentityManagementService),

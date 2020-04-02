@@ -23,7 +23,7 @@ import {
 } from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
-  baseURL: window.location.origin,
+  baseURL: process.env.PUBLIC_URL,
   timeout: 5000,
 });
 const logger = createLogger('http.client');

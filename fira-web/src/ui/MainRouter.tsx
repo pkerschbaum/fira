@@ -9,6 +9,10 @@ import { useUserState } from '../store/user/user.hooks';
 import { UserRole } from '../typings/enums';
 import { assertUnreachable } from '../util/types.util';
 
+// URL_REGEX taken from https://stackoverflow.com/a/26766402/1700319
+const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
+const PATH_NAME = URL_REGEX.exec(process.env.PUBLIC_URL)?.[5];
+
 const RedirectDependingOnUserRole: React.FC = () => {
   const { userRole } = useUserState();
 
@@ -25,7 +29,7 @@ const RedirectDependingOnUserRole: React.FC = () => {
 
 const MainRouter: React.FC = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={PATH_NAME}>
       <Switch>
         <Route exact path="/">
           <RedirectDependingOnUserRole />
