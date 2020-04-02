@@ -21,7 +21,7 @@
 }
 
 /* mobile devices, touch only */
-@media only screen and (pointer: coarse) {
+@media screen and (max-height: 500px) {
   .container {
     flex-grow: 1;
   }

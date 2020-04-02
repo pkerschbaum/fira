@@ -20,7 +20,7 @@
 }
 
 /* mobile devices, touch only */
-@media only screen and (pointer: coarse) {
+@media screen and (max-height: 500px) {
   .annotationAllowedInGeneral {
     padding: var(--padding-xxxsmall) 0;
   }

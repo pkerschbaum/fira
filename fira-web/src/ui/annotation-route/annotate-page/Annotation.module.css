@@ -71,7 +71,7 @@
 }
 
 /* mobile devices, touch only */
-@media only screen and (pointer: coarse) {
+@media screen and (max-height: 500px) {
   .container {
     justify-content: space-between;
   }
