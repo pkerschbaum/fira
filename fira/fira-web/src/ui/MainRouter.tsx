@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 
+import * as config from '../config';
 import Login from './login-page/Login';
 import Admin from './admin-page/Admin';
 import AnnotationRouter from './annotation-route/AnnotationRouter';
@@ -11,7 +12,7 @@ import { assertUnreachable } from '../util/types.util';
 
 // URL_REGEX taken from https://stackoverflow.com/a/26766402/1700319
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
-const PATH_NAME = URL_REGEX.exec(process.env.PUBLIC_URL)?.[5];
+const PATH_NAME = URL_REGEX.exec(config.application.homepage)?.[5];
 
 const RedirectDependingOnUserRole: React.FC = () => {
   const { userRole } = useUserState();

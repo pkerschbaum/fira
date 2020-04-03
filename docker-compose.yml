@@ -2,7 +2,10 @@ version: '3.4'
 
 services:
   fira-be:
-    build: fira-be/.
+    build:
+      context: fira/.
+      args:
+        - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
     ports:
       - '${FIRA_BE_PUBLIC_PORT}:80'
     networks:

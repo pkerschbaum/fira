@@ -52,7 +52,7 @@ FIRA_BE_DATA_DIRECTORY=/c/data/fira-data/
 FIRA_BE_DATABASE_DIRECTORY=/c/data/fira-db/
 KEYCLOAK_DATABASE_DIRECTORY=/c/data/keycloak-db/
 
-# configuration for domain the app is deployed on
+# configuration for domain the app is deployed on. Avoid trailing /
 FIRA_HOMEPAGE=https://my-domain/path-of-app
 ```
 

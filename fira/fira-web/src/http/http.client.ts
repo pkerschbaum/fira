@@ -1,8 +1,8 @@
 import axios from 'axios';
 
+import * as config from '../config';
 import { HttpException } from './http.exception';
 import { createLogger } from '../logger/logger';
-
 import {
   LoginRequest,
   ImportUsersResponse,
@@ -23,7 +23,7 @@ import {
 } from '../typings/fira-be-typings';
 
 const axiosClient = axios.create({
-  baseURL: `${process.env.PUBLIC_URL}/api`,
+  baseURL: `${config.application.homepage}/api`,
   timeout: 5000,
 });
 const logger = createLogger('http.client');
