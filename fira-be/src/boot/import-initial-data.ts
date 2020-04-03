@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as d3 from 'd3';
+import * as csvParse from 'csv-parse';
 
-import { AppLogger } from '../logger/app-logger.service';
 import * as config from '../config';
+import { AppLogger } from '../logger/app-logger.service';
 import { isEmpty } from '../util/strings';
 import { JudgementMode, ImportStatus } from '../typings/enums';
 import { AdminService } from '../admin/admin.service';
@@ -165,7 +166,7 @@ async function importAsset<T>({
 
   logger.log(`count of ${assetType} == 0 --> import ${assetType}...`);
   const assetFileContent = await readFileFromDisk(assetType);
-  const assetsParsed = tsvParse(assetFileContent, tsvSkipFn, tsvMapFn) as T[];
+  const assetsParsed = (await tsvParse(assetFileContent, tsvSkipFn, tsvMapFn)) as T[];
 
   const assetsImportResult = await importFn(assetsParsed);
   if (assetsImportResult) {
@@ -189,26 +190,28 @@ async function writeFileToDisk(fileName: string, content: string) {
   });
 }
 
-function tsvParse(
+async function tsvParse(
   tsv: string,
   skipFn: (obj: ObjectLiteral) => boolean,
   mapFn: (obj: ObjectLiteral) => ObjectLiteral,
 ) {
-  return d3
-    .tsvParse(tsv)
-    .filter((entry) => !skipFn(entry))
-    .map(mapFn);
+  const recordsStream = csvParse(tsv, { delimiter: '\t', quote: null, columns: true });
+  const results = [];
+  for await (const record of recordsStream) {
+    results.push(record);
+  }
+  return results.filter((entry) => !skipFn(entry)).map(mapFn);
 }
 
 function abortOnFailedImport(logger: AppLogger, importResults: ImportResult[]) {
-  const failedImport = importResults.find(
+  const failedImports = importResults.filter(
     (importResult) => importResult.status === ImportStatus.ERROR,
   );
-  if (failedImport) {
+  if (failedImports.length > 0) {
+    const exampleFailedImport = failedImports[0];
     logger.error(
-      `at least one import failed --> aborting... data of failed import was: ${JSON.stringify(
-        failedImport,
-      )}`,
+      `at least one import failed --> aborting... number of failed imports=${failedImports.length}, ` +
+        `data of first failed import was: ${JSON.stringify(exampleFailedImport)}`,
     );
     process.exit(1);
   }
