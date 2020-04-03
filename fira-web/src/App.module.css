@@ -17,26 +17,26 @@
   /* ### COLORS ### */
   --color-primary: #202932;
   --color-primary-font: white;
-  --color-error: rgb(193, 53, 21);
+  --color-error: #c13515;
   --color-disabled: #9b9b9b;
   --color-dense: #1d1d1d;
   --color-soft: #9b9b9b;
   --color-ui-element-highlight: #cccccc;
-  --color-destructive: rgb(193, 53, 21);
+  --color-destructive: #c13515;
 
-  --color-ratelevel-not-relevant: hsl(11, 100%, 69%);
-  --color-ratelevel-not-relevant-darkened: hsl(11, 100%, 49%);
-  --color-ratelevel-misleading-answer: hsl(36, 78%, 64%);
-  --color-ratelevel-misleading-answer-darkened: hsl(36, 78%, 39%);
-  --color-ratelevel-topic-relevant-does-not-answer: hsl(54, 100%, 80%);
-  --color-ratelevel-topic-relevant-does-not-answer-darkened: hsl(54, 100%, 30%);
-  --color-ratelevel-good-answer: hsl(101, 69%, 71%);
-  --color-ratelevel-good-answer-darkened: hsl(101, 69%, 41%);
-  --color-ratelevel-perfect-answer: hsl(106, 67%, 47%);
-  --color-ratelevel-perfect-answer-darkened: hsl(106, 67%, 27%);
+  --color-ratelevel-not-relevant: #ff7e61;
+  --color-ratelevel-not-relevant-darkened: #fa2e00;
+  --color-ratelevel-misleading-answer: #ebb25c;
+  --color-ratelevel-misleading-answer-darkened: #b17316;
+  --color-ratelevel-topic-relevant-does-not-answer: #fff599;
+  --color-ratelevel-topic-relevant-does-not-answer-darkened: #998a00;
+  --color-ratelevel-good-answer: #a2e882;
+  --color-ratelevel-good-answer-darkened: #4eb120;
+  --color-ratelevel-perfect-answer: #4dc828;
+  --color-ratelevel-perfect-answer-darkened: #2c7317;
 
   --color-annotation-allowed-highlight: #caffca;
-  --color-annotation-range-start: hsla(0, 79%, 72%, 50%);
+  --color-annotation-range-start: #f07f7f80;
   --color-annotation-is-in-range: lightgreen;
   --color-annotation-progress-bar: lightgreen;
 
