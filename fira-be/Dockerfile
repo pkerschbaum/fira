@@ -11,6 +11,9 @@ RUN npm install
 # Copy fira-be sources
 COPY . .
 
+# Build fira-be
+RUN npm run build
+
 # Add and execute scrpts which wait for the keycloak server to start, then start the fira backend
 ADD "./docker-resources/start.sh" "./"
 ADD "./docker-resources/wait-for-it.sh" "./"
