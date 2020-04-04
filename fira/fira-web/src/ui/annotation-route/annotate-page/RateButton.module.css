@@ -31,7 +31,7 @@
 
 /* now apply styles using the color variables */
 .button {
-  height: 3.25rem;
+  min-height: 3.25rem;
   width: 100%;
   padding: 0;
 
@@ -73,7 +73,7 @@
   }
 
   .button {
-    height: 2.75rem;
+    min-height: 2.75rem;
   }
 
   .hotkey {

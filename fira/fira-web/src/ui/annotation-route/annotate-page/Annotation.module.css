@@ -67,7 +67,7 @@
 }
 
 .nextButton {
-  height: 3rem;
+  min-height: 3rem;
   width: 3.75rem;
 }
 

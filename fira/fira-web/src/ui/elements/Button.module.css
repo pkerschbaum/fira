@@ -16,7 +16,7 @@
 }
 
 .typePrimary {
-  height: 2.75rem;
+  min-height: 2.75rem;
   padding: 0 var(--padding-xxxsmall);
   background-color: var(--color-primary);
   color: white;
@@ -35,7 +35,7 @@
 }
 
 .typeSecondary {
-  height: 2.75rem;
+  min-height: 2.75rem;
   padding: 0 var(--padding-xxsmall);
   background-color: white;
   color: var(--color-primary);
@@ -52,7 +52,7 @@
 }
 
 .typeTertiary {
-  height: 2.25rem;
+  min-height: 2.25rem;
   padding: 0 var(--padding-xxsmall);
   background-color: white;
   color: var(--color-primary);

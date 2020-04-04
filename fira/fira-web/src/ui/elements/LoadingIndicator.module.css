@@ -5,13 +5,13 @@
   align-items: center;
   position: relative;
   width: 5rem;
-  height: 1.33rem;
+  min-height: 1.33rem;
 }
 
 .ldsEllipsis div {
   position: absolute;
   width: 0.75rem;
-  height: 0.75rem;
+  min-height: 0.75rem;
   border-radius: 50%;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
