@@ -66,14 +66,14 @@
   background: var(--darkened-color);
 }
 
-/* mobile devices, touch only */
-@media screen and (max-height: 500px) {
+/* touch devices (primary input is coarse) */
+@media (pointer: coarse) {
   .container {
     width: 5rem;
   }
 
   .button {
-    height: 2.5rem;
+    height: 2.75rem;
   }
 
   .hotkey {

@@ -82,8 +82,7 @@
 
 .select {
   height: 100%;
-  padding-top: 0.875rem;
-  margin: 0.625rem 0.75rem 0.625rem 0.5rem;
+  padding: 1.5rem 0.75rem 0.625rem 0.5rem;
   border: none;
   outline: none;
   background-color: transparent;

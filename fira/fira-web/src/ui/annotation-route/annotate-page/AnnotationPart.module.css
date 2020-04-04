@@ -19,8 +19,8 @@
   background-color: var(--color-annotation-allowed-highlight);
 }
 
-/* mobile devices, touch only */
-@media screen and (max-height: 500px) {
+/* touch devices (primary input is coarse) */
+@media (pointer: coarse) {
   .annotationAllowedInGeneral {
     padding: var(--padding-xxxsmall) 0;
   }

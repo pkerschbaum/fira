@@ -1,0 +1,23 @@
+{
+  "autorun": true,
+  "terminals": [
+    {
+      "name": "docker",
+      "focus": true,
+      "execute": false,
+      "command": "./scripts/fira-dev-up.sh"
+    },
+    {
+      "name": "fira-be",
+      "cwd": "[cwd]/fira/fira-be",
+      "execute": false,
+      "command": "npm run start:debug"
+    },
+    {
+      "name": "fira-web",
+      "cwd": "[cwd]/fira/fira-web",
+      "execute": false,
+      "command": "npm run start"
+    }
+  ]
+}

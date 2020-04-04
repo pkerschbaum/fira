@@ -70,6 +70,22 @@
   --narrow-content-area-width: 32.5rem;
 }
 
+.app * {
+  font-size: 1rem;
+}
+
+/* touch devices (primary input is coarse) */
+@media (pointer: coarse) {
+  .app * {
+    font-size: 1.05rem;
+  }
+
+  .app {
+    --font-small: 0.925rem;
+    --font-xxxlarge: 2.05rem;
+  }
+}
+
 /* apply some default styles */
 body {
   margin: 0;
@@ -85,10 +101,6 @@ body * {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-* {
-  font-size: 1rem;
 }
 
 button:active,

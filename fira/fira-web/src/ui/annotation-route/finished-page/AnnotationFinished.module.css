@@ -24,8 +24,8 @@
   max-width: 22rem;
 }
 
-/* mobile devices, touch only */
-@media screen and (max-height: 500px) {
+/* 800px ~ OnePlus 6T, 6.2 inch screen with 19.5:9 ratio */
+@media (max-height: 800px) {
   .container {
     flex-grow: 1;
   }

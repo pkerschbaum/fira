@@ -67,7 +67,7 @@ const AnnotationPart: React.FC<{
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="12"
-                height="14"
+                height="15"
                 viewBox="5 3 14 18"
                 fill="var(--color-destructive)"
               >

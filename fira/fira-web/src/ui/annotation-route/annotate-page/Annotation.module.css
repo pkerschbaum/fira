@@ -71,21 +71,27 @@
   width: 3.75rem;
 }
 
-/* mobile devices, touch only */
-@media screen and (max-height: 500px) {
+/* 800px ~ OnePlus 6T, 6.2 inch screen with 19.5:9 ratio */
+@media (max-height: 800px) {
   .container {
     justify-content: space-between;
   }
 
   .annotationArea {
     flex-grow: 1;
-    user-select: none;
   }
 
   .progressBar {
     /* for mobile layouts, stretch progress bar over entire width of screen */
     left: 0;
     width: var(--finished-fraction);
+  }
+}
+
+/* touch devices (primary input is coarse) */
+@media (pointer: coarse) {
+  .annotationArea {
+    user-select: none;
   }
 }
 
