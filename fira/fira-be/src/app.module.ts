@@ -1,11 +1,8 @@
-import { Module, HttpModule, HttpService, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { AxiosInstance } from 'axios';
-import nanoid = require('nanoid');
 
 import * as config from './config';
-import { AppLogger } from './commons/app-logger.service';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { User } from './identity-management/entity/user.entity';
@@ -21,7 +18,6 @@ import { PersistenceModule } from './persistence/persistence.module';
 
 @Module({
   imports: [
-    HttpModule,
     ServeStaticModule.forRoot({
       rootPath: config.application.staticSourcesPath,
       serveRoot: config.application.urlPaths.web,
@@ -47,46 +43,5 @@ import { PersistenceModule } from './persistence/persistence.module';
     FeedbackModule,
     PersistenceModule,
   ],
-  controllers: [],
-  providers: [],
 })
-export class AppModule implements OnModuleInit {
-  constructor(private readonly httpService: HttpService, private readonly appLogger: AppLogger) {
-    this.appLogger.setContext('AppModule');
-  }
-
-  onModuleInit() {
-    registerOutgoingHttpInterceptor(this.httpService.axiosRef, this.appLogger);
-  }
-}
-
-function registerOutgoingHttpInterceptor(axiosInstance: AxiosInstance, appLogger: AppLogger) {
-  axiosInstance.interceptors.request.use((request) => {
-    try {
-      const requestId = nanoid();
-      (request as any).requestId = requestId;
-      appLogger.log(`[REQUEST] [${requestId}] ${request.method?.toUpperCase()} ${request.url}`);
-      if (request.data) {
-        appLogger.debug(`[REQUEST PAYLOAD] [${requestId}] ${JSON.stringify(request.data)}`);
-      }
-    } catch {
-      // ignore
-    }
-
-    return request;
-  });
-
-  axiosInstance.interceptors.response.use((response) => {
-    try {
-      const requestId = (response.config as any).requestId;
-      appLogger.log(`[RESPONSE] [${requestId}] ${response.status}`);
-      if (response.data) {
-        appLogger.debug(`[RESPONSE PAYLOAD] [${requestId}] ${JSON.stringify(response.data)}`);
-      }
-    } catch {
-      // ignore
-    }
-
-    return response;
-  });
-}
+export class AppModule {}

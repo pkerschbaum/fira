@@ -8,6 +8,7 @@ import { Connection, EntityManager, MoreThan } from 'typeorm';
 import moment = require('moment');
 import d3 = require('d3');
 
+import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
 import {
   PreloadJudgement,
@@ -24,20 +25,21 @@ import { Document } from '../admin/entity/document.entity';
 import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
 import { Feedback } from '../feedback/entity/feedback.entity';
-import { AppLogger } from '../commons/app-logger.service';
+import { RequestLogger } from 'src/commons/request-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import { assertUnreachable } from 'src/util/types.util';
-import * as config from '../config';
 import { Statistic } from '../admin/admin.types';
+
+const SERVICE_NAME = 'JudgementsService';
 
 @Injectable()
 export class JudgementsService {
   constructor(
     private readonly connection: Connection,
-    private readonly appLogger: AppLogger,
+    private readonly requestLogger: RequestLogger,
     private readonly persistenceService: PersistenceService,
   ) {
-    this.appLogger.setContext('JudgementsService');
+    this.requestLogger.setContext(SERVICE_NAME);
   }
 
   public preloadJudgements = this.persistenceService.wrapInTransaction(
@@ -81,7 +83,7 @@ export class JudgementsService {
       const remainingUntilFirstFeedbackRequired =
         dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
 
-      this.appLogger.log(
+      this.requestLogger.log(
         `judgements stats for user: sum of all judgements=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
           `finished=${countCurrentFinishedJudgements}, countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
           `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
@@ -140,7 +142,7 @@ export class JudgementsService {
           );
         }
 
-        this.appLogger.log(
+        this.requestLogger.log(
           `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
         );
 
@@ -280,7 +282,7 @@ export class JudgementsService {
     let countJudgementsToPreload = config.application.judgementsPreloadSize - countOfOpenJudgements;
 
     if (countJudgementsToPreload < 1) {
-      this.appLogger.log(
+      this.requestLogger.log(
         `no judgements should get preloaded for this user, countJudgementsToPreload=${countJudgementsToPreload}`,
       );
       return;
@@ -294,7 +296,7 @@ export class JudgementsService {
       user.id,
     );
     if (countOfNotPreloadedPairs < 1) {
-      this.appLogger.log(
+      this.requestLogger.log(
         `there are no judgement pairs left for this user to annotate, ` +
           `countJudgementsToPreload=${countJudgementsToPreload}, countOfNotPreloadedPairs=${countOfNotPreloadedPairs}`,
       );
@@ -303,7 +305,7 @@ export class JudgementsService {
 
     // there is at least one judgement pair left for this user to annotate
     // --> apply preload logic and store preloaded judgements
-    this.appLogger.log(
+    this.requestLogger.log(
       `preloading judgements for this user. ` +
         `countJudgementsToPreload=${countJudgementsToPreload}, countOfNotPreloadedPairs={countOfNotPreloadedPairs}`,
     );
@@ -318,7 +320,7 @@ export class JudgementsService {
         transactionalEntityManager,
       });
 
-      this.appLogger.log(
+      this.requestLogger.log(
         `round of preload complete, annotation target factor was: ${targetFactor}, ` +
           `remaining judgements to preload: ${countJudgementsToPreload}`,
       );
@@ -329,7 +331,7 @@ export class JudgementsService {
         user.id,
       );
       if (countOfNotPreloadedPairs < 1) {
-        this.appLogger.log(
+        this.requestLogger.log(
           `the user now has judgements for EVERY possible judgement pair --> stop`,
         );
         break;
@@ -376,7 +378,7 @@ export class JudgementsService {
       }
 
       const pairsToPersist = pairCandidates.slice(0, countJudgementsToPreload);
-      this.appLogger.log(
+      this.requestLogger.log(
         `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(pairsToPersist)}`,
       );
       await persistPairs(
@@ -393,6 +395,7 @@ export class JudgementsService {
   };
 
   public getStatistics = async (): Promise<Statistic[]> => {
+    this.requestLogger.log('getStatistics');
     const dbConfig = await this.connection.getRepository(Config).findOneOrFail();
     const judgementRepository = this.connection.getRepository(Judgement);
 

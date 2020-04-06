@@ -30,8 +30,8 @@ async function bootstrap() {
   // now, import all data for Fira
   await importInitialData({
     logger: appLogger,
-    imService: app.get(IdentityManagementService),
-    adminService: app.get(AdminService),
+    imService: await app.resolve(IdentityManagementService),
+    adminService: await app.resolve(AdminService),
   });
 
   // set rate-limiting middleware to avoid DOS problems

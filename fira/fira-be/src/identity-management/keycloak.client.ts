@@ -1,7 +1,8 @@
-import { HttpService, Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import qs = require('qs');
 
 import * as config from '../config';
+import { AppHttpService } from '../commons/http.service';
 
 type KeycloakCertsResponse = {
   keys?: [
@@ -27,13 +28,13 @@ type KeycloakAuthResponse = {
 
 @Injectable()
 export class KeycloakClient {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: AppHttpService) {}
 
   public async getPublicKey() {
     return (
-      await this.httpService
-        .get<KeycloakCertsResponse>(`${getEndpoint()}/protocol/openid-connect/certs`)
-        .toPromise()
+      await this.httpService.request<KeycloakCertsResponse>({
+        url: `${getEndpoint()}/protocol/openid-connect/certs`,
+      })
     ).data;
   }
 
@@ -74,17 +75,14 @@ export class KeycloakClient {
 
   private async getToken(requestBody: KeycloakLoginRequest): Promise<KeycloakAuthResponse> {
     return (
-      await this.httpService
-        .post<KeycloakAuthResponse>(
-          `${getEndpoint()}/protocol/openid-connect/token`,
-          qs.stringify(requestBody),
-          {
-            headers: {
-              'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
-            },
-          },
-        )
-        .toPromise()
+      await this.httpService.request<KeycloakAuthResponse>({
+        url: `${getEndpoint()}/protocol/openid-connect/token`,
+        data: qs.stringify(requestBody),
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        },
+      })
     ).data;
   }
 
@@ -102,13 +100,13 @@ export class KeycloakClient {
     };
 
     try {
-      await this.httpService
-        .post(`${getAdminEndpoint()}/users`, requestBody, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
-        })
-        .toPromise();
+      await this.httpService.request({
+        url: `${getAdminEndpoint()}/users`,
+        data: requestBody,
+        headers: {
+          authorization: `Bearer ${accessToken}`,
+        },
+      });
     } catch (e) {
       if (e.response?.status === 401) {
         throw new UnauthorizedException('credentials invalid');

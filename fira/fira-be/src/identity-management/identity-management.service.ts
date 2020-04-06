@@ -5,10 +5,10 @@ import { Moment } from 'moment';
 import generate = require('nanoid/generate');
 import { Repository } from 'typeorm';
 
+import * as config from '../config';
 import { AuthResponse, ImportUserResponse, ImportUserRequest } from './identity-management.types';
 import { ImportStatus } from '../typings/enums';
-import * as config from '../config';
-import { AppLogger } from '../commons/app-logger.service';
+import { RequestLogger } from '../commons/request-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
 import { User } from './entity/user.entity';
@@ -28,11 +28,11 @@ export class IdentityManagementService {
 
   constructor(
     private readonly keycloakClient: KeycloakClient,
-    private readonly appLogger: AppLogger,
+    private readonly requestLogger: RequestLogger,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {
-    this.appLogger.setContext(SERVICE_NAME);
+    this.requestLogger.setContext(SERVICE_NAME);
     this.cache = { publicKey: {} };
   }
 
@@ -100,22 +100,22 @@ export class IdentityManagementService {
           .subtract(config.keycloak.refetchInterval)
           .isAfter(this.cache.publicKey.lastFetchedOn)
       ) {
-        this.appLogger.log('fetching public key from keycloak');
+        this.requestLogger.log('fetching public key from keycloak');
 
         const keycloakCertsResponse = await this.keycloakClient.getPublicKey();
 
         const newKey = keycloakCertsResponse.keys?.[0];
         if (newKey) {
-          this.appLogger.log(
+          this.requestLogger.log(
             `could successfully retrieve public key from keycloak, converting and saving key...`,
           );
           this.cache.publicKey.val = convertKey(newKey);
           this.cache.publicKey.lastFetchedOn = moment();
-          this.appLogger.log(`could successfully convert and save public key`);
+          this.requestLogger.log(`could successfully convert and save public key`);
         }
       }
     } catch (e) {
-      this.appLogger.warn(`could not retrieve new key from keycloak, reason: ${e}`);
+      this.requestLogger.warn(`could not retrieve new key from keycloak, reason: ${e}`);
     }
 
     if (!this.cache.publicKey.val) {

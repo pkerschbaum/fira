@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-import { AppLogger } from '../commons/app-logger.service';
+import { RequestLogger } from '../commons/request-logger.service';
 
+const SERVICE_NAME = 'PersistenceService';
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
 
 @Injectable()
 export class PersistenceService {
-  constructor(private readonly connection: Connection, private readonly appLogger: AppLogger) {
-    this.appLogger.setContext('PersistenceService');
+  constructor(
+    private readonly connection: Connection,
+    private readonly requestLogger: RequestLogger,
+  ) {
+    this.requestLogger.setContext(SERVICE_NAME);
   }
 
   public wrapInTransaction<T, U extends any[]>(cb: (em: EntityManager, ...args: U) => Promise<T>) {
@@ -24,7 +28,7 @@ export class PersistenceService {
           if (e.code !== POSTGRES_SERIALIZATION_FAILURE_CODE || attemptNumber >= MAX_ATTEMPTS) {
             throw e;
           }
-          this.appLogger.debug(
+          this.requestLogger.debug(
             `transaction failed due to serialization failure, retrying...` +
               ` attemptNumber of last attempt was: ${attemptNumber}`,
           );
