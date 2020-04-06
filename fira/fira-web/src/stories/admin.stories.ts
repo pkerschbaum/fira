@@ -1,6 +1,5 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
-import { store } from '../store/store';
 import { UpdateConfig } from '../typings/fira-be-typings';
 
 const logger = createLogger('admin.service');
@@ -9,7 +8,7 @@ export const adminStories = {
   exportJudgements: async () => {
     logger.info(`executing export of judgements...`);
 
-    const response = await httpClient.exportJudgements(store.getState().user!.accessToken.val);
+    const response = await httpClient.exportJudgements();
     saveTsv('judgements.tsv', response);
 
     logger.info(`export of judgements succeeded!`, { response });
@@ -18,7 +17,7 @@ export const adminStories = {
   exportFeedback: async () => {
     logger.info(`executing export of feedback...`);
 
-    const response = await httpClient.exportFeedback(store.getState().user!.accessToken.val);
+    const response = await httpClient.exportFeedback();
     saveTsv('feedback.tsv', response);
 
     logger.info(`export of feedback succeeded!`, { response });
@@ -27,7 +26,7 @@ export const adminStories = {
   updateConfig: async (config: UpdateConfig) => {
     logger.info(`executing update of config...`);
 
-    await httpClient.updateConfig(store.getState().user!.accessToken.val, config);
+    await httpClient.updateConfig(config);
 
     logger.info(`update of config succeeded!`);
   },
@@ -35,7 +34,7 @@ export const adminStories = {
   getStatistics: async () => {
     logger.info(`executing retrieval of statistics...`);
 
-    const response = await httpClient.getStatistics(store.getState().user!.accessToken.val);
+    const response = await httpClient.getStatistics();
 
     logger.info(`retrieval of statistics succeeded!`, { response });
     return response;

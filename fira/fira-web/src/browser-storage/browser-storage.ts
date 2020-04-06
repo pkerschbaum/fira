@@ -7,6 +7,7 @@ type LocalStorageUser = {
 };
 
 const USER_KEY = 'user';
+const CLIENT_ID_KEY = 'client-id';
 
 const logger = createLogger('browser-storage');
 
@@ -33,5 +34,17 @@ export const browserStorage = {
     }
     logger.info('user found', { currentlyStoredUser: storedUser });
     return JSON.parse(storedUser) as LocalStorageUser;
+  },
+
+  saveClientId: (clientId: string) => {
+    logger.info('saveClientId called', { clientId });
+
+    localStorage.setItem(CLIENT_ID_KEY, clientId);
+  },
+
+  getClientId: (): string | null => {
+    logger.info('getClientId called');
+
+    return localStorage.getItem(CLIENT_ID_KEY);
   },
 };

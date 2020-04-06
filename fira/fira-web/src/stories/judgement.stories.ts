@@ -13,7 +13,7 @@ export const judgementStories = {
   preloadJudgements: async () => {
     logger.info(`executing preload judgements...`);
 
-    const response = await httpClient.preloadJudgements(store.getState().user!.accessToken.val);
+    const response = await httpClient.preloadJudgements();
 
     logger.info(`preload judgements succeeded! dispatching preload judgements...`, { response });
     store.dispatch(annotationActions.preloadJudgements(response));
@@ -65,15 +65,11 @@ export const judgementStories = {
     );
 
     try {
-      await httpClient.submitJudgement(
-        store.getState().user!.accessToken.val,
-        currentJudgementPair.id,
-        {
-          relevanceLevel: currentJudgementPair.relevanceLevel!,
-          relevancePositions,
-          durationUsedToJudgeMs,
-        },
-      );
+      await httpClient.submitJudgement(currentJudgementPair.id, {
+        relevanceLevel: currentJudgementPair.relevanceLevel!,
+        relevancePositions,
+        durationUsedToJudgeMs,
+      });
     } catch (error) {
       logger.error(`submit current judgement failed!`, { id: currentJudgementPair.id, error });
       store.dispatch(

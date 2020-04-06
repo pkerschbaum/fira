@@ -1,8 +1,11 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
+import deepmerge from 'deepmerge';
 
 import * as config from '../config';
 import { HttpException } from './http.exception';
 import { createLogger } from '../logger/logger';
+import { store } from '../store/store';
+import { browserStorage } from '../browser-storage/browser-storage';
 import {
   LoginRequest,
   ImportUsersResponse,
@@ -30,12 +33,27 @@ const logger = createLogger('http.client');
 const REFRESH_RETRY_COUNT = 5;
 const REFRESH_RETRY_DELAY = 3 * 1000; // 3 seconds
 
+async function request<T>(requestConfig: AxiosRequestConfig) {
+  const accessToken = store.getState().user?.accessToken.val;
+  const clientId = browserStorage.getClientId();
+  const additionalConfig: AxiosRequestConfig = {
+    headers: {
+      authorization: accessToken !== undefined ? `Bearer ${accessToken}` : undefined,
+      'fira-client-id': clientId,
+    },
+  };
+
+  return axiosClient.request<T>(deepmerge(requestConfig, additionalConfig));
+}
+
 export const httpClient = {
   login: async (loginRequest: LoginRequest): Promise<AuthResponse> => {
     logger.info('executing login...', { username: loginRequest.username });
 
     try {
-      return (await axiosClient.post<AuthResponse>('auth/v1/login', loginRequest)).data;
+      return (
+        await request<AuthResponse>({ url: 'auth/v1/login', data: loginRequest, method: 'POST' })
+      ).data;
     } catch (e) {
       logger.error('login failed!', e);
       if (e.response?.status === 401) {
@@ -54,7 +72,13 @@ export const httpClient = {
     let lastError;
     while (attempt <= REFRESH_RETRY_COUNT) {
       try {
-        return (await axiosClient.post<AuthResponse>('auth/v1/refresh', refreshRequest)).data;
+        return (
+          await request<AuthResponse>({
+            url: 'auth/v1/refresh',
+            data: refreshRequest,
+            method: 'POST',
+          })
+        ).data;
       } catch (e) {
         logger.info(`refresh failed for attempt=${attempt}`, { error: e });
         lastError = e;
@@ -72,18 +96,15 @@ export const httpClient = {
     throw lastError;
   },
 
-  importUsers: async (
-    accessToken: string,
-    importUsersRequest: ImportUsersRequest,
-  ): Promise<ImportUsersResponse> => {
+  importUsers: async (importUsersRequest: ImportUsersRequest): Promise<ImportUsersResponse> => {
     logger.info('executing import users...', { importUsersRequest });
 
     try {
       return (
-        await axiosClient.post<ImportUsersResponse>('admin/v1/import/users', importUsersRequest, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<ImportUsersResponse>({
+          url: 'admin/v1/import/users',
+          data: importUsersRequest,
+          method: 'POST',
         })
       ).data;
     } catch (e) {
@@ -93,22 +114,17 @@ export const httpClient = {
   },
 
   importDocuments: async (
-    accessToken: string,
     importDocumentsRequest: ImportDocumentsReq,
   ): Promise<ImportDocumentsResp> => {
     logger.info('executing import documents...', { importDocumentsRequest });
 
     try {
       return (
-        await axiosClient.put<ImportDocumentsResp>(
-          'admin/v1/import/documents',
-          importDocumentsRequest,
-          {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
-          },
-        )
+        await request<ImportDocumentsResp>({
+          url: 'admin/v1/import/documents',
+          data: importDocumentsRequest,
+          method: 'PUT',
+        })
       ).data;
     } catch (e) {
       logger.error('import documents failed!', e);
@@ -116,18 +132,15 @@ export const httpClient = {
     }
   },
 
-  importQueries: async (
-    accessToken: string,
-    importQueriesRequest: ImportQueriesReq,
-  ): Promise<ImportQueriesResp> => {
+  importQueries: async (importQueriesRequest: ImportQueriesReq): Promise<ImportQueriesResp> => {
     logger.info('executing import queries...', { importQueriesRequest });
 
     try {
       return (
-        await axiosClient.put<ImportQueriesResp>('admin/v1/import/queries', importQueriesRequest, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<ImportQueriesResp>({
+          url: 'admin/v1/import/queries',
+          data: importQueriesRequest,
+          method: 'PUT',
         })
       ).data;
     } catch (e) {
@@ -137,22 +150,17 @@ export const httpClient = {
   },
 
   importJudgementPairs: async (
-    accessToken: string,
     importJudgPairsRequest: ImportJudgementPairsReq,
   ): Promise<ImportJudgementPairsResp> => {
     logger.info('executing import judgement pairs...', { importJudgPairsRequest });
 
     try {
       return (
-        await axiosClient.put<ImportJudgementPairsResp>(
-          'admin/v1/import/judgement-pairs',
-          importJudgPairsRequest,
-          {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
-          },
-        )
+        await request<ImportJudgementPairsResp>({
+          url: 'admin/v1/import/judgement-pairs',
+          data: importJudgPairsRequest,
+          method: 'PUT',
+        })
       ).data;
     } catch (e) {
       logger.error('import judgement pairs failed!', e);
@@ -160,15 +168,14 @@ export const httpClient = {
     }
   },
 
-  preloadJudgements: async (accessToken: string): Promise<PreloadJudgementResponse> => {
+  preloadJudgements: async (): Promise<PreloadJudgementResponse> => {
     logger.info('executing preload judgements...');
 
     try {
       return (
-        await axiosClient.post<PreloadJudgementResponse>('judgements/v1/preload', null, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<PreloadJudgementResponse>({
+          url: 'judgements/v1/preload',
+          method: 'POST',
         })
       ).data;
     } catch (e) {
@@ -178,55 +185,46 @@ export const httpClient = {
   },
 
   submitJudgement: async (
-    accessToken: string,
     judgementId: number,
     submitJudgementRequest: SaveJudgement,
   ): Promise<void> => {
     logger.info('executing submit judgement...', { submitJudgementRequest });
 
     try {
-      return (
-        await axiosClient.put(`judgements/v1/${judgementId}`, submitJudgementRequest, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
-        })
-      ).data;
+      await request({
+        url: `judgements/v1/${judgementId}`,
+        data: submitJudgementRequest,
+        method: 'PUT',
+      });
     } catch (e) {
       logger.error('submit judgement failed!', e);
       throw e;
     }
   },
 
-  submitFeedback: async (
-    accessToken: string,
-    submitFeedbackRequest: SubmitFeedback,
-  ): Promise<void> => {
+  submitFeedback: async (submitFeedbackRequest: SubmitFeedback): Promise<void> => {
     logger.info('executing submit feedback...', { submitFeedbackRequest });
 
     try {
-      return (
-        await axiosClient.post(`feedback/v1`, submitFeedbackRequest, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
-        })
-      ).data;
+      await request({
+        url: `feedback/v1`,
+        data: submitFeedbackRequest,
+        method: 'POST',
+      });
     } catch (e) {
       logger.error('submit feedback failed!', e);
       throw e;
     }
   },
 
-  exportJudgements: async (accessToken: string): Promise<string> => {
+  exportJudgements: async (): Promise<string> => {
     logger.info('executing export of judgements...');
 
     try {
       return (
-        await axiosClient.get(`admin/v1/judgements/export/tsv`, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<string>({
+          url: `admin/v1/judgements/export/tsv`,
+          method: 'GET',
         })
       ).data;
     } catch (e) {
@@ -235,15 +233,14 @@ export const httpClient = {
     }
   },
 
-  exportFeedback: async (accessToken: string): Promise<string> => {
+  exportFeedback: async (): Promise<string> => {
     logger.info('executing export of feedback...');
 
     try {
       return (
-        await axiosClient.get(`admin/v1/feedback/export/tsv`, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<string>({
+          url: `admin/v1/feedback/export/tsv`,
+          method: 'GET',
         })
       ).data;
     } catch (e) {
@@ -252,32 +249,29 @@ export const httpClient = {
     }
   },
 
-  updateConfig: async (accessToken: string, updateConfigRequest: UpdateConfig): Promise<void> => {
+  updateConfig: async (updateConfigRequest: UpdateConfig): Promise<void> => {
     logger.info('executing update of config...', { updateConfigRequest });
 
     try {
-      return (
-        await axiosClient.put(`admin/v1/config`, updateConfigRequest, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
-        })
-      ).data;
+      await request({
+        url: `admin/v1/config`,
+        data: updateConfigRequest,
+        method: 'PUT',
+      });
     } catch (e) {
       logger.error('update of config failed!', e);
       throw e;
     }
   },
 
-  getStatistics: async (accessToken: string): Promise<StatisticsResp> => {
+  getStatistics: async (): Promise<StatisticsResp> => {
     logger.info('executing retrieval of statistics...');
 
     try {
       return (
-        await axiosClient.get(`admin/v1/statistics`, {
-          headers: {
-            authorization: `Bearer ${accessToken}`,
-          },
+        await request<StatisticsResp>({
+          url: `admin/v1/statistics`,
+          method: 'GET',
         })
       ).data;
     } catch (e) {

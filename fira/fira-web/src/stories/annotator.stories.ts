@@ -18,7 +18,7 @@ export const annotatorStories = {
   submitFeedback: async (feedbackData: SubmitFeedback) => {
     logger.info(`executing submission of feedback...`);
 
-    await httpClient.submitFeedback(store.getState().user!.accessToken.val, feedbackData);
+    await httpClient.submitFeedback(feedbackData);
 
     logger.info(`submission of feedback succeeded!`);
   },

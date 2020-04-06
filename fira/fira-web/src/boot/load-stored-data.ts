@@ -1,11 +1,11 @@
+import { createLogger } from '../logger/logger';
 import { browserStorage } from '../browser-storage/browser-storage';
 import { store } from '../store/store';
 import { actions as userActions } from '../store/user/user.slice';
-import { createLogger } from '../logger/logger';
 
-const logger = createLogger('load-stored-user');
+const logger = createLogger('load-stored-data');
 
-export function loadStoredUser() {
+export function loadStoredData() {
   logger.info('load user from browser storage');
   const storedUser = browserStorage.getUser();
 

@@ -1,7 +1,8 @@
-import { loadStoredUser } from './load-stored-user';
+import { createClientId } from './create-client-id';
+import { loadStoredData } from './load-stored-data';
 import { createLogger } from '../logger/logger';
 
-const bootScripts = [loadStoredUser];
+const bootScripts = [createClientId, loadStoredData];
 
 const logger = createLogger('boot');
 
