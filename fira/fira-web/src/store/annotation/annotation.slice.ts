@@ -108,9 +108,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         (pair) => pair.id === state.currentJudgementPairId,
       );
       currentJudgementPair!.relevanceLevel = action.payload.relevanceLevel;
-      const currentRateLevel = RateLevels.find(
-        (rateLevel) => rateLevel.relevanceLevel === currentJudgementPair!.relevanceLevel,
-      );
+      const currentRateLevel = RateLevels[currentJudgementPair!.relevanceLevel];
 
       // clear annotated ranges and current annotation start if
       // rating is changed to a level which does not require annotation of ranges

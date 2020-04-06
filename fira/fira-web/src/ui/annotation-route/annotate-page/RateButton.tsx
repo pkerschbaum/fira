@@ -8,23 +8,19 @@ const RATE_LEVEL_DATA = {
   [RelevanceLevel.NOT_RELEVANT]: {
     style: styles.notRelevant,
     text: 'Wrong',
-    keyboardKey: '1',
   },
   [RelevanceLevel.MISLEADING_ANSWER]: {
     style: styles.misleadingAnswer,
     text: 'Misleading',
-    keyboardKey: '2',
   },
   [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: {
     style: styles.topicRelevantDoesNotAnswer,
     text: 'Ok',
-    keyboardKey: '3',
   },
-  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Good', keyboardKey: '4' },
+  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Good' },
   [RelevanceLevel.PERFECT_ANSWER]: {
     style: styles.perfectAnswer,
     text: 'Perfect',
-    keyboardKey: '5',
   },
 } as const;
 
@@ -38,7 +34,7 @@ const RateButton: React.FC<{ rateLevel: RateLevelType; onClick: () => void }> = 
         className={`${styles.button} ${RATE_LEVEL_DATA[rateLevel.relevanceLevel].style}`}
         onClick={onClick}
       >
-        <div className={styles.hotkey}>{RATE_LEVEL_DATA[rateLevel.relevanceLevel].keyboardKey}</div>
+        <div className={styles.hotkey}>{rateLevel.keyboardKey.toShow}</div>
         <span>{RATE_LEVEL_DATA[rateLevel.relevanceLevel].text}</span>
       </Button>
     </div>

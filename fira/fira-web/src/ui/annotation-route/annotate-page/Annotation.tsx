@@ -73,17 +73,15 @@ const Annotation: React.FC = () => {
     return () => judgementStories.rateJudgementPair(relevanceLevel);
   }
 
-  useKeyupHandler(
-    !currentJudgementPair
-      ? {}
-      : {
-          Digit1: createJudgementFn(RelevanceLevel.NOT_RELEVANT),
-          Digit2: createJudgementFn(RelevanceLevel.MISLEADING_ANSWER),
-          Digit3: createJudgementFn(RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER),
-          Digit4: createJudgementFn(RelevanceLevel.GOOD_ANSWER),
-          Digit5: createJudgementFn(RelevanceLevel.PERFECT_ANSWER),
-        },
-  );
+  // create map which is used to rate judgement pairs with keyboard keys
+  const keyupMap: { [keyCode: string]: () => void } = {};
+  for (const rateLevel of Object.values(RateLevels)) {
+    if (rateLevel.enabled) {
+      keyupMap[rateLevel.keyboardKey.keyCode] = createJudgementFn(rateLevel.relevanceLevel);
+    }
+  }
+
+  useKeyupHandler(!currentJudgementPair ? {} : keyupMap);
 
   // compute fraction of finished annotation; used for progress bar
   let finishedFraction;
@@ -104,9 +102,10 @@ const Annotation: React.FC = () => {
     return <AnnotationShell finishedFraction={finishedFraction} />;
   }
 
-  const currentRateLevel = RateLevels.find(
-    (rateLevel) => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
-  );
+  const currentRateLevel =
+    currentJudgementPair.relevanceLevel === undefined
+      ? undefined
+      : RateLevels[currentJudgementPair.relevanceLevel];
 
   // compute some boolean variables needed to guide the user throw the annotation process
   const ratingRequired = !currentRateLevel;
@@ -274,13 +273,15 @@ const Annotation: React.FC = () => {
         }
         guideComponent={
           ratingRequired ? (
-            RateLevels.map((rateLevel) => (
-              <RateButton
-                key={rateLevel.relevanceLevel}
-                rateLevel={rateLevel}
-                onClick={createJudgementFn(rateLevel.relevanceLevel)}
-              />
-            ))
+            Object.values(RateLevels)
+              .filter((rateLevel) => rateLevel.enabled)
+              .map((rateLevel) => (
+                <RateButton
+                  key={rateLevel.relevanceLevel}
+                  rateLevel={rateLevel}
+                  onClick={createJudgementFn(rateLevel.relevanceLevel)}
+                />
+              ))
           ) : (
             <>
               <span className={styles.guideText}>

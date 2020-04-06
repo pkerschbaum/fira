@@ -28,9 +28,7 @@ export const judgementStories = {
     const currentJudgementPair = annotationState.judgementPairs.find(
       (pair) => pair.id === annotationState.currentJudgementPairId,
     )!;
-    const currentRateLevel = RateLevels.find(
-      (rateLevel) => rateLevel.relevanceLevel === currentJudgementPair.relevanceLevel,
-    );
+    const currentRateLevel = RateLevels[currentJudgementPair.relevanceLevel!];
 
     if (!currentRateLevel!.annotationRequired || currentJudgementPair!.annotatedRanges.length > 0) {
       // if the chosen rate level does not require annotation, or it does and regions are

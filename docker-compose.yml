@@ -13,6 +13,7 @@ services:
     depends_on:
       - keycloak
       - postgres_fira
+    restart: unless-stopped
     environment:
       - DB_ADDR=postgres_fira
       - DB_USER=${FIRA_DB_USER}
