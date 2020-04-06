@@ -24,7 +24,7 @@ import {
 
 const axiosClient = axios.create({
   baseURL: `${config.application.homepage}/api`,
-  timeout: 5000,
+  timeout: 10000,
 });
 const logger = createLogger('http.client');
 const REFRESH_RETRY_COUNT = 5;
