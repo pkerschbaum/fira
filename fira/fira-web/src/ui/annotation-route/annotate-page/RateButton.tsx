@@ -15,9 +15,9 @@ const RATE_LEVEL_DATA = {
   },
   [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: {
     style: styles.topicRelevantDoesNotAnswer,
-    text: 'Ok',
+    text: 'Topic',
   },
-  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Good' },
+  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Partial' },
   [RelevanceLevel.PERFECT_ANSWER]: {
     style: styles.perfectAnswer,
     text: 'Perfect',
