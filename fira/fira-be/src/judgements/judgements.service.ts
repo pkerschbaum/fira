@@ -120,7 +120,7 @@ export class JudgementsService {
       // revert the rotation
       let relevancePositions = judgementData.relevancePositions;
       if (dbJudgement.rotate) {
-        const rotateIndex = dbJudgement.document.annotateParts.length / 2;
+        const rotateIndex = getRotateIndex(dbJudgement.document.annotateParts.length);
         relevancePositions = relevancePositions.map((relevancePosition) =>
           relevancePosition >= rotateIndex
             ? relevancePosition - rotateIndex
@@ -584,7 +584,7 @@ function mapJudgementsToResponse(openJudgements: Judgement[]) {
       // rotate text (annotation parts), if requested to do so
       let annotationParts = openJudgement.document.annotateParts;
       if (openJudgement.rotate) {
-        const rotateIndex = annotationParts.length / 2;
+        const rotateIndex = getRotateIndex(annotationParts.length);
         annotationParts = annotationParts
           .slice(rotateIndex, annotationParts.length)
           .concat(annotationParts.slice(0, rotateIndex));
@@ -625,4 +625,8 @@ function constructCharacterRangesMap(textParts: string[]) {
   });
 
   return partsCharacterRanges;
+}
+
+function getRotateIndex(countOfAnnotationParts: number) {
+  return Math.floor(countOfAnnotationParts / 2);
 }
