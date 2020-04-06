@@ -49,6 +49,7 @@
 
   /* ### BORDERS ### */
   --border-small: 0.0625rem;
+  --border-medium: 0.125rem;
   --border-xlarge: 0.15rem;
   --border-radius-xsmall: 0.25rem;
   --border-radius-normal: 0.5rem;

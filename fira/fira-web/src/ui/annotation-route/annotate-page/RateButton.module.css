@@ -35,7 +35,7 @@
   width: 100%;
   padding: 0;
 
-  border: var(--border-small) solid var(--darkened-color);
+  border: var(--border-medium) solid var(--darkened-color);
   color: var(--color-dense);
   background: var(--bg-color);
 
@@ -51,8 +51,8 @@
 
 .hotkey {
   position: absolute;
-  top: -1px;
-  left: -1px;
+  top: -2px;
+  left: -2px;
   min-width: 1.25rem;
   height: 1.25rem;
   display: flex;
