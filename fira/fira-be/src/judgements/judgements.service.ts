@@ -24,7 +24,7 @@ import { Document } from '../admin/entity/document.entity';
 import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
 import { Feedback } from '../feedback/entity/feedback.entity';
-import { AppLogger } from '../logger/app-logger.service';
+import { AppLogger } from '../commons/app-logger.service';
 import { assetUtil } from '../admin/asset.util';
 import { assertUnreachable } from 'src/util/types.util';
 import * as config from '../config';

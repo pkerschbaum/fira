@@ -1,11 +1,11 @@
 import { Module, Global } from '@nestjs/common';
 
 import { PersistenceService } from './persistence.service';
-import { LoggerModule } from '../logger/app-logger.module';
+import { CommonsModule } from 'src/commons/commons.module';
 
 @Global()
 @Module({
-  imports: [LoggerModule],
+  imports: [CommonsModule],
   providers: [PersistenceService],
   exports: [PersistenceService],
 })

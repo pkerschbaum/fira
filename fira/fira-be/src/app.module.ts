@@ -3,11 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { AxiosInstance } from 'axios';
 import nanoid = require('nanoid');
-import * as path from 'path';
 
 import * as config from './config';
-import { LoggerModule } from './logger/app-logger.module';
-import { AppLogger } from './logger/app-logger.service';
+import { AppLogger } from './commons/app-logger.service';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { User } from './identity-management/entity/user.entity';
@@ -24,7 +22,6 @@ import { PersistenceModule } from './persistence/persistence.module';
 @Module({
   imports: [
     HttpModule,
-    LoggerModule,
     ServeStaticModule.forRoot({
       rootPath: config.application.staticSourcesPath,
       serveRoot: config.application.urlPaths.web,

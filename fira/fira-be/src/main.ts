@@ -5,7 +5,7 @@ import * as rateLimitMiddleware from 'express-rate-limit';
 
 import * as config from './config';
 import { AppModule } from './app.module';
-import { AppLogger } from './logger/app-logger.service';
+import { AppLogger } from './commons/app-logger.service';
 import { importInitialData } from './boot/import-initial-data';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { AdminService } from './admin/admin.service';

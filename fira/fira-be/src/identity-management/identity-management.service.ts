@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { AuthResponse, ImportUserResponse, ImportUserRequest } from './identity-management.types';
 import { ImportStatus } from '../typings/enums';
 import * as config from '../config';
-import { AppLogger } from '../logger/app-logger.service';
+import { AppLogger } from '../commons/app-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
 import { User } from './entity/user.entity';

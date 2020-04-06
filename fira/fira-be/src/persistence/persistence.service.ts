@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-import { AppLogger } from '../logger/app-logger.service';
+import { AppLogger } from '../commons/app-logger.service';
 
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';

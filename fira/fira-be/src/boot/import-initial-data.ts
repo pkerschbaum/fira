@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import * as csvParse from 'csv-parse';
 
 import * as config from '../config';
-import { AppLogger } from '../logger/app-logger.service';
+import { AppLogger } from '../commons/app-logger.service';
 import { isEmpty } from '../util/strings';
 import { JudgementMode, ImportStatus } from '../typings/enums';
 import { AdminService } from '../admin/admin.service';
