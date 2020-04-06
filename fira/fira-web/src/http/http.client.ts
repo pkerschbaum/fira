@@ -7,6 +7,7 @@ import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
 import { browserStorage } from '../browser-storage/browser-storage';
 import {
+  HEADER_CLIENT_ID,
   LoginRequest,
   ImportUsersResponse,
   ImportUsersRequest,
@@ -23,7 +24,7 @@ import {
   StatisticsResp,
   UpdateConfig,
   SubmitFeedback,
-} from '../typings/fira-be-typings';
+} from '../../../commons';
 
 const axiosClient = axios.create({
   baseURL: `${config.application.homepage}/api`,
@@ -39,7 +40,7 @@ async function request<T>(requestConfig: AxiosRequestConfig) {
   const additionalConfig: AxiosRequestConfig = {
     headers: {
       authorization: accessToken !== undefined ? `Bearer ${accessToken}` : undefined,
-      'fira-client-id': clientId,
+      [HEADER_CLIENT_ID]: clientId,
     },
   };
 

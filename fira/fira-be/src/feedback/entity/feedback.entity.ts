@@ -7,7 +7,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-import { FeedbackScore } from '../../typings/enums';
+import { FeedbackScore } from '../../../../commons';
 import { User } from '../../identity-management/entity/user.entity';
 
 @Entity()

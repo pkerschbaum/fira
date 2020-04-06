@@ -3,5 +3,6 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "plugins": ["@nestjs/swagger/plugin"]
-  }
+  },
+  "entryFile": "fira-be/src/main"
 }

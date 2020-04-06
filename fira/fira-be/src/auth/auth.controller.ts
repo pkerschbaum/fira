@@ -1,7 +1,7 @@
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
-import { IdentityManagementService } from 'src/identity-management/identity-management.service';
+import { IdentityManagementService } from '../identity-management/identity-management.service';
 import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 import { RefreshRequestDto, RefreshResponseDto } from './dto/refresh.dto';
 

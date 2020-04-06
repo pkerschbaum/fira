@@ -1,4 +1,5 @@
-import { JudgementMode, ImportStatus } from '../typings/enums';
+import { ImportStatus } from '../../fira-be/src/typings/enums';
+import { JudgementMode } from '../../commons';
 
 export type ImportDocumentsReq = {
   readonly documents: ImportAsset[];

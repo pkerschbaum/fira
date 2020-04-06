@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-import { LoginRequest } from '../auth.types';
-import { AuthResponse } from '../../identity-management/identity-management.types';
+import { LoginRequest, AuthResponse } from '../../../../commons';
 
 export class LoginRequestDto implements LoginRequest {
   @IsString()

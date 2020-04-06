@@ -1,6 +1,6 @@
 import { httpClient } from '../http/http.client';
 import { createLogger } from '../logger/logger';
-import { UpdateConfig } from '../typings/fira-be-typings';
+import { UpdateConfig } from '../../../commons';
 
 const logger = createLogger('admin.service');
 

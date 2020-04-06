@@ -6,7 +6,7 @@ import generate = require('nanoid/generate');
 import { Repository } from 'typeorm';
 
 import * as config from '../config';
-import { AuthResponse, ImportUserResponse, ImportUserRequest } from './identity-management.types';
+import { AuthResponse, ImportUserResponse, ImportUserRequest } from '../../../commons';
 import { ImportStatus } from '../typings/enums';
 import { RequestLogger } from '../commons/request-logger.service';
 import { KeycloakClient } from './keycloak.client';

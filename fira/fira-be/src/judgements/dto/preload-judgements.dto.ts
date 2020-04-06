@@ -10,8 +10,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { PreloadJudgement, PreloadJudgementResponse } from '../judgements.types';
-import { JudgementMode } from '../../typings/enums';
+import { JudgementMode, PreloadJudgement, PreloadJudgementResponse } from '../../../../commons';
 
 export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ArrayMinSize(1)

@@ -1,7 +1,7 @@
+# Phase 1: copy and build fira-web
 FROM node:12.14.0 AS build-env-web
 ARG FIRA_HOMEPAGE
 
-# Phase 1: copy and build fira-web
 # Switch workdir to the build directory
 WORKDIR /app/fira-web
 
@@ -12,7 +12,8 @@ RUN npm install
 
 # Copy sources
 COPY fira-web/. ./
-COPY fira-be/. ../fira-be/
+COPY commons/. ../commons/
+COPY tsconfig.json ../
 
 # Create production build
 RUN env PUBLIC_URL=$FIRA_HOMEPAGE npm run build
@@ -21,20 +22,22 @@ RUN env PUBLIC_URL=$FIRA_HOMEPAGE npm run build
 FROM node:12.14.0
 
 # Switch workdir to the main app directory
-WORKDIR /usr/src/app
+WORKDIR /app/fira-be
 
 # Install app dependencies
 COPY fira-be/package*.json ./
 RUN npm install
 
 # Copy sources
-COPY fira-be/. .
+COPY fira-be/. ./
+COPY commons/. ../commons/
+COPY tsconfig.json ../
 
 # Create build
 RUN npm run build
 
 # Copy final build of fira-web to fira-be
-COPY --from=build-env-web /app/fira-web/build ./client/build
+COPY --from=build-env-web /app/fira-web/build ./dist/fira-be/client/build
 
 # Add and execute scrpts which wait for the keycloak server to start, then start the fira backend
 ADD "./docker-resources/start.sh" "./"

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 
 import styles from './Admin.module.css';
-import { Statistic } from '../../typings/fira-be-typings';
-import { JudgementMode } from '../../typings/enums';
+import { JudgementMode, Statistic } from '../../../../commons';
 import { adminStories } from '../../stories/admin.stories';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';

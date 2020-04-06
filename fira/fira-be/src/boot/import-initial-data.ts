@@ -6,7 +6,8 @@ import * as csvParse from 'csv-parse';
 import * as config from '../config';
 import { AppLogger } from '../commons/app-logger.service';
 import { isEmpty } from '../util/strings';
-import { JudgementMode, ImportStatus } from '../typings/enums';
+import { ImportStatus } from '../typings/enums';
+import { JudgementMode } from '../../../commons';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
 
@@ -177,13 +178,16 @@ async function importAsset<T>({
 }
 
 async function readFileFromDisk(fileName: string) {
-  return await fs.promises.readFile(path.resolve(__dirname, '../../data', `${fileName}.tsv`), {
-    encoding: 'utf8',
-  });
+  return await fs.promises.readFile(
+    path.resolve(__dirname, '../../../../data', `${fileName}.tsv`),
+    {
+      encoding: 'utf8',
+    },
+  );
 }
 
 async function writeFileToDisk(fileName: string, content: string) {
-  const writePath = path.resolve(__dirname, '../../data/out');
+  const writePath = path.resolve(__dirname, '../../../../data/out');
   await fs.promises.mkdir(writePath, { recursive: true });
   return await fs.promises.writeFile(path.resolve(writePath, `${fileName}.tsv`), content, {
     encoding: 'utf8',

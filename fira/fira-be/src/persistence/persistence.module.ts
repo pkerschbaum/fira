@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 
 import { PersistenceService } from './persistence.service';
-import { CommonsModule } from 'src/commons/commons.module';
+import { CommonsModule } from '../commons/commons.module';
 
 @Global()
 @Module({

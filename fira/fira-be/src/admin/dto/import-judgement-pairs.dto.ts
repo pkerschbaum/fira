@@ -16,7 +16,7 @@ import {
   ImportJudgementPair,
   ImportJudgementPairResult,
   ImportJudgementPairsResp,
-} from '../admin.types';
+} from '../../../../commons';
 
 export class ImportJudgementPairsReqDto implements ImportJudgementPairsReq {
   @ArrayMinSize(1)

@@ -2,7 +2,7 @@ import { Injectable, Scope, Inject, Optional } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 
-const HEADER_CLIENT_ID = 'fira-client-id';
+import { HEADER_CLIENT_ID } from '../../../commons';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RequestProperties {

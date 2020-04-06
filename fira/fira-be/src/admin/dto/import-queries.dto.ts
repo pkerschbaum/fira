@@ -11,7 +11,12 @@ import {
 import { Type } from 'class-transformer';
 
 import { ImportStatus } from '../../typings/enums';
-import { ImportAsset, ImportResult, ImportQueriesReq, ImportQueriesResp } from '../admin.types';
+import {
+  ImportAsset,
+  ImportResult,
+  ImportQueriesReq,
+  ImportQueriesResp,
+} from '../../../../commons';
 
 export class ImportQueriesReqDto implements ImportQueriesReq {
   @ArrayMinSize(1)

@@ -10,14 +10,14 @@ import {
   ImportJudgementPair,
   ImportJudgementPairResult,
   UpdateConfig,
-} from './admin.types';
+} from '../../../commons';
 import { ImportStatus } from '../typings/enums';
 import { Document, DocumentVersion } from './entity/document.entity';
 import { Query, QueryVersion } from './entity/query.entity';
 import { JudgementPair } from './entity/judgement-pair.entity';
 import { Config } from './entity/config.entity';
 import { assetUtil } from './asset.util';
-import { partitionArray, flatten } from 'src/util/arrays';
+import { partitionArray, flatten } from '../util/arrays';
 
 const NUMBER_PARALLEL_IMPORTS = 10;
 

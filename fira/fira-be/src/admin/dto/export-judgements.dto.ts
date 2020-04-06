@@ -1,8 +1,12 @@
 import { ValidateNested, IsInt, IsDefined, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ExportJudgement, ExportJudgementsResponse } from '../../judgements/judgements.types';
-import { JudgementMode, RelevanceLevel } from '../../typings/enums';
+import {
+  JudgementMode,
+  RelevanceLevel,
+  ExportJudgement,
+  ExportJudgementsResponse,
+} from '../../../../commons';
 
 export class ExportJudgementsResponseDto implements ExportJudgementsResponse {
   @ValidateNested({ each: true })

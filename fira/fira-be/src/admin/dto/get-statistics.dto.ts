@@ -1,7 +1,7 @@
 import { ValidateNested, IsString, IsNotEmpty } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { StatisticsResp, Statistic } from '../admin.types';
+import { StatisticsResp, Statistic } from '../../../../commons';
 
 export class StatisticsResponseDto implements StatisticsResp {
   @ValidateNested({ each: true })

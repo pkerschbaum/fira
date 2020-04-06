@@ -2,7 +2,8 @@ import React from 'react';
 
 import styles from './RateButton.module.css';
 import Button from '../../elements/Button';
-import { RateLevelType, RelevanceLevel } from '../../../typings/enums';
+import { RateLevelType } from '../../../typings/enums';
+import { RelevanceLevel } from '../../../../../commons';
 
 const RATE_LEVEL_DATA = {
   [RelevanceLevel.NOT_RELEVANT]: {

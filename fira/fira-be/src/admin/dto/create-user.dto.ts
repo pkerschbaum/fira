@@ -14,7 +14,7 @@ import {
   ImportUsersResponse,
   ImportUserRequest,
   ImportUsersRequest,
-} from '../../identity-management/identity-management.types';
+} from '../../../../commons';
 
 export class ImportUsersRequestDto implements ImportUsersRequest {
   @ArrayMinSize(1)

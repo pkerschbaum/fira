@@ -7,7 +7,8 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-import { JudgementStatus, RelevanceLevel, JudgementMode } from '../../typings/enums';
+import { JudgementStatus } from '../../typings/enums';
+import { RelevanceLevel, JudgementMode } from '../../../../commons';
 import { DocumentVersion } from '../../admin/entity/document.entity';
 import { QueryVersion } from '../../admin/entity/query.entity';
 import { User } from '../../identity-management/entity/user.entity';

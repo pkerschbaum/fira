@@ -1,8 +1,7 @@
 import { ValidateNested, IsInt, IsDefined, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ExportFeedback, ExportFeedbackResponse } from '../../feedback/feedback.types';
-import { FeedbackScore } from '../../typings/enums';
+import { FeedbackScore, ExportFeedback, ExportFeedbackResponse } from '../../../../commons';
 
 export class ExportFeedbackResponseDto implements ExportFeedbackResponse {
   @ValidateNested({ each: true })

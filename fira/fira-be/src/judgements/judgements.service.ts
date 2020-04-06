@@ -10,14 +10,16 @@ import d3 = require('d3');
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
+import { JudgementStatus } from '../typings/enums';
 import {
   PreloadJudgement,
   SaveJudgement,
   CountResult,
   PreloadJudgementResponse,
   ExportJudgement,
-} from './judgements.types';
-import { JudgementMode, JudgementStatus } from '../typings/enums';
+  JudgementMode,
+  Statistic,
+} from '../../../commons';
 import { Judgement } from './entity/judgement.entity';
 import { User } from '../identity-management/entity/user.entity';
 import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.entity';
@@ -25,10 +27,9 @@ import { Document } from '../admin/entity/document.entity';
 import { Query } from '../admin/entity/query.entity';
 import { Config } from '../admin/entity/config.entity';
 import { Feedback } from '../feedback/entity/feedback.entity';
-import { RequestLogger } from 'src/commons/request-logger.service';
+import { RequestLogger } from '../commons/request-logger.service';
 import { assetUtil } from '../admin/asset.util';
-import { assertUnreachable } from 'src/util/types.util';
-import { Statistic } from '../admin/admin.types';
+import { assertUnreachable } from '../util/types.util';
 
 const SERVICE_NAME = 'JudgementsService';
 

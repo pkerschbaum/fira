@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 
-import { PreloadJudgement } from '../../typings/fira-be-typings';
-import { RelevanceLevel, RateLevels } from '../../typings/enums';
+import { RateLevels } from '../../typings/enums';
+import { RelevanceLevel, PreloadJudgement } from '../../../../commons';
 import { actions as userActions } from '../user/user.slice';
 import { assertUnreachable } from '../../util/types.util';
 

@@ -1,4 +1,4 @@
-import { FeedbackScore } from '../typings/enums';
+import { FeedbackScore } from '../../commons';
 
 export type SubmitFeedback = {
   score: FeedbackScore;

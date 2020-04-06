@@ -1,4 +1,4 @@
-import { JudgementMode, RelevanceLevel } from '../typings/enums';
+import { JudgementMode, RelevanceLevel } from '../../commons';
 
 export type PreloadJudgementResponse = {
   readonly judgements: PreloadJudgement[];

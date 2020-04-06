@@ -4,8 +4,7 @@ import styles from './AnnotationFeedback.module.css';
 import Form from '../../elements/forms/Form';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { judgementStories } from '../../../stories/judgement.stories';
-import { FeedbackScore } from '../../../typings/enums';
-import { SubmitFeedback } from '../../../typings/fira-be-typings';
+import { FeedbackScore, SubmitFeedback } from '../../../../../commons';
 
 const FEEDBACK_SCORE_TEXTS = {
   [FeedbackScore.VERY_GOOD]: 'Very good',

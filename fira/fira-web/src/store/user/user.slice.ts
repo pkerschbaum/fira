@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import * as jwt from 'jsonwebtoken';
 
-import { JwtPayload } from '../../typings/fira-be-typings';
+import { JwtPayload } from '../../../../commons';
 import { UserRole } from '../../typings/enums';
 import { assertUnreachable } from '../../util/types.util';
 

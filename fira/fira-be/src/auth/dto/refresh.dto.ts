@@ -1,7 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-import { RefreshRequest } from '../auth.types';
-import { AuthResponse } from '../../identity-management/identity-management.types';
+import { RefreshRequest, AuthResponse } from '../../../../commons';
 
 export class RefreshRequestDto implements RefreshRequest {
   @IsString()

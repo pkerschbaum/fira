@@ -1,7 +1,6 @@
 import { IsDefined, IsString, IsOptional, IsEnum } from 'class-validator';
 
-import { SubmitFeedback } from '../feedback.types';
-import { FeedbackScore } from '../../typings/enums';
+import { FeedbackScore, SubmitFeedback } from '../../../../commons';
 
 export class SubmitFeedbackDto implements SubmitFeedback {
   @IsDefined()

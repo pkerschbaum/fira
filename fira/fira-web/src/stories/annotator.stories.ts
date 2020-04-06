@@ -2,7 +2,7 @@ import { createLogger } from '../logger/logger';
 import { store } from '../store/store';
 import { httpClient } from '../http/http.client';
 import { actions as userActions } from '../store/user/user.slice';
-import { SubmitFeedback } from '../typings/fira-be-typings';
+import { SubmitFeedback } from '../../../commons';
 
 const logger = createLogger('annotators.service');
 

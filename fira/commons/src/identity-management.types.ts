@@ -1,4 +1,4 @@
-import { ImportStatus } from '../typings/enums';
+import { ImportStatus } from '../../fira-be/src/typings/enums';
 
 export type AuthResponse = {
   accessToken: string;

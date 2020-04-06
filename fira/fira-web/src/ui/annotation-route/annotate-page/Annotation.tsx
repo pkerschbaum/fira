@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 
 import styles from './Annotation.module.css';
-import { RelevanceLevel, RateLevels, JudgementMode } from '../../../typings/enums';
+import { RateLevels } from '../../../typings/enums';
+import { RelevanceLevel, JudgementMode } from '../../../../../commons';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { noop } from '../../../util/functions';
 import Button from '../../elements/Button';

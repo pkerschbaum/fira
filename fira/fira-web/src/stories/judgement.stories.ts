@@ -5,7 +5,8 @@ import {
   actions as annotationActions,
   JudgementPairStatus,
 } from '../store/annotation/annotation.slice';
-import { RelevanceLevel, RateLevels } from '../typings/enums';
+import { RateLevels } from '../typings/enums';
+import { RelevanceLevel } from '../../../commons';
 
 const logger = createLogger('judgements.service');
 

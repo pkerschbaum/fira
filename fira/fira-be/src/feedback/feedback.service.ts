@@ -4,7 +4,7 @@ import d3 = require('d3');
 
 import { Feedback } from './entity/feedback.entity';
 import { User } from '../identity-management/entity/user.entity';
-import { SubmitFeedback, ExportFeedback } from './feedback.types';
+import { SubmitFeedback, ExportFeedback } from '../../../commons';
 
 @Injectable()
 export class FeedbackService {
