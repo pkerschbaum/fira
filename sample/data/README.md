@@ -9,7 +9,7 @@ Can have the following values:
 - `PLAIN_RELEVANCE_SCORING`: users must only give a score and cannot annotate text parts of the paragraph
 - `SCORING_AND_SELECT_SPANS`: users must give a score and annotate text parts of the paragraph
 
-### `priority` of `judgement-pairs.tsv`
+### `priority` of [`judgement-pairs.tsv`](judgement-pairs.tsv)
 
 Can have integer values and the value `all`.  
 The higher the number, the higher is the priority.  
