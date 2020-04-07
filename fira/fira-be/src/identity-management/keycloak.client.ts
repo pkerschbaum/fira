@@ -34,6 +34,7 @@ export class KeycloakClient {
     return (
       await this.httpService.request<KeycloakCertsResponse>({
         url: `${getEndpoint()}/protocol/openid-connect/certs`,
+        method: 'GET',
       })
     ).data;
   }

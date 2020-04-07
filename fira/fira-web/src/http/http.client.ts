@@ -34,7 +34,10 @@ const logger = createLogger('http.client');
 const REFRESH_RETRY_COUNT = 5;
 const REFRESH_RETRY_DELAY = 3 * 1000; // 3 seconds
 
-async function request<T>(requestConfig: AxiosRequestConfig) {
+async function request<T>(
+  /* method mandatory */
+  requestConfig: AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> },
+) {
   const accessToken = store.getState().user?.accessToken.val;
   const clientId = browserStorage.getClientId();
   const additionalConfig: AxiosRequestConfig = {

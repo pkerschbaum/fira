@@ -16,7 +16,10 @@ export class AppHttpService {
     this.requestLogger.setContext(SERVICE_NAME);
   }
 
-  async request<T>(requestConfig: AxiosRequestConfig) {
+  async request<T>(
+    /* method mandatory */
+    requestConfig: AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> },
+  ) {
     const requestId = nanoid(ID_SIZE);
 
     // log request
