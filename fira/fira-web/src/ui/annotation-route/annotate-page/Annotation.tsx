@@ -202,7 +202,14 @@ const Annotation: React.FC = () => {
         queryComponent={
           <>
             <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
-            <Menu />
+            <Menu
+              additionalInfo={
+                <span>
+                  Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
+                  <strong>{alreadyFinished! + remainingToFinish}</strong>
+                </span>
+              }
+            />
           </>
         }
         documentComponentRef={documentComponentRef}

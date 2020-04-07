@@ -19,7 +19,7 @@ const MenuButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(
   ),
 );
 
-const Menu: React.FC = () => {
+const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }) => {
   const [showMenu, setShowMenu] = useState(false);
   useOnViewportClick(() => setShowMenu(false));
   const userActions = useUserActions();
@@ -49,6 +49,9 @@ const Menu: React.FC = () => {
       <Popper placement="bottom-end">
         {({ ref, style, placement }) => (
           <div ref={ref} style={style} className={styles.container} data-placement={placement}>
+            {additionalInfo === undefined ? null : (
+              <div className={styles.additionalInfo}>{additionalInfo}</div>
+            )}
             <Button onClick={onShowInfoPage}>Go to Info Page</Button>
             <Button onClick={onLogout}>Logout</Button>
           </div>
