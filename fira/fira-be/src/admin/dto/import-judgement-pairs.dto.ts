@@ -3,7 +3,6 @@ import {
   ValidateNested,
   IsNotEmpty,
   IsString,
-  IsNumber,
   IsDefined,
   IsEnum,
   IsOptional,
@@ -26,15 +25,15 @@ export class ImportJudgementPairsReqDto implements ImportJudgementPairsReq {
 }
 
 class ImportJudgementPairDto implements ImportJudgementPair {
-  @IsNumber()
+  @IsString()
   @IsDefined()
   readonly documentId: string;
-  @IsNumber()
+  @IsString()
   @IsDefined()
   readonly queryId: string;
-  @IsNumber()
+  @IsString()
   @IsDefined()
-  readonly priority: number;
+  readonly priority: string;
 }
 
 export class ImportJudgementPairsRespDto implements ImportJudgementPairsResp {
@@ -45,10 +44,10 @@ export class ImportJudgementPairsRespDto implements ImportJudgementPairsResp {
 }
 
 class ImportJudgementPairResultDto implements ImportJudgementPairResult {
-  @IsNumber()
+  @IsString()
   @IsDefined()
   readonly documentId: string;
-  @IsNumber()
+  @IsString()
   @IsDefined()
   readonly queryId: string;
   @IsString()

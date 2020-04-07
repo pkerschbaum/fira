@@ -16,13 +16,6 @@ export type PreloadJudgement = {
   readonly mode: JudgementMode;
 };
 
-export type CountResult = {
-  readonly count: number;
-  readonly document_id: number;
-  readonly priority: number;
-  readonly query_id: number;
-};
-
 export type SaveJudgement = {
   readonly relevanceLevel: RelevanceLevel;
   readonly relevancePositions: number[];

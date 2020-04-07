@@ -24,7 +24,7 @@ export class JudgementPair {
   })
   query: Query;
   @Column({ name: COLUMN_PRIORITY, nullable: false })
-  priority: number;
+  priority: string;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

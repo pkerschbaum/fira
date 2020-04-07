@@ -35,7 +35,7 @@ export type ImportJudgementPairsReq = {
 export type ImportJudgementPair = {
   readonly documentId: string;
   readonly queryId: string;
-  readonly priority: number;
+  readonly priority: string;
 };
 
 export type ImportJudgementPairsResp = {

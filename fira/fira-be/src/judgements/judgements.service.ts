@@ -14,7 +14,6 @@ import { JudgementStatus } from '../typings/enums';
 import {
   PreloadJudgement,
   SaveJudgement,
-  CountResult,
   PreloadJudgementResponse,
   ExportJudgement,
   JudgementMode,
@@ -33,6 +32,15 @@ import { assertUnreachable } from '../util/types.util';
 
 const SERVICE_NAME = 'JudgementsService';
 
+type PairQueryResult = {
+  readonly document_id: string;
+  readonly query_id: string;
+};
+
+type CountQueryResult = PairQueryResult & {
+  readonly count: number;
+};
+
 @Injectable()
 export class JudgementsService {
   constructor(
@@ -48,16 +56,10 @@ export class JudgementsService {
       // preparation: load data needed throughout the entire preload transaction
       const user = await transactionalEntityManager.findOneOrFail(User, userId);
       const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
-      const priorities = ((await transactionalEntityManager
-        .createQueryBuilder(JudgementPair, 'judgement_pair')
-        .select(`DISTINCT judgement_pair.${COLUMN_PRIORITY}`, 'priority')
-        .getRawMany()) as Array<{ priority: number }>)
-        .map((dbObj) => dbObj.priority)
-        .sort((a, b) => b - a); // sort priorities descending
 
       // phase #1: determine how many judgements should, and can, be preloaded for the user,
       // and save preloaded judgements to the database
-      await this.preloadAllJudgements({ transactionalEntityManager, user, priorities, dbConfig });
+      await this.preloadAllJudgements({ transactionalEntityManager, user, dbConfig });
 
       // phase #2: after the user got preloaded as many judgements as possible,
       // load all the data and return it to the client
@@ -266,17 +268,16 @@ export class JudgementsService {
   private preloadAllJudgements = async ({
     transactionalEntityManager,
     user,
-    priorities,
     dbConfig,
   }: {
     transactionalEntityManager: EntityManager;
     user: User;
-    priorities: number[];
     dbConfig: Config;
   }) => {
     const allJudgementsOfUser = await transactionalEntityManager.find(Judgement, {
       where: { user },
     });
+    const countOfAllJudgements = allJudgementsOfUser.length;
     const countOfOpenJudgements = allJudgementsOfUser.filter(
       (j) => j.status === JudgementStatus.TO_JUDGE,
     ).length;
@@ -308,12 +309,107 @@ export class JudgementsService {
     // --> apply preload logic and store preloaded judgements
     this.requestLogger.log(
       `preloading judgements for this user. ` +
-        `countJudgementsToPreload=${countJudgementsToPreload}, countOfNotPreloadedPairs={countOfNotPreloadedPairs}`,
+        `countJudgementsToPreload=${countJudgementsToPreload}, countOfNotPreloadedPairs=${countOfNotPreloadedPairs}`,
     );
+
+    // get priorities, extract "all" priority and numeric priorities, and sort the latter descending
+    const allPriorities = ((await transactionalEntityManager
+      .createQueryBuilder(JudgementPair, 'judgement_pair')
+      .select(`DISTINCT judgement_pair.${COLUMN_PRIORITY}`, 'priority')
+      .getRawMany()) as Array<{ priority: string | 'all' }>).map((dbObj) => dbObj.priority);
+
+    const priorityAllExists = allPriorities.some((p) => p === 'all');
+    const numericPriorities = allPriorities
+      .map((p) => Number(p))
+      .filter((p) => !isNaN(p))
+      .sort((a, b) => b - a);
+
+    if (priorityAllExists) {
+      const countOfPairsWithPrioAll = await transactionalEntityManager
+        .createQueryBuilder(JudgementPair, 'judgement_pair')
+        .where({ priority: 'all' })
+        .getCount();
+      const stepSizeToPreloadPrioAllPair = Math.floor(
+        dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
+      );
+      const countPrioAllPairsUserShouldHave = Math.min(
+        countOfPairsWithPrioAll,
+        Math.floor(
+          (countOfAllJudgements + countJudgementsToPreload) / stepSizeToPreloadPrioAllPair,
+        ),
+      );
+      if (countPrioAllPairsUserShouldHave > 0) {
+        const countPrioAllPairsUserActuallyHas = await transactionalEntityManager
+          .createQueryBuilder(JudgementPair, 'jp')
+          .select('jp.*')
+          .where((qb) => {
+            return `jp.${COLUMN_PRIORITY} = :priority AND EXISTS ${qb
+              .subQuery()
+              .select(`1`)
+              .from(Judgement, 'j')
+              .where(
+                `j.document_document = jp.document_id AND j.query_query = jp.query_id AND j.user_id = :userid`,
+              )
+              .getQuery()}`;
+          })
+          .setParameter('userid', user.id)
+          .setParameter('priority', 'all')
+          .groupBy('jp.document_id, jp.query_id')
+          .getCount();
+
+        let countPrioAllPairsMissing =
+          countPrioAllPairsUserShouldHave - countPrioAllPairsUserActuallyHas;
+
+        while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
+          const pairCandidates: PairQueryResult[] = await transactionalEntityManager
+            .createQueryBuilder(JudgementPair, 'jp')
+            .select('jp.document_id, jp.query_id')
+            .where((qb) => {
+              return `jp.${COLUMN_PRIORITY} = :priority AND NOT EXISTS ${qb
+                .subQuery()
+                .select(`1`)
+                .from(Judgement, 'j')
+                .where(
+                  `j.document_document = jp.document_id AND j.query_query = jp.query_id AND j.user_id = :userid`,
+                )
+                .getQuery()}`;
+            })
+            .setParameter('userid', user.id)
+            .setParameter('priority', 'all')
+            .groupBy('jp.document_id, jp.query_id')
+            .execute();
+
+          if (pairCandidates.length < 1) {
+            this.requestLogger.warn(
+              `although the user should have got at least one judgement pair with priority=all preloaded, ` +
+                `no such judgement pair which the user has not judged yet could be found. ` +
+                `countPrioAllPairsUserShouldHave=${countPrioAllPairsUserShouldHave}, countPrioAllPairsUserActuallyHas=${countPrioAllPairsUserActuallyHas}`,
+            );
+            break;
+          }
+
+          const pairsToPersist = pairCandidates[0];
+          this.requestLogger.log(
+            `persisting open judgement with priority=all, pair=${JSON.stringify(pairsToPersist)}`,
+          );
+
+          await persistPairs(
+            [pairsToPersist],
+            user,
+            dbConfig.judgementMode,
+            dbConfig.rotateDocumentText,
+            transactionalEntityManager,
+          );
+          countJudgementsToPreload--;
+          countPrioAllPairsMissing--;
+        }
+      }
+    }
+
     let targetFactor = 1;
     while (countJudgementsToPreload > 0) {
       countJudgementsToPreload = await this.preloadNextJudgements({
-        priorities,
+        priorities: numericPriorities,
         targetFactor,
         user,
         countJudgementsToPreload,
@@ -496,7 +592,7 @@ async function getCandidatesByPriority(
   userId: string,
   dbConfig: Config,
   entityManager: EntityManager,
-): Promise<CountResult[]> {
+): Promise<CountQueryResult[]> {
   return (
     await entityManager
       .createQueryBuilder(JudgementPair, 'jp')
@@ -507,7 +603,7 @@ async function getCandidatesByPriority(
         'j.document_document = jp.document_id AND j.query_query = jp.query_id',
       )
       .where((qb) => {
-        return `jp.priority = ${priority} AND NOT EXISTS ${qb
+        return `jp.${COLUMN_PRIORITY} = :priority AND NOT EXISTS ${qb
           .subQuery()
           .select(`1`)
           .from(Judgement, 'j2')
@@ -517,19 +613,22 @@ async function getCandidatesByPriority(
           .getQuery()}`;
       })
       .setParameter('userid', userId)
+      .setParameter('priority', priority)
       .groupBy('jp.document_id, jp.query_id')
       .execute()
   )
-    .map((pair: CountResult) => ({
+    .map((pair: CountQueryResult) => ({
       ...pair,
       count: Number(pair.count),
     }))
-    .filter((pair: CountResult) => pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor)
-    .sort((p1: CountResult, p2: CountResult) => p1.count - p2.count);
+    .filter(
+      (pair: CountQueryResult) => pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor,
+    )
+    .sort((p1: CountQueryResult, p2: CountQueryResult) => p1.count - p2.count);
 }
 
 async function persistPairs(
-  pairs: CountResult[],
+  pairs: PairQueryResult[],
   user: User,
   judgementMode: JudgementMode,
   rotateDocumentText: boolean,

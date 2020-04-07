@@ -86,7 +86,7 @@ export async function importInitialData({
 
   /* --- JUDGEMENT-PAIRS --- */
 
-  await importAsset<{ queryId: string; documentId: string; priority: number }>({
+  await importAsset<{ queryId: string; documentId: string; priority: string }>({
     logger,
     assetType: 'judgement-pairs',
     getCountFn: adminService.getCountOfJudgPairs,
@@ -94,7 +94,7 @@ export async function importInitialData({
     tsvMapFn: (entry) => ({
       queryId: entry[COLUMN_QUERY_ID].trim(),
       documentId: entry[COLUMN_DOCUMENT_ID].trim(),
-      priority: Number(entry[COLUMN_PRIORITY]),
+      priority: entry[COLUMN_PRIORITY].trim(),
     }),
     importFn: adminService.importJudgementPairs,
   });
