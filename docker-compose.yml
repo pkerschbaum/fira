@@ -23,7 +23,7 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
     volumes:
-      - ${FIRA_BE_DATA_DIRECTORY}:/usr/src/app/data
+      - ${FIRA_BE_DATA_DIRECTORY}:/app/fira-be/data
 
   postgres_fira:
     image: postgres:12

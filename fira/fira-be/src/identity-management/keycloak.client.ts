@@ -103,6 +103,7 @@ export class KeycloakClient {
       await this.httpService.request({
         url: `${getAdminEndpoint()}/users`,
         data: requestBody,
+        method: 'POST',
         headers: {
           authorization: `Bearer ${accessToken}`,
         },

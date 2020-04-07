@@ -9,6 +9,10 @@ export class RequestProperties {
   constructor(@Inject(REQUEST) private request: Request) {}
 
   public getClientId(): string | undefined {
-    return this.request.get(HEADER_CLIENT_ID);
+    try {
+      return this.request.get(HEADER_CLIENT_ID);
+    } catch {
+      // ignore
+    }
   }
 }
