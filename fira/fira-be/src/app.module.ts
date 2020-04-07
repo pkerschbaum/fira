@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
@@ -15,6 +15,7 @@ import { Feedback } from './feedback/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { PersistenceModule } from './persistence/persistence.module';
+import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middleware';
 
 @Module({
   imports: [
@@ -44,4 +45,11 @@ import { PersistenceModule } from './persistence/persistence.module';
     PersistenceModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(IncomingLoggerMiddleware).forRoutes({
+      path: '*',
+      method: RequestMethod.ALL,
+    });
+  }
+}

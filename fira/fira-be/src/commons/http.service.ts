@@ -1,10 +1,9 @@
 import { Injectable, Scope, HttpService } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
-import nanoid = require('nanoid');
 
 import { RequestLogger } from './request-logger.service';
+import { uniqueIdGenerator } from '../util/id-generator';
 
-const ID_SIZE = 10;
 const SERVICE_NAME = 'HttpService';
 
 @Injectable({ scope: Scope.REQUEST })
@@ -20,18 +19,20 @@ export class AppHttpService {
     /* method mandatory */
     requestConfig: AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> },
   ) {
-    const requestId = nanoid(ID_SIZE);
+    const requestId = uniqueIdGenerator.generate();
 
     // log request
     try {
       this.requestLogger.log(
-        `[REQUEST] [request-id=${requestId}] ${requestConfig.method?.toUpperCase()} ${
+        `[REQUEST OUTGOING] [request-id=${requestId}] ${requestConfig.method?.toUpperCase()} ${
           requestConfig.url
         }`,
       );
       if (requestConfig.data) {
         this.requestLogger.debug(
-          `[REQUEST PAYLOAD] [request-id=${requestId}] ${JSON.stringify(requestConfig.data)}`,
+          `[REQUEST OUTGOING PAYLOAD] [request-id=${requestId}] ${JSON.stringify(
+            requestConfig.data,
+          )}`,
         );
       }
     } catch {
@@ -43,10 +44,10 @@ export class AppHttpService {
 
     // log response
     try {
-      this.requestLogger.log(`[RESPONSE] [request-id=${requestId}] ${response.status}`);
+      this.requestLogger.log(`[RESPONSE INCOMING] [request-id=${requestId}] ${response.status}`);
       if (response.data) {
         this.requestLogger.debug(
-          `[RESPONSE PAYLOAD] [request-id=${requestId}] ${JSON.stringify(response.data)}`,
+          `[RESPONSE INCOMING PAYLOAD] [request-id=${requestId}] ${JSON.stringify(response.data)}`,
         );
       }
     } catch {

@@ -13,14 +13,23 @@ export class RequestLogger {
   }
 
   public log(message: any, context?: string): void {
-    this.appLogger.log(`[client-id=${this.requestProperties.getClientId()}] ${message}`, context);
+    this.appLogger.log(
+      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
+      context,
+    );
   }
 
   public debug(message: any, context?: string): void {
-    this.appLogger.debug(`[client-id=${this.requestProperties.getClientId()}] ${message}`, context);
+    this.appLogger.debug(
+      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
+      context,
+    );
   }
 
   public warn(message: any, context?: string): void {
-    this.appLogger.warn(`[client-id=${this.requestProperties.getClientId()}] ${message}`, context);
+    this.appLogger.warn(
+      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
+      context,
+    );
   }
 }
