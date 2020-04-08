@@ -69,11 +69,11 @@
 /* touch devices (primary input is coarse) */
 @media (pointer: coarse) {
   .container {
-    width: 5rem;
+    width: 4.25rem;
   }
 
   .button {
-    min-height: 2.75rem;
+    min-height: 3rem;
   }
 
   .hotkey {
