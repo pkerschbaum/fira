@@ -5,8 +5,12 @@ import Button from '../../elements/Button';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { useRouting } from '../AnnotationRouter';
 
-import infoPage01 from './info-page-01.png';
-import infoPage02 from './info-page-02.png';
+import infoPageLabels from './info-page-labels.png';
+import infoPageSpan from './info-page-span-example.png';
+import infoEx1 from './info-example-wrong.png';
+import infoEx2 from './info-example-topic.png';
+import infoEx3 from './info-example-partial.png';
+import infoEx4 from './info-example-perfect.png';
 
 const AnnotationInfo: React.FC = () => {
   const annotationRouting = useRouting();
@@ -14,21 +18,60 @@ const AnnotationInfo: React.FC = () => {
   const content = [
     {
       type: 'text',
-      content: 'Choose a score for the document',
+      content: 'Welcome to Fira! Our goal is to create fine-grained relevance annotations for query - document snippet pairs. '+
+               'In the annotation interface you will see 1 query and 1 document snippet and a range of relevance classes to select.'
     },
     {
       type: 'image',
-      content: infoPage01,
-      alt: 'image showing how to choose a score',
+      content: infoPageLabels,
     },
     {
       type: 'text',
-      content: 'Select regions of the document relevant to the query',
+      content: 'For each pair you must select 1 from 4 relevance classes: </br><ul>'+
+      '<li><b>Wrong</b> If the document has nothing to do with the query, and does not help in any way to answer it</li>'+
+      '<li><b>Topic</b> If the document talks about the general area or topic of a query, might provide some background info, but ultimately does not answer it</li>'+
+      '<li><b>Partial</b> The document contains a partial answer, but you think that there should be more to it</li>'+
+      '<li><b>Perfect</b> The document contains a full answer: easy to understand and it directly answers the question in full</li>'+
+      '</ul>'
+    },
+    {
+      type: 'text',
+      content: '<hr><b>Important annotation guidelines and Fira usage tips:</b> <br><br>'+
+      '<b>(1)</b> You should use your general knowledge to deduce links between query and answers, but if you don\'t know what the question (or part of it such as an acronym) means, '+
+      'fall back to see if the document clearly explains the question and answer and if not score it as <b>Wrong</b> or <b>Topic</b> only. We do not assume specific domain knowledge requirements. <br>'+
+      '<b>(2)</b> For <b>Partial</b> and <b>Perfect</b> grades you need to select the text spans, that are in fact the relevant text parts to the questions. You can select multiple words (the span) with your mouse or by once tapping or clicking on the start and once on the end of the span. '+
+      'You can select more than one and you can also select them before clicking on the grade button. Below is an example of two selected spans:' 
     },
     {
       type: 'image',
-      content: infoPage02,
-      alt: 'image showing how to select regions of the document',
+      content: infoPageSpan,
+    },
+    {
+      type: 'text',
+      content: '<b>(3)</b> On the desktop you can use the keys 1-4 on your keyboard to quickly select the relevance label.'
+    },
+    {
+      type: 'text',
+      content: '<hr> Now before we get started, let\'s have a look at an example from each relevance grade:'
+    },
+      {
+        type: 'image',
+        content: infoEx1,
+      },
+      {
+        type: 'image',
+        content: infoEx2,
+      },{
+        type: 'image',
+        content: infoEx3,
+      },
+      {
+        type: 'image',
+        content: infoEx4,
+      },  
+    {
+      type: 'text',
+      content: 'Your goal is to annotate 500 examples. You can do it on any device. You can always come back to this info page, via the dropdown menu in the upper-right corner.<br>Thank you for your work!'
     },
   ] as const;
 
@@ -39,15 +82,15 @@ const AnnotationInfo: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <span className={styles.headline}>Info - How to annotate</span>
+      <span className={styles.headline}>How to annotate</span>
       {content.map((entry, idx) =>
         entry.type === 'text' ? (
-          <span key={idx}>{entry.content}</span>
+          <p key={idx} dangerouslySetInnerHTML={{ __html: entry.content}}></p>
         ) : (
-          <img key={idx} className={styles.infoImage} src={entry.content} alt={entry.alt} />
+          <img key={idx} className={styles.infoImage} src={entry.content} />
         ),
       )}
-      <Button onClick={onAcknowledge}>Continue</Button>
+      <Button onClick={onAcknowledge}>Let's get started!</Button>
     </div>
   );
 };
