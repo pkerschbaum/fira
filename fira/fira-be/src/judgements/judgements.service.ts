@@ -377,6 +377,7 @@ export class JudgementsService {
             .setParameter('userid', user.id)
             .setParameter('priority', 'all')
             .groupBy('jp.document_id, jp.query_id')
+            .orderBy('jp.document_id, jp.query_id', 'ASC')
             .execute();
 
           if (pairCandidates.length < 1) {
@@ -389,11 +390,8 @@ export class JudgementsService {
           }
 
           const pairsToPersist = pairCandidates[0];
-          this.requestLogger.log(
-            `persisting open judgement with priority=all, pair=${JSON.stringify(pairsToPersist)}`,
-          );
 
-          await persistPairs(
+          await this.persistPairs(
             [pairsToPersist],
             user,
             dbConfig.judgementMode,
@@ -475,10 +473,7 @@ export class JudgementsService {
       }
 
       const pairsToPersist = pairCandidates.slice(0, countJudgementsToPreload);
-      this.requestLogger.log(
-        `persisting open judgements, priority=${priority}, pairs=${JSON.stringify(pairsToPersist)}`,
-      );
-      await persistPairs(
+      await this.persistPairs(
         pairsToPersist,
         user,
         dbConfig.judgementMode,
@@ -489,6 +484,62 @@ export class JudgementsService {
     }
 
     return countJudgementsToPreload;
+  };
+
+  private persistPairs = async (
+    pairs: PairQueryResult[],
+    user: User,
+    judgementMode: JudgementMode,
+    rotateDocumentText: boolean,
+    entityManager: EntityManager,
+  ): Promise<void> => {
+    for (const pair of pairs) {
+      // determine whether to set 'rotate text'-flag or not
+      let rotate: boolean;
+      if (!rotateDocumentText) {
+        // according to the server config, no rotation should be done
+        rotate = false;
+      } else {
+        // determine how often each variant - rotation or no-rotation - was used,
+        // and set the variant which was used less often
+        const rotateStats: Array<{ rotate: boolean; count: number }> = (
+          await entityManager
+            .createQueryBuilder(Judgement, 'j')
+            .select('j.rotate, count(j.*)')
+            .groupBy('j.rotate')
+            .execute()
+        ).map((elem: { rotate: boolean; count: string }) => ({
+          ...elem,
+          count: Number(elem.count),
+        }));
+        const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
+        const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
+        rotate = countRotate < countNoRotate;
+      }
+
+      // gather data and persist judgement
+      const dbDocument = await entityManager.findOneOrFail(Document, pair.document_id);
+      const dbQuery = await entityManager.findOneOrFail(Query, pair.query_id);
+      const dbDocumentVersion = await assetUtil.findCurrentDocumentVersion(
+        dbDocument,
+        entityManager,
+      );
+      const dbQueryVersion = await assetUtil.findCurrentQueryVersion(dbQuery, entityManager);
+
+      const dbJudgement = new Judgement();
+      dbJudgement.status = JudgementStatus.TO_JUDGE;
+      dbJudgement.rotate = rotate;
+      dbJudgement.mode = judgementMode;
+      dbJudgement.document = dbDocumentVersion;
+      dbJudgement.query = dbQueryVersion;
+      dbJudgement.user = user;
+
+      this.requestLogger.log(
+        `persisting judgement, documentId=${dbDocument.id}, queryId=${dbQuery.id}, rotate=${rotate}, mode=${dbJudgement.mode}, userId=${user.id}`,
+      );
+
+      await entityManager.save(Judgement, dbJudgement);
+    }
   };
 
   public getStatistics = async (): Promise<Statistic[]> => {
@@ -615,6 +666,7 @@ async function getCandidatesByPriority(
       .setParameter('userid', userId)
       .setParameter('priority', priority)
       .groupBy('jp.document_id, jp.query_id')
+      .orderBy('jp.document_id, jp.query_id', 'ASC')
       .execute()
   )
     .map((pair: CountQueryResult) => ({
@@ -625,60 +677,6 @@ async function getCandidatesByPriority(
       (pair: CountQueryResult) => pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor,
     )
     .sort((p1: CountQueryResult, p2: CountQueryResult) => p1.count - p2.count);
-}
-
-async function persistPairs(
-  pairs: PairQueryResult[],
-  user: User,
-  judgementMode: JudgementMode,
-  rotateDocumentText: boolean,
-  entityManager: EntityManager,
-): Promise<void> {
-  // determine whether to set 'rotate text'-flag or not
-  let rotate: boolean;
-  if (!rotateDocumentText) {
-    // according to the server config, no rotation should be done
-    rotate = false;
-  } else {
-    // determine how often each variant - rotation or no-rotation - was used,
-    // and set the variant which was used less often
-    const rotateStats: Array<{ rotate: boolean; count: number }> = (
-      await entityManager
-        .createQueryBuilder(Judgement, 'j')
-        .select('j.rotate, count(j.*)')
-        .groupBy('j.rotate')
-        .execute()
-    ).map((elem: { rotate: boolean; count: string }) => ({
-      ...elem,
-      count: Number(elem.count),
-    }));
-    const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
-    const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
-    rotate = countRotate < countNoRotate;
-  }
-
-  // gather data and persist judgements
-  await Promise.all(
-    pairs.map(async (pair) => {
-      const dbDocument = await entityManager.findOneOrFail(Document, pair.document_id);
-      const dbQuery = await entityManager.findOneOrFail(Query, pair.query_id);
-      const dbDocumentVersion = await assetUtil.findCurrentDocumentVersion(
-        dbDocument,
-        entityManager,
-      );
-      const dbQueryVersion = await assetUtil.findCurrentQueryVersion(dbQuery, entityManager);
-
-      const dbJudgement = new Judgement();
-      dbJudgement.status = JudgementStatus.TO_JUDGE;
-      dbJudgement.rotate = rotate;
-      dbJudgement.mode = judgementMode;
-      dbJudgement.document = dbDocumentVersion;
-      dbJudgement.query = dbQueryVersion;
-      dbJudgement.user = user;
-
-      await entityManager.save(Judgement, dbJudgement);
-    }),
-  );
 }
 
 function mapJudgementsToResponse(openJudgements: Judgement[]) {
