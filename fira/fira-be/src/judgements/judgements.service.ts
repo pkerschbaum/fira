@@ -125,7 +125,7 @@ export class JudgementsService {
       // revert the rotation
       let relevancePositions = judgementData.relevancePositions;
       if (dbJudgement.rotate) {
-        const rotateIndex = getRotateIndex(dbJudgement.document.annotateParts.length);
+        const rotateIndex = Math.ceil(getRotateIndex(dbJudgement.document.annotateParts.length));
         relevancePositions = relevancePositions.map((relevancePosition) =>
           relevancePosition >= rotateIndex
             ? relevancePosition - rotateIndex
@@ -209,7 +209,7 @@ export class JudgementsService {
     );
   };
 
-  public exportJudgements = async (): Promise<ExportJudgement[]> => {
+  private exportJudgements = async (): Promise<ExportJudgement[]> => {
     const allJudgements = await this.connection
       .getRepository(Judgement)
       .find({ where: { status: JudgementStatus.JUDGED } });
@@ -685,7 +685,7 @@ function mapJudgementsToResponse(openJudgements: Judgement[]) {
       // rotate text (annotation parts), if requested to do so
       let annotationParts = openJudgement.document.annotateParts;
       if (openJudgement.rotate) {
-        const rotateIndex = getRotateIndex(annotationParts.length);
+        const rotateIndex = Math.floor(getRotateIndex(annotationParts.length));
         annotationParts = annotationParts
           .slice(rotateIndex, annotationParts.length)
           .concat(annotationParts.slice(0, rotateIndex));
@@ -729,5 +729,5 @@ function constructCharacterRangesMap(textParts: string[]) {
 }
 
 function getRotateIndex(countOfAnnotationParts: number) {
-  return Math.floor(countOfAnnotationParts / 2);
+  return countOfAnnotationParts / 2;
 }
