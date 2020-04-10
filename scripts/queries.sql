@@ -9,7 +9,7 @@ select * from query;
 select * from document_version;
 select * from query_version;
 select * from judgement_pair;
-select * from judgement;
+select * from judgement order by created_at, id;
 
 delete from judgement where id=67;
 
