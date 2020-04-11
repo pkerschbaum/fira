@@ -1,7 +1,6 @@
 import { NestFactory, HttpAdapterHost } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import * as rateLimitMiddleware from 'express-rate-limit';
 
 import * as config from './config';
 import { AppModule } from './app.module';
@@ -33,11 +32,6 @@ async function bootstrap() {
     imService: await app.resolve(IdentityManagementService),
     adminService: await app.resolve(AdminService),
   });
-
-  // set rate-limiting middleware to avoid DOS problems
-  const rateLimit = config.application.rateLimit;
-  appLogger.log(`installing rate-limiting middleware, rate limit: ${JSON.stringify(rateLimit)}`);
-  app.use(rateLimitMiddleware(rateLimit));
 
   // set up Swagger doc and UI
   appLogger.log('setting up swagger module...');
