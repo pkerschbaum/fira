@@ -34,17 +34,18 @@
   flex-grow: 1;
 }
 
-/* chrome has a nasty bug on mobile devices: if the user clicks on the 
-   left or right edge of a valid annotation part (i.e., an annotation part 
-   which can be annotated, most of the time a word), the click event is executed 
-   on the _whitespace_ instead of the _annotation part_. So the target of the click event 
-   is simply wrong. Since the click on a whitespace does nothing, there is some 
-   kind of "dead zone" on every annotation part, and that's why clicks 
-   do not start/end an annotation if the user clicks on the left or right edge 
-   of an annotation part (even though it should do that).
-   This is fixed by telling chrome that whitespaces cannot be the target of pointer events */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
+/* touch devices (primary input is coarse), webkit only (Chrome, Safari) */
+@media (pointer: coarse) and (-webkit-min-device-pixel-ratio: 0) {
   .whitespace {
+    /* chrome has a nasty bug on mobile devices: if the user clicks on the 
+       left or right edge of a valid annotation part (i.e., an annotation part 
+       which can be annotated, most of the time a word), the click event is executed 
+       on the _whitespace_ instead of the _annotation part_. So the target of the click event 
+       is simply wrong. Since the click on a whitespace does nothing, there is some 
+       kind of "dead zone" on every annotation part, and that's why clicks 
+       do not start/end an annotation if the user clicks on the left or right edge 
+       of an annotation part (even though it should do that).
+       This is fixed by telling chrome that whitespaces cannot be the target of pointer events */
     pointer-events: none;
   }
 }
