@@ -8,7 +8,7 @@ import { AppLogger } from './commons/app-logger.service';
 import { importInitialData } from './boot/import-initial-data';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { AdminService } from './admin/admin.service';
-import { RewriteNotFoundFilter } from './filter/redirect-client.filter';
+import { RedirectClientFilter } from './filter/redirect-client.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,7 +23,7 @@ async function bootstrap() {
   // with the urlPaths.api prefix. In that case, the request should be handled by an HTTP endpoint.
   // Serving index.html is sufficient since the single page application will handle further routing on the client side
   app.useGlobalFilters(
-    new RewriteNotFoundFilter(app.get(HttpAdapterHost).httpAdapter.getHttpServer()),
+    new RedirectClientFilter(app.get(HttpAdapterHost).httpAdapter.getHttpServer()),
   );
 
   // now, import all data for Fira

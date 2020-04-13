@@ -1,4 +1,5 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod, Scope } from '@nestjs/common';
+import { APP_FILTER } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 
@@ -16,6 +17,7 @@ import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middleware';
+import { LogExceptionsFilter } from './filter/log-exceptions.filter';
 
 @Module({
   imports: [
@@ -43,6 +45,13 @@ import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middlewar
     JudgementsModule,
     FeedbackModule,
     PersistenceModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: LogExceptionsFilter,
+      scope: Scope.REQUEST,
+    },
   ],
 })
 export class AppModule implements NestModule {

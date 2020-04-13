@@ -7,7 +7,7 @@ import * as config from '../config';
 
 // taken from https://github.com/nestjs/nest/issues/402
 @Catch(NotFoundException)
-export class RewriteNotFoundFilter extends BaseExceptionFilter {
+export class RedirectClientFilter extends BaseExceptionFilter {
   constructor(applicationRef: HttpServer) {
     super(applicationRef);
   }
