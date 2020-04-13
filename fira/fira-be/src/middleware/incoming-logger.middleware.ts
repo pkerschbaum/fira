@@ -2,8 +2,6 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { RequestLogger } from '../commons/request-logger.service';
-import { uniqueIdGenerator } from '../util/id-generator';
-import { ExtendedRequest, CUSTOM_PROP_SYMBOL } from '../commons/request-properties.service';
 
 const CONTEXT_NAME = 'IncomingLoggerMiddleware';
 
@@ -15,8 +13,6 @@ export class IncomingLoggerMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: () => void) {
     try {
-      const requestId = uniqueIdGenerator.generate();
-      (req as ExtendedRequest)[CUSTOM_PROP_SYMBOL] = { requestId };
       this.requestLogger.log(
         `[REQUEST INCOMING] originalUrl=${req.originalUrl} method=${
           req.method

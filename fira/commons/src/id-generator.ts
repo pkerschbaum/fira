@@ -1,5 +1,4 @@
-import nanoid = require('nanoid');
-import generate = require('nanoid/generate');
+import { nanoid, customAlphabet } from 'nanoid';
 
 const ID_SIZE = 10;
 
@@ -8,7 +7,7 @@ export const uniqueIdGenerator = {
     if (config === undefined) {
       return nanoid(ID_SIZE);
     } else {
-      return generate(config.alphabet, config.size);
+      return customAlphabet(config.alphabet, config.size)();
     }
   },
 };

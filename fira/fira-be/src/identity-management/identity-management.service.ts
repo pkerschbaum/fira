@@ -5,13 +5,17 @@ import { Moment } from 'moment';
 import { Repository } from 'typeorm';
 
 import * as config from '../config';
-import { AuthResponse, ImportUserResponse, ImportUserRequest } from '../../../commons';
+import {
+  AuthResponse,
+  ImportUserResponse,
+  ImportUserRequest,
+  uniqueIdGenerator,
+} from '../../../commons';
 import { ImportStatus } from '../typings/enums';
 import { RequestLogger } from '../commons/request-logger.service';
 import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
 import { User } from './entity/user.entity';
-import { uniqueIdGenerator } from '../util/id-generator';
 
 const SERVICE_NAME = 'IdentityManagementService';
 

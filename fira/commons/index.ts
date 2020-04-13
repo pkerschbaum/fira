@@ -4,5 +4,6 @@ export * from './src/commons';
 export * from './src/constants';
 export * from './src/enums';
 export * from './src/feedback.types';
+export * from './src/id-generator';
 export * from './src/identity-management.types';
 export * from './src/judgements.types';

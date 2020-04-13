@@ -2,14 +2,11 @@ import { Injectable, Scope, Inject, Optional } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 
-import { HEADER_CLIENT_ID } from '../../../commons';
-
-export const CUSTOM_PROP_SYMBOL = Symbol('custom-properties');
-export type ExtendedRequest = Request & { [CUSTOM_PROP_SYMBOL]?: { requestId?: string } };
+import { HEADER_CLIENT_ID, HEADER_REQUEST_ID } from '../../../commons';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RequestProperties {
-  constructor(@Inject(REQUEST) private request: ExtendedRequest) {}
+  constructor(@Inject(REQUEST) private request: Request) {}
 
   public getClientId(): string | undefined {
     try {
@@ -21,7 +18,7 @@ export class RequestProperties {
 
   public getRequestId(): string | undefined {
     try {
-      return this.request[CUSTOM_PROP_SYMBOL]?.requestId;
+      return this.request.get(HEADER_REQUEST_ID);
     } catch {
       // ignore
     }

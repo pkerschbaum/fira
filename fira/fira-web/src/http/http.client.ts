@@ -24,6 +24,8 @@ import {
   StatisticsResp,
   UpdateConfig,
   SubmitFeedback,
+  HEADER_REQUEST_ID,
+  uniqueIdGenerator,
 } from '../../../commons';
 
 const axiosClient = axios.create({
@@ -40,10 +42,12 @@ async function request<T>(
 ) {
   const accessToken = store.getState().user?.accessToken.val;
   const clientId = browserStorage.getClientId();
+  const requestId = uniqueIdGenerator.generate();
   const additionalConfig: AxiosRequestConfig = {
     headers: {
       authorization: accessToken !== undefined ? `Bearer ${accessToken}` : undefined,
       [HEADER_CLIENT_ID]: clientId,
+      [HEADER_REQUEST_ID]: requestId,
     },
   };
 

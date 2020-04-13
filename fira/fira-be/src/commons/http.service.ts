@@ -2,7 +2,7 @@ import { Injectable, Scope, HttpService } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 
 import { RequestLogger } from './request-logger.service';
-import { uniqueIdGenerator } from '../util/id-generator';
+import { uniqueIdGenerator } from '../../../commons';
 
 const SERVICE_NAME = 'HttpService';
 
