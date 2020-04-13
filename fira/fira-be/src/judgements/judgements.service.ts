@@ -141,7 +141,10 @@ export class JudgementsService {
           )
         ) {
           throw new BadRequestException(
-            `at least one submitted relevance position is out of bound, regarding the size of the document`,
+            `at least one submitted relevance position is out of bound, regarding the size of the document. ` +
+              `judgementId=${dbJudgement.id}, documentId=${dbJudgement.document.document.id}, queryId=${dbJudgement.query.query.id}, rotate=${dbJudgement.rotate}, ` +
+              `relevancePositions=${JSON.stringify(relevancePositions)}, ` +
+              `dbJudgement.document.annotateParts=${dbJudgement.document.annotateParts}`,
           );
         }
 
