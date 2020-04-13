@@ -5,4 +5,6 @@ fira-be/data
 fira-web/node_modules
 fira-web/npm-debug.log
 fira-web/build
+commons/node_modules
+commons/npm-debug.log
 commons/build

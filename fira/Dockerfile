@@ -2,6 +2,15 @@
 FROM node:12.14.0 AS build-env-web
 ARG FIRA_HOMEPAGE
 
+# Switch workdir to the build directory for commons
+WORKDIR /app/commons
+
+# Copy sources
+COPY commons/. ./
+
+# Install app dependencies
+RUN npm install
+
 # Switch workdir to the build directory
 WORKDIR /app/fira-web
 
@@ -12,7 +21,6 @@ RUN npm install
 
 # Copy sources
 COPY fira-web/. ./
-COPY commons/. ../commons/
 COPY tsconfig.json ../
 
 # Create production build
@@ -20,6 +28,15 @@ RUN env PUBLIC_URL=$FIRA_HOMEPAGE npm run build
 
 # Phase 2: copy and build fira-be
 FROM node:12.14.0
+
+# Switch workdir to the build directory for commons
+WORKDIR /app/commons
+
+# Copy sources
+COPY commons/. ./
+
+# Install app dependencies
+RUN npm install
 
 # Switch workdir to the main app directory
 WORKDIR /app/fira-be
@@ -30,7 +47,6 @@ RUN npm install
 
 # Copy sources
 COPY fira-be/. ./
-COPY commons/. ../commons/
 COPY tsconfig.json ../
 
 # Create build
