@@ -32,4 +32,11 @@ export class RequestLogger {
       context,
     );
   }
+
+  public error(message: any, context?: string): void {
+    this.appLogger.error(
+      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
+      context,
+    );
+  }
 }
