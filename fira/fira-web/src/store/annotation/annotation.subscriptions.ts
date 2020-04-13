@@ -11,32 +11,37 @@ const logger = createLogger('annotation.subscriptions');
 
 export const setupSubscriptions = (store: RootStore) => {
   // if no judgement pairs got loaded from the server yet, execute initial preload of judgement pairs
-  store.subscribe(() => {
-    const user = store.getState().user;
-    if (!user || !user.accessToken) {
-      logger.info(
-        'no judgement pairs got loaded from the server yet, but there is no access token available --> skip preload',
-      );
-      return;
-    }
-    if (user.role !== UserRole.ANNOTATOR) {
-      logger.info(
-        'no judgement pairs got loaded from the server yet, but user role is not annotator --> skip preload',
-      );
-      return;
-    }
+  const initialPreloadSubscription: MemoizedSubscription = {
+    memoizeOnValue: (subscribedStore) => subscribedStore.getState().user?.accessToken.val,
+    listener: async (subscribedStore) => {
+      const user = subscribedStore.getState().user;
+      if (!user || !user.accessToken) {
+        logger.info(
+          'no judgement pairs got loaded from the server yet, but there is no access token available --> skip preload',
+        );
+        return;
+      }
+      if (user.role !== UserRole.ANNOTATOR) {
+        logger.info(
+          'no judgement pairs got loaded from the server yet, but user role is not annotator --> skip preload',
+        );
+        return;
+      }
 
-    if (!annotationComputations.annotationDataReceivedFromServer(store.getState())) {
-      logger.info('no judgement pairs got loaded from the server yet --> execute preload...');
-      judgementStories.preloadJudgements();
-    }
-  });
+      if (!annotationComputations.annotationDataReceivedFromServer(subscribedStore.getState())) {
+        logger.info('no judgement pairs got loaded from the server yet --> execute preload...');
+        await judgementStories.preloadJudgements();
+      }
+    },
+  };
+  addMemoizedSubscription(store, initialPreloadSubscription);
 
   // retrieve judgement pairs from server if count of (local) judgement pairs does not fulfill threshold,
   // and the user did not annotate every possible judgement pair
+  let retrieveJudgPairsInflight = false;
   const retrieveJudgPairsSubscription: MemoizedSubscription = {
     memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
-    listener: (subscribedStore) => {
+    listener: async (subscribedStore) => {
       const annotationState = subscribedStore.getState().annotation;
 
       if (annotationComputations.annotationDataReceivedFromServer(subscribedStore.getState())) {
@@ -48,13 +53,19 @@ export const setupSubscriptions = (store: RootStore) => {
         const countOfNotPreloadedPairs = annotationState.countOfNotPreloadedPairs!;
         if (
           countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD &&
-          countOfNotPreloadedPairs > 0
+          countOfNotPreloadedPairs > 0 &&
+          !retrieveJudgPairsInflight
         ) {
-          logger.info(
-            'count of preloaded judgement pairs does not fulfill threshold and ' +
-              'there are remaining judgements to preload on the server --> execute preload...',
-          );
-          judgementStories.preloadJudgements();
+          try {
+            retrieveJudgPairsInflight = true;
+            logger.info(
+              'count of preloaded judgement pairs does not fulfill threshold and ' +
+                'there are remaining judgements to preload on the server --> execute preload...',
+            );
+            await judgementStories.preloadJudgements();
+          } finally {
+            retrieveJudgPairsInflight = false;
+          }
         }
       }
     },
