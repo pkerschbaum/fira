@@ -126,10 +126,11 @@ export class JudgementsService {
       let relevancePositions = judgementData.relevancePositions;
       if (dbJudgement.rotate) {
         const rotateIndex = Math.ceil(getRotateIndex(dbJudgement.document.annotateParts.length));
+        const rotateIndex2 = Math.floor(getRotateIndex(dbJudgement.document.annotateParts.length));
         relevancePositions = relevancePositions.map((relevancePosition) =>
           relevancePosition >= rotateIndex
             ? relevancePosition - rotateIndex
-            : relevancePosition + rotateIndex,
+            : relevancePosition + rotateIndex2,
         );
       }
 
