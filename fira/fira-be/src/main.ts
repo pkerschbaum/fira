@@ -10,6 +10,8 @@ import { IdentityManagementService } from './identity-management/identity-manage
 import { AdminService } from './admin/admin.service';
 import { RedirectClientFilter } from './filter/redirect-client.filter';
 
+const RUNNING_LOG_INTERVAL = 1000; // ms
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const appLogger = await app.resolve(AppLogger);
@@ -46,6 +48,11 @@ async function bootstrap() {
   // validate all requests according to the Swagger schema
   appLogger.log('setting up request validation pipe...');
   app.useGlobalPipes(new ValidationPipe());
+
+  // schedule logging
+  setInterval(() => {
+    appLogger.log('server is running');
+  }, RUNNING_LOG_INTERVAL);
 
   // start application
   appLogger.log('starting application...');

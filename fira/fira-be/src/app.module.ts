@@ -16,6 +16,7 @@ import { Feedback } from './feedback/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { PersistenceModule } from './persistence/persistence.module';
+import { MgmtModule } from './mgmt/mgmt.module';
 import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middleware';
 import { LogExceptionsFilter } from './filter/log-exceptions.filter';
 
@@ -45,6 +46,7 @@ import { LogExceptionsFilter } from './filter/log-exceptions.filter';
     JudgementsModule,
     FeedbackModule,
     PersistenceModule,
+    MgmtModule,
   ],
   providers: [
     {

@@ -9,10 +9,6 @@ const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 export const application = {
   version: '1.3.0',
   port: 80,
-  rateLimit: {
-    windowMs: 10 * 60 * 1000, // 10 minutes
-    max: 500, // limit each IP to 200 requests per windowMs
-  },
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
   urlPaths: {

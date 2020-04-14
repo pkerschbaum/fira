@@ -27,7 +27,6 @@ import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 import { JudgementsService } from '../judgements/judgements.service';
 import { FeedbackService } from '../feedback/feedback.service';
-import { ExportJudgementsResponseDto } from './dto/export-judgements.dto';
 import { StatisticsResponseDto } from './dto/get-statistics.dto';
 
 @ApiTags('admin')
