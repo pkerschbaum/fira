@@ -1,9 +1,9 @@
-import { Injectable, Scope } from '@nestjs/common';
+import { Injectable, Scope, LoggerService } from '@nestjs/common';
 import { AppLogger } from './app-logger.service';
 import { RequestProperties } from './request-properties.service';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class RequestLogger {
+export class RequestLogger implements LoggerService {
   constructor(private appLogger: AppLogger, private requestProperties: RequestProperties) {
     this.appLogger = new AppLogger();
   }

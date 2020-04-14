@@ -31,9 +31,7 @@ export class JudgementsController {
     @Headers('authorization') authHeader: string,
   ): Promise<PreloadJudgementsResponseDto> {
     const jwtPayload = extractJwtPayload(authHeader);
-
-    // preload judgements
-    return await this.judgementsService.preloadJudgements(jwtPayload.preferred_username);
+    return await this.judgementsService.addPreloadWorklet(jwtPayload.preferred_username);
   }
 
   @Put('v1/:id')
@@ -50,7 +48,6 @@ export class JudgementsController {
     }
     const jwtPayload = extractJwtPayload(authHeader);
 
-    // preload judgements
     return await this.judgementsService.saveJudgement(
       jwtPayload.preferred_username,
       id,
