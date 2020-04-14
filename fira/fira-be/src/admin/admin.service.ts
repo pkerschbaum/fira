@@ -4,6 +4,7 @@ import { Repository, Connection } from 'typeorm';
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
+import { RequestLogger } from '../commons/request-logger.service';
 import {
   ImportAsset,
   ImportResult,
@@ -28,9 +29,10 @@ export class AdminService {
     private readonly persistenceService: PersistenceService,
     @InjectRepository(Config)
     private readonly configRepository: Repository<Config>,
+    private readonly requestLogger: RequestLogger,
   ) {}
 
-  public importDocuments = this.persistenceService.wrapInTransaction(
+  public importDocuments = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (transactionalEntityManager, documents: ImportAsset[]): Promise<ImportResult[]> => {
       // create partitions which are processed in parallel
       const partitions = partitionArray(documents, NUMBER_PARALLEL_IMPORTS);
@@ -83,7 +85,7 @@ export class AdminService {
     },
   );
 
-  public importQueries = this.persistenceService.wrapInTransaction(
+  public importQueries = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (transactionalEntityManager, queries: ImportAsset[]): Promise<ImportResult[]> => {
       // create partitions which are processed in parallel
       const partitions = partitionArray(queries, NUMBER_PARALLEL_IMPORTS);
@@ -133,7 +135,7 @@ export class AdminService {
     },
   );
 
-  public importJudgementPairs = this.persistenceService.wrapInTransaction(
+  public importJudgementPairs = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (
       transactionalEntityManager,
       judgementPairs: ImportJudgementPair[],

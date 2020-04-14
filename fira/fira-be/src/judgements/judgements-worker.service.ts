@@ -53,12 +53,10 @@ const createLogger = (requestLogger: LoggerService) => ({
 export class JudgementsWorkerService {
   private preloadQueue: PreloadWorklet[] = [];
   private workerActive = false;
+  private readonly appLogger: AppLogger;
 
-  constructor(
-    private readonly persistenceService: PersistenceService,
-    private readonly appLogger: AppLogger,
-  ) {
-    this.appLogger.setContext(SERVICE_NAME);
+  constructor(private readonly persistenceService: PersistenceService) {
+    this.appLogger = new AppLogger(SERVICE_NAME);
   }
 
   public addPreloadWorklet = (
@@ -88,7 +86,7 @@ export class JudgementsWorkerService {
         if (worklet !== undefined) {
           worklet.logger.log(`starting processing preload worklet... userId=${worklet.userId}`);
           try {
-            const result = await this.preloadJudgements(worklet);
+            const result = await this.preloadJudgements(worklet.logger)(worklet);
             worklet.responsePromise.resolve(result);
           } catch (e) {
             worklet.responsePromise.reject(e);
@@ -106,62 +104,63 @@ export class JudgementsWorkerService {
     }, 0);
   };
 
-  private preloadJudgements = this.persistenceService.wrapInTransaction(
-    async (
-      transactionalEntityManager,
-      worklet: PreloadWorklet,
-    ): Promise<PreloadJudgementResponse> => {
-      const logger = worklet.logger;
-
-      // preparation: load data needed throughout the entire preload transaction
-      const user = await transactionalEntityManager.findOneOrFail(User, worklet.userId);
-      const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
-
-      // phase #1: determine how many judgements should, and can, be preloaded for the user,
-      // and save preloaded judgements to the database
-      await this.preloadAllJudgements({ transactionalEntityManager, logger, user, dbConfig });
-
-      // phase #2: after the user got preloaded as many judgements as possible,
-      // load all the data and return it to the client
-      const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
-        where: { user },
-      });
-      const countOfFeedbacks = await transactionalEntityManager.count(Feedback, {
-        where: { user },
-      });
-      const countOfNotPreloadedPairs = await getCountOfNotPreloadedPairs(
+  private preloadJudgements = (requestLogger: LoggerService) =>
+    this.persistenceService.wrapInTransaction(requestLogger)(
+      async (
         transactionalEntityManager,
-        user.id,
-      );
+        worklet: PreloadWorklet,
+      ): Promise<PreloadJudgementResponse> => {
+        const logger = worklet.logger;
 
-      // compute some statistics for this user
-      const currentOpenJudgements = judgementsOfUser.filter(
-        (judgement) => judgement.status === JudgementStatus.TO_JUDGE,
-      );
-      const countCurrentFinishedJudgements = judgementsOfUser.filter(
-        (judgement) => judgement.status === JudgementStatus.JUDGED,
-      ).length;
+        // preparation: load data needed throughout the entire preload transaction
+        const user = await transactionalEntityManager.findOneOrFail(User, worklet.userId);
+        const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
 
-      const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
-      const remainingUntilFirstFeedbackRequired =
-        dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
+        // phase #1: determine how many judgements should, and can, be preloaded for the user,
+        // and save preloaded judgements to the database
+        await this.preloadAllJudgements({ transactionalEntityManager, logger, user, dbConfig });
 
-      logger.log(
-        `judgements stats for user: sum of all judgements=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
-          `finished=${countCurrentFinishedJudgements}, countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
-          `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
-      );
+        // phase #2: after the user got preloaded as many judgements as possible,
+        // load all the data and return it to the client
+        const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
+          where: { user },
+        });
+        const countOfFeedbacks = await transactionalEntityManager.count(Feedback, {
+          where: { user },
+        });
+        const countOfNotPreloadedPairs = await getCountOfNotPreloadedPairs(
+          transactionalEntityManager,
+          user.id,
+        );
 
-      return {
-        judgements: mapJudgementsToResponse(currentOpenJudgements),
-        alreadyFinished: countCurrentFinishedJudgements,
-        remainingToFinish,
-        remainingUntilFirstFeedbackRequired,
-        countOfFeedbacks,
-        countOfNotPreloadedPairs,
-      };
-    },
-  );
+        // compute some statistics for this user
+        const currentOpenJudgements = judgementsOfUser.filter(
+          (judgement) => judgement.status === JudgementStatus.TO_JUDGE,
+        );
+        const countCurrentFinishedJudgements = judgementsOfUser.filter(
+          (judgement) => judgement.status === JudgementStatus.JUDGED,
+        ).length;
+
+        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
+        const remainingUntilFirstFeedbackRequired =
+          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
+
+        logger.log(
+          `judgements stats for user: sum of all judgements=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
+            `finished=${countCurrentFinishedJudgements}, countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
+            `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
+        );
+
+        return {
+          judgements: mapJudgementsToResponse(currentOpenJudgements),
+          alreadyFinished: countCurrentFinishedJudgements,
+          remainingToFinish,
+          remainingUntilFirstFeedbackRequired,
+          countOfFeedbacks,
+          countOfNotPreloadedPairs,
+        };
+      },
+    );
 
   private preloadAllJudgements = async ({
     transactionalEntityManager,
