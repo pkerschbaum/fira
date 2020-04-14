@@ -103,91 +103,88 @@ export class JudgementsService {
     },
   );
 
-  public saveJudgement = this.persistenceService.wrapInTransaction(
-    async (
-      transactionalEntityManager,
-      userId: string,
-      judgementId: number,
-      judgementData: SaveJudgement,
-    ): Promise<void> => {
-      const user = await transactionalEntityManager.findOneOrFail(User, userId);
-      const dbJudgement = await transactionalEntityManager.findOne(Judgement, {
-        where: { user, id: judgementId },
-      });
+  public saveJudgement = async (
+    userId: string,
+    judgementId: number,
+    judgementData: SaveJudgement,
+  ): Promise<void> => {
+    const user = await this.connection.getRepository(User).findOneOrFail(userId);
+    const dbJudgement = await this.connection.getRepository(Judgement).findOne({
+      where: { user, id: judgementId },
+    });
 
-      if (!dbJudgement) {
-        throw new NotFoundException(
-          `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
+    if (!dbJudgement) {
+      throw new NotFoundException(
+        `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+
+    // if relevance positions got rotated when sent to the client, then the server has to
+    // revert the rotation
+    let relevancePositions = judgementData.relevancePositions;
+    if (dbJudgement.rotate) {
+      const rotateIndex = Math.ceil(getRotateIndex(dbJudgement.document.annotateParts.length));
+      const rotateIndex2 = Math.floor(getRotateIndex(dbJudgement.document.annotateParts.length));
+      relevancePositions = relevancePositions.map((relevancePosition) =>
+        relevancePosition >= rotateIndex
+          ? relevancePosition - rotateIndex
+          : relevancePosition + rotateIndex2,
+      );
+    }
+
+    if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
+      if (
+        relevancePositions.length > dbJudgement.document.annotateParts.length ||
+        relevancePositions.some(
+          (position) => position >= dbJudgement.document.annotateParts.length || position < 0,
+        )
+      ) {
+        this.requestLogger.error(
+          `at least one submitted relevance position is out of bound, regarding the size of the document. ` +
+            `judgementId=${dbJudgement.id}, documentId=${dbJudgement.document.document.id}, queryId=${dbJudgement.query.query.id}, rotate=${dbJudgement.rotate}, ` +
+            `relevancePositions=${JSON.stringify(relevancePositions)}, ` +
+            `dbJudgement.document.annotateParts=${JSON.stringify(
+              dbJudgement.document.annotateParts,
+            )}`,
+        );
+        throw new BadRequestException(
+          `at least one submitted relevance position is out of bound, regarding the size of the document`,
         );
       }
 
-      // if relevance positions got rotated when sent to the client, then the server has to
-      // revert the rotation
-      let relevancePositions = judgementData.relevancePositions;
-      if (dbJudgement.rotate) {
-        const rotateIndex = Math.ceil(getRotateIndex(dbJudgement.document.annotateParts.length));
-        const rotateIndex2 = Math.floor(getRotateIndex(dbJudgement.document.annotateParts.length));
-        relevancePositions = relevancePositions.map((relevancePosition) =>
-          relevancePosition >= rotateIndex
-            ? relevancePosition - rotateIndex
-            : relevancePosition + rotateIndex2,
+      this.requestLogger.log(
+        `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
+      );
+
+      dbJudgement.status = JudgementStatus.JUDGED;
+      dbJudgement.relevanceLevel = judgementData.relevanceLevel;
+      if (relevancePositions.length > 0) {
+        dbJudgement.relevancePositions = relevancePositions;
+      }
+      dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
+      dbJudgement.judgedAt = new Date();
+
+      await this.connection.getRepository(Judgement).save(dbJudgement);
+    } else if (dbJudgement.status === JudgementStatus.JUDGED) {
+      // if all parameters are equal, return status OK, otherwise CONFLICT
+      if (
+        dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
+        (dbJudgement.relevancePositions === null && relevancePositions.length > 0) ||
+        dbJudgement.relevancePositions?.length !== relevancePositions.length ||
+        dbJudgement.relevancePositions.some(
+          (position1, index) => relevancePositions[index] !== position1,
+        ) ||
+        dbJudgement.durationUsedToJudgeMs !== judgementData.durationUsedToJudgeMs
+      ) {
+        throw new ConflictException(
+          `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
         );
       }
-
-      if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
-        if (
-          relevancePositions.length > dbJudgement.document.annotateParts.length ||
-          relevancePositions.some(
-            (position) => position >= dbJudgement.document.annotateParts.length || position < 0,
-          )
-        ) {
-          this.requestLogger.error(
-            `at least one submitted relevance position is out of bound, regarding the size of the document. ` +
-              `judgementId=${dbJudgement.id}, documentId=${dbJudgement.document.document.id}, queryId=${dbJudgement.query.query.id}, rotate=${dbJudgement.rotate}, ` +
-              `relevancePositions=${JSON.stringify(relevancePositions)}, ` +
-              `dbJudgement.document.annotateParts=${JSON.stringify(
-                dbJudgement.document.annotateParts,
-              )}`,
-          );
-          throw new BadRequestException(
-            `at least one submitted relevance position is out of bound, regarding the size of the document`,
-          );
-        }
-
-        this.requestLogger.log(
-          `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
-        );
-
-        dbJudgement.status = JudgementStatus.JUDGED;
-        dbJudgement.relevanceLevel = judgementData.relevanceLevel;
-        if (relevancePositions.length > 0) {
-          dbJudgement.relevancePositions = relevancePositions;
-        }
-        dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
-        dbJudgement.judgedAt = new Date();
-
-        await transactionalEntityManager.save(Judgement, dbJudgement);
-      } else if (dbJudgement.status === JudgementStatus.JUDGED) {
-        // if all parameters are equal, return status OK, otherwise CONFLICT
-        if (
-          dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
-          (dbJudgement.relevancePositions === null && relevancePositions.length > 0) ||
-          dbJudgement.relevancePositions?.length !== relevancePositions.length ||
-          dbJudgement.relevancePositions.some(
-            (position1, index) => relevancePositions[index] !== position1,
-          ) ||
-          dbJudgement.durationUsedToJudgeMs !== judgementData.durationUsedToJudgeMs
-        ) {
-          throw new ConflictException(
-            `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
-          );
-        }
-      } else {
-        // exhaustive check
-        assertUnreachable(dbJudgement.status);
-      }
-    },
-  );
+    } else {
+      // exhaustive check
+      assertUnreachable(dbJudgement.status);
+    }
+  };
 
   public exportJudgementsTsv = async (): Promise<string> => {
     const judgements = await this.exportJudgements();
