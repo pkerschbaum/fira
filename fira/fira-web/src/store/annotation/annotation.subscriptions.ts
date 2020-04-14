@@ -36,8 +36,13 @@ export const setupSubscriptions = (store: RootStore) => {
   };
   addMemoizedSubscription(store, initialPreloadSubscription);
 
-  // retrieve judgement pairs from server if count of (local) judgement pairs does not fulfill threshold,
-  // and the user did not annotate every possible judgement pair
+  /* retrieve judgement pairs from server if
+   * - count of (local) judgement pairs does not fulfill threshold,
+   * - the user did not annotate every possible judgement pair,
+   * - no judgement pair is currently in status SEND_PENDING, i.e. the annotation of the
+   *   judgement pair is currently transferred to the server,
+   * - and no judgement pairs are currently retrieved from the server
+   */
   let retrieveJudgPairsInflight = false;
   const retrieveJudgPairsSubscription: MemoizedSubscription = {
     memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
@@ -50,10 +55,14 @@ export const setupSubscriptions = (store: RootStore) => {
             pair.status === JudgementPairStatus.TO_JUDGE ||
             pair.status === JudgementPairStatus.SEND_PENDING,
         ).length;
+        const countOfPendingJudgementPairs = annotationState.judgementPairs.filter(
+          (pair) => pair.status === JudgementPairStatus.SEND_PENDING,
+        ).length;
         const countOfNotPreloadedPairs = annotationState.countOfNotPreloadedPairs!;
         if (
           countOfOpenJudgementPairs <= PRELOAD_JUDGEMENTS_THRESHOLD &&
           countOfNotPreloadedPairs > 0 &&
+          countOfPendingJudgementPairs === 0 &&
           !retrieveJudgPairsInflight
         ) {
           try {
