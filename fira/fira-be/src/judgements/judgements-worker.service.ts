@@ -49,12 +49,19 @@ const createLogger = (requestLogger: LoggerService) => ({
   },
 });
 
-@Injectable({ /* singleton scope */ scope: Scope.DEFAULT })
+@Injectable()
 export class JudgementsWorkerService {
   private preloadQueue: PreloadWorklet[] = [];
   private workerActive = false;
   private readonly appLogger: AppLogger;
 
+  /* NestJS does not have any mechanism to force a singleton-scope for a service. But the worker must
+   * be a singleton in order to have only one worker processing all pending preloads in sequence. Whether
+   * a NestJS service is a singleton or not depends on all of its dependencies, the dependencies of those
+   * dependencies, etc. If any of the dependencies is not request- or transient-scoped, then this service
+   * will also be of that scope. Thus when changing the dependencies of this service, make sure that they
+   * are, and stay, singleton-scoped.
+   */
   constructor(private readonly persistenceService: PersistenceService) {
     this.appLogger = new AppLogger(SERVICE_NAME);
   }

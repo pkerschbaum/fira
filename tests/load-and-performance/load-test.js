@@ -44,9 +44,11 @@ export default function () {
   const results = {};
 
   group('login', function () {
-    const payload = JSON.stringify(USER_CREDENTIALS[__ITER % 3]);
+    const payload = JSON.stringify(USER_CREDENTIALS[(__VU - 1) % 3]);
 
-    const res = http.post(`${FIRA_BE_BASE}/auth/v1/login`, payload, { headers: DEFAULT_HEADERS });
+    const res = http.post(`${FIRA_BE_BASE}/auth/v1/login`, payload, {
+      headers: DEFAULT_HEADERS,
+    });
     if (
       !check(res, {
         'status was 200': (r) => r.status == 200,
