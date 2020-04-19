@@ -1,0 +1,2 @@
+annotation_target_per_user	annotation_target_per_judgement_pair	judgement_mode	rotate_document_text	annotation_target_to_require_feedback
+12	10	SCORING_AND_SELECT_SPANS	true	10

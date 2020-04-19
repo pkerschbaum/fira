@@ -1,30 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { Connection } from 'typeorm';
 import d3 = require('d3');
 
-import { Feedback } from './entity/feedback.entity';
-import { User } from '../identity-management/entity/user.entity';
+import { FeedbackDAO } from '../persistence/feedback.dao';
+import { UserDAO } from '../persistence/user.dao';
 import { SubmitFeedback, ExportFeedback } from '../../../commons';
 
 @Injectable()
 export class FeedbackService {
-  constructor(private readonly connection: Connection) {}
+  constructor(private readonly feedbackDAO: FeedbackDAO, private readonly userDAO: UserDAO) {}
 
   public submitFeedback = async (userId: string, submitFeedback: SubmitFeedback): Promise<void> => {
-    const user = await this.connection.getRepository(User).findOneOrFail(userId);
-    const feedback = new Feedback();
-    feedback.score = submitFeedback.score;
-    feedback.text = submitFeedback.text;
-    feedback.user = user;
-    await this.connection.getRepository(Feedback).save(feedback);
+    const user = await this.userDAO.findUserOrFail({ id: userId });
+    await this.feedbackDAO.saveFeedback({
+      score: submitFeedback.score,
+      text: submitFeedback.text,
+      user,
+    });
   };
 
   private exportFeedback = async (): Promise<ExportFeedback[]> => {
-    const dbFeedback = await this.connection.getRepository(Feedback).find();
-    return dbFeedback.map((feedback) => ({
+    const dbFeedbacks = await this.feedbackDAO.findFeedbacks();
+    return dbFeedbacks.map((feedback) => ({
       id: feedback.id,
       score: feedback.score,
-      text: feedback.text,
+      text: feedback.text ?? undefined,
       userId: feedback.user.id,
     }));
   };

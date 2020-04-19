@@ -8,16 +8,25 @@ import {
 } from 'typeorm';
 
 import { FeedbackScore } from '../../../../commons';
-import { User } from '../../identity-management/entity/user.entity';
+import { User } from './user.entity';
+
+export type TFeedback = {
+  id: number;
+  score: FeedbackScore;
+  text: string | null;
+  user: User;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Entity()
-export class Feedback {
+export class Feedback implements TFeedback {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ enum: FeedbackScore, nullable: false })
+  @Column({ enum: FeedbackScore })
   score: FeedbackScore;
   @Column({ type: 'text', nullable: true })
-  text?: string;
+  text: string | null;
   @ManyToOne(() => User, {
     eager: true,
     cascade: false,

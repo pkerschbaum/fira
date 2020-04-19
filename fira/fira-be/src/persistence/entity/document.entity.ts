@@ -8,10 +8,24 @@ import {
 } from 'typeorm';
 
 const DEFAULT_VERSION = 1;
-export const COLUMN_QUERY_VERSION = 'query_version';
+export const COLUMN_DOCUMENT_VERSION = 'document_version';
+
+export type TDocument = {
+  id: string;
+  createdAt: Date;
+};
+
+export type TDocumentVersion = {
+  document: Document;
+  version: number;
+  text: string;
+  annotateParts: string[];
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Entity()
-export class Query {
+export class Document implements TDocument {
   @PrimaryColumn()
   id: string;
   @CreateDateColumn()
@@ -19,24 +33,26 @@ export class Query {
 }
 
 @Entity()
-export class QueryVersion {
-  @ManyToOne((type) => Query, {
+export class DocumentVersion implements TDocumentVersion {
+  @ManyToOne(() => Document, {
     eager: true,
     cascade: ['insert'],
     onDelete: 'RESTRICT',
     primary: true,
     nullable: false,
   })
-  query: Query;
+  document: Document;
   @PrimaryColumn({
-    name: COLUMN_QUERY_VERSION,
+    name: COLUMN_DOCUMENT_VERSION,
     type: 'integer',
     nullable: false,
     default: DEFAULT_VERSION,
   })
   version: number = DEFAULT_VERSION;
-  @Column({ nullable: false })
+  @Column()
   text: string;
+  @Column({ type: 'text', array: true })
+  annotateParts: string[];
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

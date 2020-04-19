@@ -8,37 +8,48 @@ import {
 } from 'typeorm';
 
 const DEFAULT_VERSION = 1;
-export const COLUMN_DOCUMENT_VERSION = 'document_version';
+export const COLUMN_QUERY_VERSION = 'query_version';
+
+export type TQuery = {
+  id: string;
+  createdAt: Date;
+};
+
+export type TQueryVersion = {
+  query: Query;
+  version: number;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Entity()
-export class Document {
-  @PrimaryColumn({ nullable: false })
+export class Query implements TQuery {
+  @PrimaryColumn()
   id: string;
   @CreateDateColumn()
   createdAt: Date;
 }
 
 @Entity()
-export class DocumentVersion {
-  @ManyToOne((type) => Document, {
+export class QueryVersion implements TQueryVersion {
+  @ManyToOne(() => Query, {
     eager: true,
     cascade: ['insert'],
     onDelete: 'RESTRICT',
     primary: true,
     nullable: false,
   })
-  document: Document;
+  query: Query;
   @PrimaryColumn({
-    name: COLUMN_DOCUMENT_VERSION,
+    name: COLUMN_QUERY_VERSION,
     type: 'integer',
     nullable: false,
     default: DEFAULT_VERSION,
   })
   version: number = DEFAULT_VERSION;
-  @Column({ nullable: false })
+  @Column()
   text: string;
-  @Column({ nullable: false, type: 'text', array: true })
-  annotateParts: string[];
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

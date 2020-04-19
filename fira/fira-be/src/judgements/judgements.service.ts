@@ -5,15 +5,14 @@ import {
   BadRequestException,
   Scope,
 } from '@nestjs/common';
-import { Connection, MoreThan } from 'typeorm';
 import moment = require('moment');
 import d3 = require('d3');
 
 import { JudgementsWorkerService, getRotateIndex } from './judgements-worker.service';
 import { RequestLogger } from '../commons/request-logger.service';
-import { Judgement } from './entity/judgement.entity';
-import { User } from '../identity-management/entity/user.entity';
-import { Config } from '../admin/entity/config.entity';
+import { JudgementsDAO } from '../persistence/judgements.dao';
+import { UserDAO } from '../persistence/user.dao';
+import { ConfigDAO } from '../persistence/config.dao';
 import { assertUnreachable } from '../util/types.util';
 import { JudgementStatus } from '../typings/enums';
 import {
@@ -28,7 +27,9 @@ const SERVICE_NAME = 'JudgementsService';
 @Injectable({ scope: Scope.REQUEST })
 export class JudgementsService {
   constructor(
-    private readonly connection: Connection,
+    private readonly judgementsDAO: JudgementsDAO,
+    private readonly userDAO: UserDAO,
+    private readonly configDAO: ConfigDAO,
     private readonly requestLogger: RequestLogger,
     private readonly judgementsWorkerService: JudgementsWorkerService,
   ) {
@@ -45,10 +46,8 @@ export class JudgementsService {
     judgementId: number,
     judgementData: SaveJudgement,
   ): Promise<void> => {
-    const user = await this.connection.getRepository(User).findOneOrFail(userId);
-    const dbJudgement = await this.connection.getRepository(Judgement).findOne({
-      where: { user, id: judgementId },
-    });
+    const user = await this.userDAO.findUserOrFail({ id: userId });
+    const dbJudgement = await this.judgementsDAO.findJudgement({ user, judgementId });
 
     if (!dbJudgement) {
       throw new NotFoundException(
@@ -93,15 +92,14 @@ export class JudgementsService {
         `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
       );
 
-      dbJudgement.status = JudgementStatus.JUDGED;
-      dbJudgement.relevanceLevel = judgementData.relevanceLevel;
-      if (relevancePositions.length > 0) {
-        dbJudgement.relevancePositions = relevancePositions;
-      }
-      dbJudgement.durationUsedToJudgeMs = judgementData.durationUsedToJudgeMs;
-      dbJudgement.judgedAt = new Date();
-
-      await this.connection.getRepository(Judgement).save(dbJudgement);
+      await this.judgementsDAO.saveJudgement({
+        id: judgementId,
+        status: JudgementStatus.JUDGED,
+        relevanceLevel: judgementData.relevanceLevel,
+        relevancePositions,
+        durationUsedToJudgeMs: judgementData.durationUsedToJudgeMs,
+        judgedAt: new Date(),
+      });
     } else if (dbJudgement.status === JudgementStatus.JUDGED) {
       // if all parameters are equal, return status OK, otherwise CONFLICT
       if (
@@ -153,9 +151,9 @@ export class JudgementsService {
   };
 
   private exportJudgements = async (): Promise<ExportJudgement[]> => {
-    const allJudgements = await this.connection
-      .getRepository(Judgement)
-      .find({ where: { status: JudgementStatus.JUDGED } });
+    const allJudgements = await this.judgementsDAO.findJudgements({
+      status: JudgementStatus.JUDGED,
+    });
 
     return allJudgements.map((judgement) => {
       const partsAvailable = judgement.document.annotateParts;
@@ -195,12 +193,12 @@ export class JudgementsService {
 
       return {
         id: judgement.id,
-        relevanceLevel: judgement.relevanceLevel,
+        relevanceLevel: judgement.relevanceLevel!,
         relevanceCharacterRanges,
         rotate: judgement.rotate,
         mode: judgement.mode,
-        durationUsedToJudgeMs: judgement.durationUsedToJudgeMs,
-        judgedAtUnixTS: Math.round(judgement.judgedAt.getTime() / 1000),
+        durationUsedToJudgeMs: judgement.durationUsedToJudgeMs!,
+        judgedAtUnixTS: Math.round(judgement.judgedAt!.getTime() / 1000),
         documentId: judgement.document.document.id,
         queryId: judgement.query.query.id,
         userId: judgement.user.id,
@@ -210,46 +208,31 @@ export class JudgementsService {
 
   public getStatistics = async (): Promise<Statistic[]> => {
     this.requestLogger.log('getStatistics');
-    const dbConfig = await this.connection.getRepository(Config).findOneOrFail();
-    const judgementRepository = this.connection.getRepository(Judgement);
+
+    const dbConfig = await this.configDAO.findConfigOrFail();
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
-    const countOfAllCompletedJudgements = await judgementRepository
-      .createQueryBuilder()
-      .where({ status: JudgementStatus.JUDGED })
-      .getCount();
+    const countOfAllCompletedJudgements = await this.judgementsDAO.countJudgements({
+      status: JudgementStatus.JUDGED,
+    });
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
     // in the last 24 hours
-    const countOfAllCompletedJudgementsLast24Hours = await judgementRepository
-      .createQueryBuilder('j')
-      .where({
-        status: JudgementStatus.JUDGED,
-        judgedAt: MoreThan(moment().subtract(24, 'hours').toDate()),
-      })
-      .getCount();
+    const countOfAllCompletedJudgementsLast24Hours = await this.judgementsDAO.countJudgements({
+      status: JudgementStatus.JUDGED,
+      judgedAt: { min: moment().subtract(24, 'hours').toDate() },
+    });
 
     // count of users with at least 5 completed judgements
-    const countUsersWithAtLeast5ComplJudgements = (
-      await judgementRepository
-        .createQueryBuilder('j')
-        .select(`j.user_id AS user, count(*) AS count`)
-        .where({ status: JudgementStatus.JUDGED })
-        .groupBy(`j.user_id`)
-        .having(`count(*) >= 5`)
-        .execute()
-    ).length;
+    const countUsersWithAtLeast5ComplJudgements = await this.judgementsDAO.countJudgementsGroupByUser(
+      { status: JudgementStatus.JUDGED, havingCount: { min: 5 } },
+    );
 
     // count of users who reached their annotation targets
-    const countUsersTargetReached = (
-      await judgementRepository
-        .createQueryBuilder('j')
-        .select(`j.user_id AS user, count(*) AS count`)
-        .where({ status: JudgementStatus.JUDGED })
-        .groupBy(`j.user_id`)
-        .having(`count(*) >= ${dbConfig.annotationTargetPerUser}`)
-        .execute()
-    ).length;
+    const countUsersTargetReached = await this.judgementsDAO.countJudgementsGroupByUser({
+      status: JudgementStatus.JUDGED,
+      havingCount: { min: dbConfig.annotationTargetPerUser },
+    });
 
     return [
       {

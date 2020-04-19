@@ -1,28 +1,21 @@
-import { Injectable, Scope, LoggerService } from '@nestjs/common';
+import { Injectable, LoggerService } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
 import { AppLogger } from '../commons/app-logger.service';
-import { User } from '../identity-management/entity/user.entity';
-import { Config } from '../admin/entity/config.entity';
-import { Judgement } from './entity/judgement.entity';
-import { Feedback } from '../feedback/entity/feedback.entity';
-import { Document } from '../admin/entity/document.entity';
-import { Query } from '../admin/entity/query.entity';
-import { JudgementPair, COLUMN_PRIORITY } from '../admin/entity/judgement-pair.entity';
+import { UserDAO } from '../persistence/user.dao';
+import { ConfigDAO } from '../persistence/config.dao';
+import { DocumentDAO } from '../persistence/document.dao';
+import { QueryDAO } from '../persistence/query.dao';
+import { JudgementsDAO } from '../persistence/judgements.dao';
+import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
+import { FeedbackDAO } from '../persistence/feedback.dao';
+import { TUser } from '../persistence/entity/user.entity';
+import { TConfig } from '../persistence/entity/config.entity';
+import { TJudgement } from '../persistence/entity/judgement.entity';
 import { PreloadJudgementResponse, JudgementMode, PreloadJudgement } from '../../../commons';
 import { JudgementStatus } from '../typings/enums';
-import { assetUtil } from '../admin/asset.util';
-
-type PairQueryResult = {
-  readonly document_id: string;
-  readonly query_id: string;
-};
-
-type CountQueryResult = PairQueryResult & {
-  readonly count: number;
-};
 
 type PreloadWorklet = {
   userId: string;
@@ -62,7 +55,16 @@ export class JudgementsWorkerService {
    * will also be of that scope. Thus when changing the dependencies of this service, make sure that they
    * are, and stay, singleton-scoped.
    */
-  constructor(private readonly persistenceService: PersistenceService) {
+  constructor(
+    private readonly persistenceService: PersistenceService,
+    private readonly userDAO: UserDAO,
+    private readonly configDAO: ConfigDAO,
+    private readonly documentDAO: DocumentDAO,
+    private readonly queryDAO: QueryDAO,
+    private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementPairDAO: JudgementPairDAO,
+    private readonly feedbackDAO: FeedbackDAO,
+  ) {
     this.appLogger = new AppLogger(SERVICE_NAME);
   }
 
@@ -120,8 +122,11 @@ export class JudgementsWorkerService {
         const logger = worklet.logger;
 
         // preparation: load data needed throughout the entire preload transaction
-        const user = await transactionalEntityManager.findOneOrFail(User, worklet.userId);
-        const dbConfig = await transactionalEntityManager.findOneOrFail(Config);
+        const user = await this.userDAO.findUserOrFail(
+          { id: worklet.userId },
+          transactionalEntityManager,
+        );
+        const dbConfig = await this.configDAO.findConfigOrFail(transactionalEntityManager);
 
         // phase #1: determine how many judgements should, and can, be preloaded for the user,
         // and save preloaded judgements to the database
@@ -129,15 +134,14 @@ export class JudgementsWorkerService {
 
         // phase #2: after the user got preloaded as many judgements as possible,
         // load all the data and return it to the client
-        const judgementsOfUser = await transactionalEntityManager.find(Judgement, {
-          where: { user },
-        });
-        const countOfFeedbacks = await transactionalEntityManager.count(Feedback, {
-          where: { user },
-        });
-        const countOfNotPreloadedPairs = await getCountOfNotPreloadedPairs(
+        const judgementsOfUser = await this.judgementsDAO.findJudgements(
+          { user },
           transactionalEntityManager,
-          user.id,
+        );
+        const countOfFeedbacks = await this.feedbackDAO.count({ user }, transactionalEntityManager);
+        const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
+          { userId: user.id },
+          transactionalEntityManager,
         );
 
         // compute some statistics for this user
@@ -177,12 +181,13 @@ export class JudgementsWorkerService {
   }: {
     transactionalEntityManager: EntityManager;
     logger: LoggerService;
-    user: User;
-    dbConfig: Config;
+    user: TUser;
+    dbConfig: TConfig;
   }) => {
-    const allJudgementsOfUser = await transactionalEntityManager.find(Judgement, {
-      where: { user },
-    });
+    const allJudgementsOfUser = await this.judgementsDAO.findJudgements(
+      { user },
+      transactionalEntityManager,
+    );
     const countOfAllJudgements = allJudgementsOfUser.length;
     const countOfOpenJudgements = allJudgementsOfUser.filter(
       (j) => j.status === JudgementStatus.TO_JUDGE,
@@ -199,9 +204,9 @@ export class JudgementsWorkerService {
     // judgements should get preloaded for this user. Only reason this could not be possible is that
     // the user might have annotated every possible judgement pair already.
     // --> determine how many judgement pairs the user has not annotated so far
-    const countOfNotPreloadedPairs = await getCountOfNotPreloadedPairs(
+    const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
+      { userId: user.id },
       transactionalEntityManager,
-      user.id,
     );
     if (countOfNotPreloadedPairs < 1) {
       logger.log(
@@ -219,10 +224,9 @@ export class JudgementsWorkerService {
     );
 
     // get priorities, extract "all" priority and numeric priorities, and sort the latter descending
-    const allPriorities = ((await transactionalEntityManager
-      .createQueryBuilder(JudgementPair, 'judgement_pair')
-      .select(`DISTINCT judgement_pair.${COLUMN_PRIORITY}`, 'priority')
-      .getRawMany()) as Array<{ priority: string | 'all' }>).map((dbObj) => dbObj.priority);
+    const allPriorities = await this.judgementPairDAO.getAvailablePriorities(
+      transactionalEntityManager,
+    );
 
     const priorityAllExists = allPriorities.some((p) => p === 'all');
     const numericPriorities = allPriorities
@@ -231,10 +235,10 @@ export class JudgementsWorkerService {
       .sort((a, b) => b - a);
 
     if (priorityAllExists) {
-      const countOfPairsWithPrioAll = await transactionalEntityManager
-        .createQueryBuilder(JudgementPair, 'judgement_pair')
-        .where({ priority: 'all' })
-        .getCount();
+      const countOfPairsWithPrioAll = await this.judgementPairDAO.count(
+        { priority: 'all' },
+        transactionalEntityManager,
+      );
       const stepSizeToPreloadPrioAllPair = Math.floor(
         dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
       );
@@ -245,46 +249,19 @@ export class JudgementsWorkerService {
         ),
       );
       if (countPrioAllPairsUserShouldHave > 0) {
-        const countPrioAllPairsUserActuallyHas = await transactionalEntityManager
-          .createQueryBuilder(JudgementPair, 'jp')
-          .select('jp.*')
-          .where((qb) => {
-            return `jp.${COLUMN_PRIORITY} = :priority AND EXISTS ${qb
-              .subQuery()
-              .select(`1`)
-              .from(Judgement, 'j')
-              .where(
-                `j.document_document = jp.document_id AND j.query_query = jp.query_id AND j.user_id = :userid`,
-              )
-              .getQuery()}`;
-          })
-          .setParameter('userid', user.id)
-          .setParameter('priority', 'all')
-          .groupBy('jp.document_id, jp.query_id')
-          .getCount();
+        const countPrioAllPairsUserActuallyHas = await this.judgementPairDAO.countPreloaded({
+          userId: user.id,
+          priority: 'all',
+        });
 
         let countPrioAllPairsMissing =
           countPrioAllPairsUserShouldHave - countPrioAllPairsUserActuallyHas;
 
         while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
-          const pairCandidates: PairQueryResult[] = await transactionalEntityManager
-            .createQueryBuilder(JudgementPair, 'jp')
-            .select('jp.document_id, jp.query_id')
-            .where((qb) => {
-              return `jp.${COLUMN_PRIORITY} = :priority AND NOT EXISTS ${qb
-                .subQuery()
-                .select(`1`)
-                .from(Judgement, 'j')
-                .where(
-                  `j.document_document = jp.document_id AND j.query_query = jp.query_id AND j.user_id = :userid`,
-                )
-                .getQuery()}`;
-            })
-            .setParameter('userid', user.id)
-            .setParameter('priority', 'all')
-            .groupBy('jp.document_id, jp.query_id')
-            .orderBy('jp.document_id, jp.query_id', 'ASC')
-            .execute();
+          const pairCandidates: PairQueryResult[] = await this.judgementPairDAO.findNotPreloaded(
+            { userId: user.id, priority: 'all' },
+            transactionalEntityManager,
+          );
 
           if (pairCandidates.length < 1) {
             logger.warn(
@@ -329,9 +306,9 @@ export class JudgementsWorkerService {
       );
 
       // edge case: if the user now has judgements for EVERY possible judgement pair, stop
-      const countOfNotPreloadedPairs = await getCountOfNotPreloadedPairs(
+      const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
+        { userId: user.id },
         transactionalEntityManager,
-        user.id,
       );
       if (countOfNotPreloadedPairs < 1) {
         logger.log(`the user now has judgements for EVERY possible judgement pair --> stop`);
@@ -355,9 +332,9 @@ export class JudgementsWorkerService {
     logger: LoggerService;
     priorities: number[];
     targetFactor: number;
-    user: User;
+    user: TUser;
     countJudgementsToPreload: number;
-    dbConfig: Config;
+    dbConfig: TConfig;
   }): Promise<number> => {
     for (const priority of priorities) {
       if (countJudgementsToPreload < 1) {
@@ -365,10 +342,9 @@ export class JudgementsWorkerService {
         break;
       }
 
-      const pairCandidates = await getCandidatesByPriority(
-        priority,
+      const pairCandidates = await this.judgementPairDAO.getCandidatesByPriority(
+        { userId: user.id, priority },
         targetFactor,
-        user.id,
         dbConfig,
         transactionalEntityManager,
       );
@@ -399,7 +375,7 @@ export class JudgementsWorkerService {
     entityManager: EntityManager,
     logger: LoggerService,
     pairs: PairQueryResult[],
-    user: User,
+    user: TUser,
     judgementMode: JudgementMode,
     rotateDocumentText: boolean,
   ): Promise<void> => {
@@ -412,117 +388,44 @@ export class JudgementsWorkerService {
       } else {
         // determine how often each variant - rotation or no-rotation - was used,
         // and set the variant which was used less often
-        const rotateStats: Array<{ rotate: boolean; count: number }> = (
-          await entityManager
-            .createQueryBuilder(Judgement, 'j')
-            .select('j.rotate, count(j.*)')
-            .groupBy('j.rotate')
-            .execute()
-        ).map((elem: { rotate: boolean; count: string }) => ({
-          ...elem,
-          count: Number(elem.count),
-        }));
+        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate(entityManager);
         const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
         const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
         rotate = countRotate < countNoRotate;
       }
 
       // gather data and persist judgement
-      const dbDocument = await entityManager.findOneOrFail(Document, pair.document_id);
-      const dbQuery = await entityManager.findOneOrFail(Query, pair.query_id);
-      const dbDocumentVersion = await assetUtil.findCurrentDocumentVersion(
+      const dbDocument = await this.documentDAO.findDocumentOrFail(
+        { id: pair.document_id },
+        entityManager,
+      );
+      const dbQuery = await this.queryDAO.findQueryOrFail({ id: pair.query_id }, entityManager);
+      const dbDocumentVersion = await this.documentDAO.findCurrentDocumentVersion(
         dbDocument,
         entityManager,
       );
-      const dbQueryVersion = await assetUtil.findCurrentQueryVersion(dbQuery, entityManager);
-
-      const dbJudgement = new Judgement();
-      dbJudgement.status = JudgementStatus.TO_JUDGE;
-      dbJudgement.rotate = rotate;
-      dbJudgement.mode = judgementMode;
-      dbJudgement.document = dbDocumentVersion;
-      dbJudgement.query = dbQueryVersion;
-      dbJudgement.user = user;
+      const dbQueryVersion = await this.queryDAO.findCurrentQueryVersion(dbQuery, entityManager);
 
       logger.log(
-        `persisting judgement, documentId=${dbDocument.id}, queryId=${dbQuery.id}, rotate=${rotate}, mode=${dbJudgement.mode}, userId=${user.id}`,
+        `persisting judgement, documentId=${dbDocument.id}, queryId=${dbQuery.id}, rotate=${rotate}, mode=${judgementMode}, userId=${user.id}`,
       );
 
-      await entityManager.save(Judgement, dbJudgement);
+      await this.judgementsDAO.saveJudgement(
+        {
+          status: JudgementStatus.TO_JUDGE,
+          rotate,
+          mode: judgementMode,
+          document: dbDocumentVersion,
+          query: dbQueryVersion,
+          user,
+        },
+        entityManager,
+      );
     }
   };
 }
 
-async function getCountOfNotPreloadedPairs(
-  transactionalEntityManager: EntityManager,
-  userId: string,
-) {
-  return await transactionalEntityManager
-    .createQueryBuilder(JudgementPair, 'jp')
-    .select('jp.*')
-    .leftJoin(
-      Judgement,
-      'j',
-      'j.document_document = jp.document_id AND j.query_query = jp.query_id',
-    )
-    .where((qb) => {
-      return `NOT EXISTS ${qb
-        .subQuery()
-        .select(`1`)
-        .from(Judgement, 'j2')
-        .where(
-          `j2.document_document = j.document_document AND j2.query_query = j.query_query AND j2.user_id = :userid`,
-        )
-        .getQuery()}`;
-    })
-    .setParameter('userid', userId)
-    .groupBy('jp.document_id, jp.query_id')
-    .getCount();
-}
-
-async function getCandidatesByPriority(
-  priority: number,
-  targetFactor: number,
-  userId: string,
-  dbConfig: Config,
-  entityManager: EntityManager,
-): Promise<CountQueryResult[]> {
-  return (
-    await entityManager
-      .createQueryBuilder(JudgementPair, 'jp')
-      .select('jp.document_id, jp.query_id, count(j.*)')
-      .leftJoin(
-        Judgement,
-        'j',
-        'j.document_document = jp.document_id AND j.query_query = jp.query_id',
-      )
-      .where((qb) => {
-        return `jp.${COLUMN_PRIORITY} = :priority AND NOT EXISTS ${qb
-          .subQuery()
-          .select(`1`)
-          .from(Judgement, 'j2')
-          .where(
-            `j2.document_document = j.document_document AND j2.query_query = j.query_query AND j2.user_id = :userid`,
-          )
-          .getQuery()}`;
-      })
-      .setParameter('userid', userId)
-      .setParameter('priority', priority)
-      .groupBy('jp.document_id, jp.query_id')
-      .orderBy('jp.document_id, jp.query_id', 'ASC')
-      .execute()
-  )
-    .map((pair: CountQueryResult) => ({
-      ...pair,
-      count: Number(pair.count),
-    }))
-    .filter(
-      (pair: CountQueryResult) => pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor,
-    )
-    .sort((p1: CountQueryResult, p2: CountQueryResult) => p1.count - p2.count);
-}
-
-function mapJudgementsToResponse(openJudgements: Judgement[]) {
+function mapJudgementsToResponse(openJudgements: TJudgement[]) {
   return openJudgements
     .map((openJudgement) => {
       // rotate text (annotation parts), if requested to do so

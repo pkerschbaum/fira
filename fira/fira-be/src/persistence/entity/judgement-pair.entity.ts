@@ -5,9 +5,17 @@ import { Query } from './query.entity';
 
 export const COLUMN_PRIORITY = 'priority';
 
+export type TJudgementPair = {
+  document: Document;
+  query: Query;
+  priority: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 @Entity()
-export class JudgementPair {
-  @ManyToOne((type) => Document, {
+export class JudgementPair implements TJudgementPair {
+  @ManyToOne(() => Document, {
     eager: true,
     cascade: false,
     onDelete: 'RESTRICT',
@@ -15,7 +23,7 @@ export class JudgementPair {
     nullable: false,
   })
   document: Document;
-  @ManyToOne((type) => Query, {
+  @ManyToOne(() => Query, {
     eager: true,
     cascade: false,
     onDelete: 'RESTRICT',
@@ -23,7 +31,7 @@ export class JudgementPair {
     nullable: false,
   })
   query: Query;
-  @Column({ name: COLUMN_PRIORITY, nullable: false })
+  @Column({ name: COLUMN_PRIORITY })
   priority: string;
   @CreateDateColumn()
   createdAt: Date;

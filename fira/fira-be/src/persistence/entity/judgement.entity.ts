@@ -9,23 +9,39 @@ import {
 
 import { JudgementStatus } from '../../typings/enums';
 import { RelevanceLevel, JudgementMode } from '../../../../commons';
-import { DocumentVersion } from '../../admin/entity/document.entity';
-import { QueryVersion } from '../../admin/entity/query.entity';
-import { User } from '../../identity-management/entity/user.entity';
+import { DocumentVersion } from './document.entity';
+import { QueryVersion } from './query.entity';
+import { User } from './user.entity';
+
+export type TJudgement = {
+  id: number;
+  status: JudgementStatus;
+  relevanceLevel: RelevanceLevel | null;
+  relevancePositions: number[] | null;
+  rotate: boolean;
+  mode: JudgementMode;
+  document: DocumentVersion;
+  query: QueryVersion;
+  user: User;
+  durationUsedToJudgeMs: number | null;
+  judgedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 @Entity()
-export class Judgement {
+export class Judgement implements TJudgement {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ enum: JudgementStatus, nullable: false })
+  @Column({ enum: JudgementStatus })
   status: JudgementStatus;
   @Column({ enum: RelevanceLevel, nullable: true })
   relevanceLevel: RelevanceLevel;
   @Column({ type: 'numeric', array: true, nullable: true })
   relevancePositions: number[] | null;
-  @Column({ nullable: false })
+  @Column()
   rotate: boolean;
-  @Column({ enum: JudgementMode, nullable: false })
+  @Column({ enum: JudgementMode })
   mode: JudgementMode;
   @ManyToOne(() => DocumentVersion, {
     eager: true,
@@ -49,9 +65,9 @@ export class Judgement {
   })
   user: User;
   @Column({ nullable: true, type: 'integer' })
-  durationUsedToJudgeMs: number;
+  durationUsedToJudgeMs: number | null;
   @Column({ nullable: true, type: 'timestamp with time zone' })
-  judgedAt: Date;
+  judgedAt: Date | null;
   @CreateDateColumn()
   createdAt: Date;
   @UpdateDateColumn()

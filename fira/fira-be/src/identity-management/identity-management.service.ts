@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as moment from 'moment';
 import { Moment } from 'moment';
-import { Repository } from 'typeorm';
 
 import * as config from '../config';
+import { RequestLogger } from '../commons/request-logger.service';
+import { KeycloakClient } from './keycloak.client';
+import { UserDAO } from '../persistence/user.dao';
 import {
   AuthResponse,
   ImportUserResponse,
@@ -12,10 +13,7 @@ import {
   uniqueIdGenerator,
 } from '../../../commons';
 import { ImportStatus } from '../typings/enums';
-import { RequestLogger } from '../commons/request-logger.service';
-import { KeycloakClient } from './keycloak.client';
 import { convertKey } from '../util/keys.util';
-import { User } from './entity/user.entity';
 
 const SERVICE_NAME = 'IdentityManagementService';
 
@@ -33,8 +31,7 @@ export class IdentityManagementService {
   constructor(
     private readonly keycloakClient: KeycloakClient,
     private readonly requestLogger: RequestLogger,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userDAO: UserDAO,
   ) {
     this.requestLogger.setContext(SERVICE_NAME);
   }
@@ -69,7 +66,7 @@ export class IdentityManagementService {
         });
 
         try {
-          if ((await this.userRepository.findByIds([user.id])).length > 0) {
+          if ((await this.userDAO.findUsers({ ids: [user.id] })).length > 0) {
             return {
               id: user.id,
               status: ImportStatus.ERROR,
@@ -78,9 +75,7 @@ export class IdentityManagementService {
           }
 
           await this.keycloakClient.createUser(accessToken, user.id, password);
-          const dbUser = new User();
-          dbUser.id = user.id;
-          await this.userRepository.save(dbUser);
+          await this.userDAO.saveUser({ id: user.id });
           return {
             id: user.id,
             status: ImportStatus.SUCCESS,
@@ -130,6 +125,6 @@ export class IdentityManagementService {
   };
 
   public getCountOfUsers = async (): Promise<number> => {
-    return this.userRepository.count();
+    return await this.userDAO.count();
   };
 }

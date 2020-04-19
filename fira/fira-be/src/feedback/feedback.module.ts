@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 
+import { IdentityManagementModule } from '../identity-management/identity-management.module';
 import { FeedbackController } from './feedback.controller';
 import { FeedbackService } from './feedback.service';
-import { IdentityManagementModule } from '../identity-management/identity-management.module';
 
 @Module({
   imports: [IdentityManagementModule],
