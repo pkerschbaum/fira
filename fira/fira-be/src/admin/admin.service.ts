@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
-import { RequestLogger } from '../commons/request-logger.service';
+import { RequestLogger } from '../commons/logger/request-logger';
 import { DocumentDAO } from '../persistence/document.dao';
 import { QueryDAO } from '../persistence/query.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';

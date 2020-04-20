@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-import { RequestLogger } from '../commons/request-logger.service';
+import { RequestLogger } from '../commons/logger/request-logger';
 
 const CONTEXT_NAME = 'IncomingLoggerMiddleware';
 

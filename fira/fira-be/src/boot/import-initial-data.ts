@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import * as csvParse from 'csv-parse';
 
 import * as config from '../config';
-import { AppLogger } from '../commons/app-logger.service';
+import { TransientLogger } from '../commons/logger/transient-logger';
 import { isEmpty } from '../util/strings';
 import { ImportStatus } from '../typings/enums';
 import { JudgementMode } from '../../../commons';
@@ -28,7 +28,7 @@ export async function importInitialData({
   imService,
   adminService,
 }: {
-  logger: AppLogger;
+  logger: TransientLogger;
   imService: IdentityManagementService;
   adminService: AdminService;
 }) {
@@ -152,7 +152,7 @@ async function importAsset<T>({
   tsvMapFn,
   importFn,
 }: {
-  logger: AppLogger;
+  logger: TransientLogger;
   assetType: string;
   getCountFn: () => Promise<number>;
   tsvSkipFn: (obj: ObjectLiteral) => boolean;
@@ -207,7 +207,7 @@ async function tsvParse(
   return results.filter((entry) => !skipFn(entry)).map(mapFn);
 }
 
-function abortOnFailedImport(logger: AppLogger, importResults: ImportResult[]) {
+function abortOnFailedImport(logger: TransientLogger, importResults: ImportResult[]) {
   const failedImports = importResults.filter(
     (importResult) => importResult.status === ImportStatus.ERROR,
   );

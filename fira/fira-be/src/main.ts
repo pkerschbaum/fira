@@ -4,7 +4,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import * as config from './config';
 import { AppModule } from './app.module';
-import { AppLogger } from './commons/app-logger.service';
+import { TransientLogger } from './commons/logger/transient-logger';
+import { BaseLogger } from './commons/logger/base-logger';
 import { importInitialData } from './boot/import-initial-data';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { AdminService } from './admin/admin.service';
@@ -13,8 +14,8 @@ import { RedirectClientFilter } from './filter/redirect-client.filter';
 const RUNNING_LOG_INTERVAL = 1000; // ms
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const appLogger = await app.resolve(AppLogger);
+  const app = await NestFactory.create(AppModule, { logger: new BaseLogger() });
+  const appLogger = await app.resolve(TransientLogger);
   appLogger.setContext('Main-Bootstrap');
 
   // set global prefix which is applied to all HTTP endpoints and the Swagger UI, but not to
@@ -58,4 +59,5 @@ async function bootstrap() {
   appLogger.log('starting application...');
   await app.listen(config.application.port);
 }
+// tslint:disable-next-line: no-floating-promises
 bootstrap();

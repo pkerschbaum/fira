@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { Moment } from 'moment';
 
 import * as config from '../config';
-import { RequestLogger } from '../commons/request-logger.service';
+import { RequestLogger } from '../commons/logger/request-logger';
 import { KeycloakClient } from './keycloak.client';
 import { UserDAO } from '../persistence/user.dao';
 import {

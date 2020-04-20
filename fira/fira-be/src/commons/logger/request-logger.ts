@@ -1,40 +1,41 @@
-import { Injectable, Scope, LoggerService } from '@nestjs/common';
-import { AppLogger } from './app-logger.service';
-import { RequestProperties } from './request-properties.service';
+import { Injectable, Scope, LoggerService, Inject } from '@nestjs/common';
+import { TransientLogger } from './transient-logger';
+import { RequestProperties } from '../request-properties';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class RequestLogger implements LoggerService {
-  constructor(private appLogger: AppLogger, private requestProperties: RequestProperties) {
-    this.appLogger = new AppLogger();
-  }
+  constructor(
+    private transientLogger: TransientLogger,
+    private requestProperties: RequestProperties,
+  ) {}
 
   public setContext(context: string): void {
-    this.appLogger.setContext(context);
+    this.transientLogger.setContext(context);
   }
 
   public log(message: any, context?: string): void {
-    this.appLogger.log(
+    this.transientLogger.log(
       `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
       context,
     );
   }
 
   public debug(message: any, context?: string): void {
-    this.appLogger.debug(
+    this.transientLogger.debug(
       `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
       context,
     );
   }
 
   public warn(message: any, context?: string): void {
-    this.appLogger.warn(
+    this.transientLogger.warn(
       `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
       context,
     );
   }
 
   public error(message: any, context?: string): void {
-    this.appLogger.error(
+    this.transientLogger.error(
       `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
       context,
     );

@@ -3,7 +3,7 @@ import { EntityManager } from 'typeorm';
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
-import { AppLogger } from '../commons/app-logger.service';
+import { BaseLogger } from '../commons/logger/base-logger';
 import { UserDAO } from '../persistence/user.dao';
 import { ConfigDAO } from '../persistence/config.dao';
 import { DocumentDAO } from '../persistence/document.dao';
@@ -46,7 +46,7 @@ const createLogger = (requestLogger: LoggerService) => ({
 export class JudgementsWorkerService {
   private preloadQueue: PreloadWorklet[] = [];
   private workerActive = false;
-  private readonly appLogger: AppLogger;
+  private readonly appLogger: BaseLogger;
 
   /* NestJS does not have any mechanism to force a singleton-scope for a service. But the worker must
    * be a singleton in order to have only one worker processing all pending preloads in sequence. Whether
@@ -65,7 +65,8 @@ export class JudgementsWorkerService {
     private readonly judgementPairDAO: JudgementPairDAO,
     private readonly feedbackDAO: FeedbackDAO,
   ) {
-    this.appLogger = new AppLogger(SERVICE_NAME);
+    this.appLogger = new BaseLogger();
+    this.appLogger.setContext(SERVICE_NAME);
   }
 
   public addPreloadWorklet = (

@@ -9,7 +9,7 @@ import moment = require('moment');
 import d3 = require('d3');
 
 import { JudgementsWorkerService, getRotateIndex } from './judgements-worker.service';
-import { RequestLogger } from '../commons/request-logger.service';
+import { RequestLogger } from '../commons/logger/request-logger';
 import { JudgementsDAO } from '../persistence/judgements.dao';
 import { UserDAO } from '../persistence/user.dao';
 import { ConfigDAO } from '../persistence/config.dao';

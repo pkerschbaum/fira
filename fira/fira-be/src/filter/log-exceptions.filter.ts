@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 
-import { RequestLogger } from '../commons/request-logger.service';
+import { RequestLogger } from '../commons/logger/request-logger';
 
 const SERVICE_NAME = 'LogExceptionsFilter';
 
