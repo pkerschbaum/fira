@@ -1,23 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { TConfig, Config } from './entity/config.entity';
-import { failIfUndefined } from './persistence.util';
+import { failIfUndefined, optionalTransaction, DAO } from './persistence.util';
 
 @Injectable()
-export class ConfigDAO {
+export class ConfigDAO implements DAO<Config> {
   constructor(
     @InjectRepository(Config)
-    private readonly configRepository: Repository<Config>,
+    public readonly repository: Repository<Config>,
   ) {}
 
-  public findConfig = async (transactionalEM?: EntityManager): Promise<Config | undefined> => {
-    const repository =
-      transactionalEM !== undefined ? transactionalEM.getRepository(Config) : this.configRepository;
-
-    return await repository.findOne();
-  };
+  public findConfig = optionalTransaction(Config)(
+    async (_, repository): Promise<Config | undefined> => {
+      return await repository.findOne();
+    },
+  );
 
   public findConfigOrFail = failIfUndefined(this.findConfig);
 
@@ -38,10 +37,10 @@ export class ConfigDAO {
     if (data.annotationTargetToRequireFeedback !== undefined) {
       dbEntry.annotationTargetToRequireFeedback = data.annotationTargetToRequireFeedback;
     }
-    await this.configRepository.save(dbEntry);
+    await this.repository.save(dbEntry);
   };
 
   public count = async (): Promise<number> => {
-    return await this.configRepository.count();
+    return await this.repository.count();
   };
 }

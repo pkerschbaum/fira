@@ -7,7 +7,9 @@ import { CommonsModule } from '../commons/commons.module';
 import { ConfigDAO } from './config.dao';
 import { UserDAO } from './user.dao';
 import { DocumentDAO } from './document.dao';
+import { DocumentVersionDAO } from './document-version.dao';
 import { QueryDAO } from './query.dao';
+import { QueryVersionDAO } from './query-version.dao';
 import { JudgementsDAO } from './judgements.dao';
 import { JudgementPairDAO } from './judgement-pair.dao';
 import { FeedbackDAO } from './feedback.dao';
@@ -41,7 +43,9 @@ import { Feedback } from './entity/feedback.entity';
     ConfigDAO,
     UserDAO,
     DocumentDAO,
+    DocumentVersionDAO,
     QueryDAO,
+    QueryVersionDAO,
     JudgementsDAO,
     JudgementPairDAO,
     FeedbackDAO,
@@ -51,7 +55,9 @@ import { Feedback } from './entity/feedback.entity';
     ConfigDAO,
     UserDAO,
     DocumentDAO,
+    DocumentVersionDAO,
     QueryDAO,
+    QueryVersionDAO,
     JudgementsDAO,
     JudgementPairDAO,
     FeedbackDAO,

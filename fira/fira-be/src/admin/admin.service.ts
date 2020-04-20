@@ -4,7 +4,9 @@ import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { DocumentDAO } from '../persistence/document.dao';
+import { DocumentVersionDAO } from '../persistence/document-version.dao';
 import { QueryDAO } from '../persistence/query.dao';
+import { QueryVersionDAO } from '../persistence/query-version.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
 import { ConfigDAO } from '../persistence/config.dao';
 import {
@@ -24,7 +26,9 @@ export class AdminService {
   constructor(
     private readonly persistenceService: PersistenceService,
     private readonly documentDAO: DocumentDAO,
+    private readonly documentVersionDAO: DocumentVersionDAO,
     private readonly queryDAO: QueryDAO,
+    private readonly queryVersionDAO: QueryVersionDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
     private readonly configDAO: ConfigDAO,
     private readonly requestLogger: RequestLogger,
@@ -42,13 +46,15 @@ export class AdminService {
 
           for (const document of partition) {
             try {
-              await this.documentDAO.saveDocumentVersion(
+              await this.documentVersionDAO.saveDocumentVersion(
                 {
-                  documentId: document.id,
-                  text: document.text,
-                  annotateParts: document.text
-                    .split(config.application.splitRegex)
-                    .filter((part) => part !== ''),
+                  data: {
+                    documentId: document.id,
+                    text: document.text,
+                    annotateParts: document.text
+                      .split(config.application.splitRegex)
+                      .filter((part) => part !== ''),
+                  },
                 },
                 transactionalEntityManager,
               );
@@ -83,10 +89,12 @@ export class AdminService {
 
           for (const query of partition) {
             try {
-              await this.queryDAO.saveQueryVersion(
+              await this.queryVersionDAO.saveQueryVersion(
                 {
-                  queryId: query.id,
-                  text: query.text,
+                  data: {
+                    queryId: query.id,
+                    text: query.text,
+                  },
                 },
                 transactionalEntityManager,
               );
@@ -128,11 +136,11 @@ export class AdminService {
           for (const judgementPair of partition) {
             try {
               const documentPromise = this.documentDAO.findDocument(
-                { id: judgementPair.documentId },
+                { criteria: { id: judgementPair.documentId } },
                 transactionalEntityManager,
               );
               const query = await this.queryDAO.findQuery(
-                { id: judgementPair.queryId },
+                { criteria: { id: judgementPair.queryId } },
                 transactionalEntityManager,
               );
               const document = await documentPromise;
@@ -149,7 +157,7 @@ export class AdminService {
               }
 
               await this.judgementPairDAO.saveJudgementPair(
-                { document, query, priority: judgementPair.priority },
+                { data: { document, query, priority: judgementPair.priority } },
                 transactionalEntityManager,
               );
               partitionResults.push({

@@ -53,7 +53,7 @@ export class JudgementsService {
     judgementId: number,
     judgementData: SaveJudgement,
   ): Promise<void> => {
-    const user = await this.userDAO.findUserOrFail({ id: userId });
+    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
     const dbJudgement = await this.judgementsDAO.findJudgement({ user, judgementId });
 
     if (!dbJudgement) {
@@ -100,12 +100,14 @@ export class JudgementsService {
       );
 
       await this.judgementsDAO.saveJudgement({
-        id: judgementId,
-        status: JudgementStatus.JUDGED,
-        relevanceLevel: judgementData.relevanceLevel,
-        relevancePositions,
-        durationUsedToJudgeMs: judgementData.durationUsedToJudgeMs,
-        judgedAt: new Date(),
+        data: {
+          id: judgementId,
+          status: JudgementStatus.JUDGED,
+          relevanceLevel: judgementData.relevanceLevel,
+          relevancePositions,
+          durationUsedToJudgeMs: judgementData.durationUsedToJudgeMs,
+          judgedAt: new Date(),
+        },
       });
     } else if (dbJudgement.status === JudgementStatus.JUDGED) {
       // if all parameters are equal, return status OK, otherwise CONFLICT
@@ -159,7 +161,9 @@ export class JudgementsService {
 
   private exportJudgements = async (): Promise<ExportJudgement[]> => {
     const allJudgements = await this.judgementsDAO.findJudgements({
-      status: JudgementStatus.JUDGED,
+      criteria: {
+        status: JudgementStatus.JUDGED,
+      },
     });
 
     return allJudgements.map((judgement) => {
@@ -216,18 +220,22 @@ export class JudgementsService {
   public getStatistics = async (): Promise<Statistic[]> => {
     this.requestLogger.log('getStatistics');
 
-    const dbConfig = await this.configDAO.findConfigOrFail();
+    const dbConfig = await this.configDAO.findConfigOrFail({});
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
     const countOfAllCompletedJudgements = await this.judgementsDAO.countJudgements({
-      status: JudgementStatus.JUDGED,
+      criteria: {
+        status: JudgementStatus.JUDGED,
+      },
     });
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
     // in the last 24 hours
     const countOfAllCompletedJudgementsLast24Hours = await this.judgementsDAO.countJudgements({
-      status: JudgementStatus.JUDGED,
-      judgedAt: { min: moment().subtract(24, 'hours').toDate() },
+      criteria: {
+        status: JudgementStatus.JUDGED,
+        judgedAt: { min: moment().subtract(24, 'hours').toDate() },
+      },
     });
 
     // count of users with at least 5 completed judgements
