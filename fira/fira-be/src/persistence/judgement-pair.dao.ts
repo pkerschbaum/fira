@@ -2,14 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, EntityManager, SelectQueryBuilder } from 'typeorm';
 
+import { BaseLogger } from '../commons/logger/base-logger';
 import { TJudgementPair, JudgementPair, COLUMN_PRIORITY } from './entity/judgement-pair.entity';
 import { Judgement } from './entity/judgement.entity';
 import { TConfig } from './entity/config.entity';
+import { TDocument } from './entity/document.entity';
+import { TQuery } from './entity/query.entity';
+import { TUser } from './entity/user.entity';
+import * as arrays from '../util/arrays';
 import { undefinedIfEmpty } from '../util/objects';
 
+const CONTEXT = 'JudgementPairDAO';
+
 export type PairQueryResult = {
-  readonly document_id: string;
-  readonly query_id: string;
+  readonly document_id: TDocument['id'];
+  readonly query_id: TQuery['id'];
 };
 
 export type CountQueryResult = PairQueryResult & {
@@ -18,10 +25,17 @@ export type CountQueryResult = PairQueryResult & {
 
 @Injectable()
 export class JudgementPairDAO {
+  private readonly cache: {
+    availablePriorities?: { countOfPairsWithPrioAll: number; numericPriorities: number[] };
+  } = {};
+  private readonly baseLogger: BaseLogger;
+
   constructor(
     @InjectRepository(JudgementPair)
     private readonly judgementPairRepository: Repository<JudgementPair>,
-  ) {}
+  ) {
+    this.baseLogger = new BaseLogger(CONTEXT);
+  }
 
   public count = async (
     criteria?: { priority?: TJudgementPair['priority'] },
@@ -66,32 +80,74 @@ export class JudgementPairDAO {
     await repository.delete({});
   };
 
-  public getAvailablePriorities = async (transactionalEM?: EntityManager): Promise<string[]> => {
-    const repository =
-      transactionalEM !== undefined
-        ? transactionalEM.getRepository(JudgementPair)
-        : this.judgementPairRepository;
+  public getAvailablePriorities = async (
+    transactionalEM?: EntityManager,
+  ): Promise<{ countOfPairsWithPrioAll: number; numericPriorities: number[] }> => {
+    if (this.cache.availablePriorities === undefined) {
+      this.baseLogger.log(`computing and caching available priorities...`);
 
-    return ((await repository
-      .createQueryBuilder('judgement_pair')
-      .select(`DISTINCT judgement_pair.${COLUMN_PRIORITY}`, 'priority')
-      .getRawMany()) as Array<{ priority: string | 'all' }>).map((dbObj) => dbObj.priority);
+      const repository =
+        transactionalEM !== undefined
+          ? transactionalEM.getRepository(JudgementPair)
+          : this.judgementPairRepository;
+
+      const priorities = ((await repository
+        .createQueryBuilder('judgement_pair')
+        .select(`judgement_pair.${COLUMN_PRIORITY}`, 'priority')
+        .getRawMany()) as Array<{ priority: TJudgementPair['priority'] | 'all' }>).map(
+        (dbObj) => dbObj.priority,
+      );
+
+      const countOfPairsWithPrioAll = priorities.filter((p) => p === 'all').length;
+      const numericPriorities = arrays
+        .uniqueValues(priorities)
+        .map((p) => Number(p))
+        .filter((p) => !isNaN(p))
+        .sort((a, b) => b - a);
+
+      this.cache.availablePriorities = { countOfPairsWithPrioAll, numericPriorities };
+    }
+
+    return this.cache.availablePriorities;
+  };
+
+  public findPreloaded = async (
+    criteria: { userId: string },
+    transactionalEM?: EntityManager,
+  ): Promise<PairQueryResult[]> => {
+    return this.preloaded(criteria, transactionalEM)
+      .select('jp.document_id, jp.query_id')
+      .groupBy('jp.document_id, jp.query_id')
+      .execute();
   };
 
   public countPreloaded = async (
     criteria: { userId: string; priority: string },
     transactionalEM?: EntityManager,
   ): Promise<number> => {
+    return this.preloaded(criteria, transactionalEM)
+      .select('jp.*')
+      .groupBy('jp.document_id, jp.query_id')
+      .getCount();
+  };
+
+  private preloaded = (
+    criteria: { userId: string; priority?: string },
+    transactionalEM?: EntityManager,
+  ): SelectQueryBuilder<JudgementPair> => {
     const repository =
       transactionalEM !== undefined
         ? transactionalEM.getRepository(JudgementPair)
         : this.judgementPairRepository;
 
-    return await repository
+    return repository
       .createQueryBuilder('jp')
-      .select('jp.*')
       .where((qb) => {
-        return `jp.${COLUMN_PRIORITY} = :priority AND EXISTS ${qb
+        let subQuery = '';
+        if (criteria.priority !== undefined) {
+          subQuery += `jp.${COLUMN_PRIORITY} = :priority AND `;
+        }
+        subQuery += `EXISTS ${qb
           .subQuery()
           .select(`1`)
           .from(Judgement, 'j')
@@ -99,11 +155,10 @@ export class JudgementPairDAO {
             `j.document_document = jp.document_id AND j.query_query = jp.query_id AND j.user_id = :userid`,
           )
           .getQuery()}`;
+        return subQuery;
       })
       .setParameter('userid', criteria.userId)
-      .setParameter('priority', criteria.priority)
-      .groupBy('jp.document_id, jp.query_id')
-      .getCount();
+      .setParameter('priority', criteria.priority);
   };
 
   public findNotPreloaded = async (
@@ -111,6 +166,8 @@ export class JudgementPairDAO {
     transactionalEM?: EntityManager,
   ): Promise<PairQueryResult[]> => {
     return await this.notPreloaded(criteria, transactionalEM)
+      .select('jp.document_id, jp.query_id')
+      .groupBy('jp.document_id, jp.query_id')
       .orderBy('jp.document_id, jp.query_id', 'ASC')
       .execute();
   };
@@ -119,7 +176,10 @@ export class JudgementPairDAO {
     criteria: { userId: string; priority?: TJudgementPair['priority'] },
     transactionalEM?: EntityManager,
   ): Promise<number> => {
-    return await this.notPreloaded(criteria, transactionalEM).getCount();
+    return await this.notPreloaded(criteria, transactionalEM)
+      .select('*')
+      .groupBy('jp.document_id, jp.query_id')
+      .getCount();
   };
 
   private notPreloaded = (
@@ -133,7 +193,6 @@ export class JudgementPairDAO {
 
     return repository
       .createQueryBuilder('jp')
-      .select('jp.document_id, jp.query_id')
       .where((qb) => {
         let subQuery = '';
         if (criteria.priority !== undefined) {
@@ -150,12 +209,12 @@ export class JudgementPairDAO {
         return subQuery;
       })
       .setParameter('userid', criteria.userId)
-      .setParameter('priority', criteria.priority)
-      .groupBy('jp.document_id, jp.query_id');
+      .setParameter('priority', criteria.priority);
   };
 
   public getCandidatesByPriority = async (
-    criteria: { userId: string; priority: number },
+    criteria: { userId: TUser['id']; priority: number },
+    excluding: { judgementPairs: PairQueryResult[] },
     targetFactor: number,
     dbConfig: TConfig,
     transactionalEM?: EntityManager,
@@ -174,16 +233,12 @@ export class JudgementPairDAO {
           'j',
           'j.document_document = jp.document_id AND j.query_query = jp.query_id',
         )
-        .where((qb) => {
-          return `jp.${COLUMN_PRIORITY} = :priority AND NOT EXISTS ${qb
-            .subQuery()
-            .select(`1`)
-            .from(Judgement, 'j2')
-            .where(
-              `j2.document_document = j.document_document AND j2.query_query = j.query_query AND j2.user_id = :userid`,
-            )
-            .getQuery()}`;
-        })
+        .where(
+          `jp.${COLUMN_PRIORITY} = :priority AND (jp.document_id, jp.query_id) NOT IN ( VALUES ` +
+            `${excluding.judgementPairs
+              .map((p) => `(${p.document_id},${p.query_id})`)
+              .join(',')} ) `,
+        )
         .setParameter('userid', criteria.userId)
         .setParameter('priority', criteria.priority)
         .groupBy('jp.document_id, jp.query_id')

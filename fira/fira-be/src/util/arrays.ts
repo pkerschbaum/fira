@@ -18,3 +18,7 @@ export function flatten<T>(array: T[][]): T[] {
     return flat;
   }, []);
 }
+
+export function uniqueValues<T>(array: T[]): T[] {
+  return [...new Set(array)];
+}
