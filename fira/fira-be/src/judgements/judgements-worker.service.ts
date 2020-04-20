@@ -82,36 +82,36 @@ export class JudgementsWorkerService {
       if (!this.workerActive) {
         this.appLogger.log(`preload worker was paused, resuming...`);
         this.workerActive = true;
+        // tslint:disable-next-line: no-floating-promises
         this.processQueue();
       }
     });
   };
 
-  private processQueue = (): void => {
-    setTimeout(async () => {
-      try {
-        // get first element of queue
-        const worklet = this.preloadQueue.shift();
+  private processQueue = async (): Promise<void> => {
+    try {
+      // get first element of queue
+      const worklet = this.preloadQueue.shift();
 
-        if (worklet !== undefined) {
-          worklet.logger.log(`starting processing preload worklet... userId=${worklet.userId}`);
-          try {
-            const result = await this.preloadJudgements(worklet.logger)(worklet);
-            worklet.responsePromise.resolve(result);
-          } catch (e) {
-            worklet.responsePromise.reject(e);
-          }
-        }
-      } finally {
-        if (this.preloadQueue.length > 0) {
-          // continue working on queue
-          this.processQueue();
-        } else {
-          this.appLogger.log(`no preload worklets left in queue, pausing worker...`);
-          this.workerActive = false;
+      if (worklet !== undefined) {
+        worklet.logger.log(`starting processing preload worklet... userId=${worklet.userId}`);
+        try {
+          const result = await this.preloadJudgements(worklet.logger)(worklet);
+          worklet.responsePromise.resolve(result);
+        } catch (e) {
+          worklet.responsePromise.reject(e);
         }
       }
-    }, 0);
+    } finally {
+      if (this.preloadQueue.length > 0) {
+        // continue working on queue
+        // tslint:disable-next-line: no-floating-promises
+        this.processQueue();
+      } else {
+        this.appLogger.log(`no preload worklets left in queue, pausing worker...`);
+        this.workerActive = false;
+      }
+    }
   };
 
   private preloadJudgements = (requestLogger: LoggerService) =>
@@ -135,31 +135,27 @@ export class JudgementsWorkerService {
 
         // phase #2: after the user got preloaded as many judgements as possible,
         // load all the data and return it to the client
-        const judgementsOfUser = await this.judgementsDAO.findJudgements(
-          { user },
-          transactionalEntityManager,
-        );
         const countOfFeedbacks = await this.feedbackDAO.count({ user }, transactionalEntityManager);
         const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
           { userId: user.id },
           transactionalEntityManager,
         );
-
-        // compute some statistics for this user
-        const currentOpenJudgements = judgementsOfUser.filter(
-          (judgement) => judgement.status === JudgementStatus.TO_JUDGE,
+        const currentOpenJudgements = await this.judgementsDAO.findJudgements(
+          { user, status: JudgementStatus.TO_JUDGE },
+          transactionalEntityManager,
         );
-        const countCurrentFinishedJudgements = judgementsOfUser.filter(
-          (judgement) => judgement.status === JudgementStatus.JUDGED,
-        ).length;
+        const countCurrentFinishedJudgements = await this.judgementsDAO.countJudgements(
+          { user, status: JudgementStatus.JUDGED },
+          transactionalEntityManager,
+        );
 
         const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
         const remainingUntilFirstFeedbackRequired =
           dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
 
         logger.log(
-          `judgements stats for user: sum of all judgements=${judgementsOfUser.length}, open=${currentOpenJudgements.length}, ` +
-            `finished=${countCurrentFinishedJudgements}, countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
+          `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
+            `countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
             `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
         );
 
@@ -184,15 +180,11 @@ export class JudgementsWorkerService {
     logger: LoggerService;
     user: TUser;
     dbConfig: TConfig;
-  }) => {
-    const allJudgementsOfUser = await this.judgementsDAO.findJudgements(
-      { user },
+  }): Promise<void> => {
+    const countOfOpenJudgements = await this.judgementsDAO.countJudgements(
+      { user, status: JudgementStatus.TO_JUDGE },
       transactionalEntityManager,
     );
-    const countOfAllJudgements = allJudgementsOfUser.length;
-    const countOfOpenJudgements = allJudgementsOfUser.filter(
-      (j) => j.status === JudgementStatus.TO_JUDGE,
-    ).length;
     let countJudgementsToPreload = config.application.judgementsPreloadSize - countOfOpenJudgements;
 
     if (countJudgementsToPreload < 1) {
@@ -242,6 +234,10 @@ export class JudgementsWorkerService {
       );
       const stepSizeToPreloadPrioAllPair = Math.floor(
         dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
+      );
+      const countOfAllJudgements = await this.judgementsDAO.countJudgements(
+        { user },
+        transactionalEntityManager,
       );
       const countPrioAllPairsUserShouldHave = Math.min(
         countOfPairsWithPrioAll,

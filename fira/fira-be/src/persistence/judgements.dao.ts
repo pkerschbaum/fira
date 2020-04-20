@@ -48,16 +48,30 @@ export class JudgementsDAO {
     });
   };
 
-  public countJudgements = async (criteria: {
-    status: JudgementStatus;
-    judgedAt?: { min: Date };
-  }): Promise<number> => {
+  public countJudgements = async (
+    criteria: {
+      user?: TUser;
+      status?: JudgementStatus;
+      judgedAt?: { min: Date };
+    },
+    transactionalEM?: EntityManager,
+  ): Promise<number> => {
+    const repository =
+      transactionalEM !== undefined
+        ? transactionalEM.getRepository(Judgement)
+        : this.judgementRepository;
+
     const findConditions: FindConditions<TJudgement> = {};
-    findConditions.status = criteria.status;
+    if (criteria.user !== undefined) {
+      findConditions.user = criteria.user;
+    }
+    if (criteria.status !== undefined) {
+      findConditions.status = criteria.status;
+    }
     if (criteria.judgedAt !== undefined) {
       findConditions.judgedAt = MoreThan(criteria.judgedAt.min);
     }
-    return await this.judgementRepository.count({
+    return await repository.count({
       where: undefinedIfEmpty(findConditions),
     });
   };
