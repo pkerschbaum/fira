@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 const DEFAULT_VERSION = 1;
@@ -32,6 +33,7 @@ export class Query implements TQuery {
 }
 
 @Entity()
+@Index(['query', 'version'], { unique: true })
 export class QueryVersion implements TQueryVersion {
   @ManyToOne(() => Query, {
     eager: true,

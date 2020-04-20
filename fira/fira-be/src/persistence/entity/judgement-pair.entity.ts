@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 import { Document } from './document.entity';
 import { Query } from './query.entity';
@@ -14,6 +14,8 @@ export type TJudgementPair = {
 };
 
 @Entity()
+@Index(['document'])
+@Index(['query'])
 export class JudgementPair implements TJudgementPair {
   @ManyToOne(() => Document, {
     eager: true,

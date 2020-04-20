@@ -5,12 +5,13 @@ import {
   ManyToOne,
   UpdateDateColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
 import { JudgementStatus } from '../../typings/enums';
 import { RelevanceLevel, JudgementMode } from '../../../../commons';
-import { DocumentVersion } from './document.entity';
-import { QueryVersion } from './query.entity';
+import { DocumentVersion, Document } from './document.entity';
+import { QueryVersion, Query } from './query.entity';
 import { User } from './user.entity';
 
 export type TJudgement = {
@@ -30,6 +31,10 @@ export type TJudgement = {
 };
 
 @Entity()
+@Index(['documentDocument', 'documentVersion'])
+@Index(['queryQuery', 'queryVersion'])
+@Index(['user'])
+@Index(['documentDocument', 'queryQuery', 'user'])
 export class Judgement implements TJudgement {
   @PrimaryGeneratedColumn()
   id: number;
@@ -43,6 +48,7 @@ export class Judgement implements TJudgement {
   rotate: boolean;
   @Column({ enum: JudgementMode })
   mode: JudgementMode;
+
   @ManyToOne(() => DocumentVersion, {
     eager: true,
     cascade: false,
@@ -50,6 +56,12 @@ export class Judgement implements TJudgement {
     nullable: false,
   })
   document: DocumentVersion;
+  // capture composite foreign key columns do enable applying an index onto them
+  @Column({ name: 'document_document' })
+  documentDocument: Document['id'];
+  @Column({ name: 'document_version' })
+  documentVersion: DocumentVersion['version'];
+
   @ManyToOne(() => QueryVersion, {
     eager: true,
     cascade: false,
@@ -57,6 +69,12 @@ export class Judgement implements TJudgement {
     nullable: false,
   })
   query: QueryVersion;
+  // capture composite foreign key columns do enable applying an index onto them
+  @Column({ name: 'query_query' })
+  queryQuery: Query['id'];
+  @Column({ name: 'query_version' })
+  queryVersion: QueryVersion['version'];
+
   @ManyToOne(() => User, {
     eager: true,
     cascade: false,

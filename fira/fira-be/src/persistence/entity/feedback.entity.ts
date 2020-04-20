@@ -5,6 +5,7 @@ import {
   ManyToOne,
   UpdateDateColumn,
   CreateDateColumn,
+  Index,
 } from 'typeorm';
 
 import { FeedbackScore } from '../../../../commons';
@@ -20,6 +21,7 @@ export type TFeedback = {
 };
 
 @Entity()
+@Index(['user'])
 export class Feedback implements TFeedback {
   @PrimaryGeneratedColumn()
   id: number;

@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 const DEFAULT_VERSION = 1;
@@ -33,6 +34,7 @@ export class Document implements TDocument {
 }
 
 @Entity()
+@Index(['document', 'version'], { unique: true })
 export class DocumentVersion implements TDocumentVersion {
   @ManyToOne(() => Document, {
     eager: true,
