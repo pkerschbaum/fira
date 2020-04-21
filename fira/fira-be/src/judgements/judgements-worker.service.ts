@@ -368,7 +368,7 @@ export class JudgementsWorkerService {
 
       const pairCandidates = await this.judgementPairDAO.getCandidatesByPriority(
         {
-          criteria: { userId: user.id, priority },
+          criteria: { priority },
           excluding: { judgementPairs: preloadedPairs },
           targetFactor,
           dbConfig,

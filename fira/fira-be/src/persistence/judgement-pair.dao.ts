@@ -92,7 +92,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   public findPreloaded = optionalTransaction(JudgementPair)(
     async (
-      { criteria }: { criteria: { userId: string } },
+      { criteria }: { criteria: { userId: TUser['id'] } },
       _,
       transactionalEM,
     ): Promise<PairQueryResult[]> => {
@@ -105,7 +105,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   public countPreloaded = optionalTransaction(JudgementPair)(
     async (
-      { criteria }: { criteria: { userId: string; priority: string } },
+      { criteria }: { criteria: { userId: TUser['id']; priority: TJudgementPair['priority'] } },
       _,
       transactionalEM,
     ): Promise<number> => {
@@ -118,7 +118,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   private preloaded = optionalTransaction(JudgementPair)(
     (
-      { criteria }: { criteria: { userId: string; priority?: string } },
+      { criteria }: { criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] } },
       repository,
     ): SelectQueryBuilder<JudgementPair> => {
       return repository
@@ -145,7 +145,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   public findNotPreloaded = optionalTransaction(JudgementPair)(
     async (
-      { criteria }: { criteria: { userId: string; priority?: TJudgementPair['priority'] } },
+      { criteria }: { criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] } },
       _,
       transactionalEM,
     ): Promise<PairQueryResult[]> => {
@@ -159,7 +159,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   public countNotPreloaded = optionalTransaction(JudgementPair)(
     async (
-      { criteria }: { criteria: { userId: string; priority?: TJudgementPair['priority'] } },
+      { criteria }: { criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] } },
       _,
       transactionalEM,
     ): Promise<number> => {
@@ -172,7 +172,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   private notPreloaded = optionalTransaction(JudgementPair)(
     (
-      { criteria }: { criteria: { userId: string; priority?: TJudgementPair['priority'] } },
+      { criteria }: { criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] } },
       repository,
     ): SelectQueryBuilder<JudgementPair> => {
       return repository
@@ -205,7 +205,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
         targetFactor,
         dbConfig,
       }: {
-        criteria: { userId: TUser['id']; priority: number };
+        criteria: { priority: number };
         excluding: { judgementPairs: PairQueryResult[] };
         targetFactor: number;
         dbConfig: TConfig;
@@ -227,7 +227,6 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
                 .map((p) => `(${p.document_id},${p.query_id})`)
                 .join(',')} ) `,
           )
-          .setParameter('userid', criteria.userId)
           .setParameter('priority', criteria.priority)
           .groupBy('jp.document_id, jp.query_id')
           .orderBy('jp.document_id, jp.query_id', 'ASC')
