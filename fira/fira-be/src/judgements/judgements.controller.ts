@@ -7,8 +7,10 @@ import {
   Param,
   Body,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
+import { Request } from 'express';
 
 import { JudgementsService } from './judgements.service';
 import { PreloadJudgementsResponseDto } from './dto/preload-judgements.dto';
@@ -29,9 +31,22 @@ export class JudgementsController {
   @Post('v1/preload')
   async preloadJudgements(
     @Headers('authorization') authHeader: string,
+    @Req() request: Request,
   ): Promise<PreloadJudgementsResponseDto> {
     const jwtPayload = extractJwtPayload(authHeader);
-    return await this.judgementsService.addPreloadWorklet(jwtPayload.preferred_username);
+    const worklet = this.judgementsService.addPreloadWorklet(jwtPayload.preferred_username);
+
+    // if the connection aborts before the response promise is settled, remove the worklet
+    let promiseSettled = false;
+    // tslint:disable-next-line: no-floating-promises
+    worklet.responsePromise.finally(() => (promiseSettled = true));
+    request.on('close', () => {
+      if (!promiseSettled) {
+        this.judgementsService.removePreloadWorklet(worklet.workletId);
+      }
+    });
+
+    return worklet.responsePromise;
   }
 
   @Put('v1/:id')

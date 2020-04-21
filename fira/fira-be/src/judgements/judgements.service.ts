@@ -36,9 +36,16 @@ export class JudgementsService {
     this.requestLogger.setContext(SERVICE_NAME);
   }
 
-  public addPreloadWorklet = async (userId: string): Promise<PreloadJudgementResponse> => {
+  public addPreloadWorklet = (
+    userId: string,
+  ): { workletId: string; responsePromise: Promise<PreloadJudgementResponse> } => {
     this.requestLogger.log(`adding preload worklet for userId=${userId}`);
     return this.judgementsWorkerService.addPreloadWorklet(userId, this.requestLogger);
+  };
+
+  public removePreloadWorklet = (workletIdToRemove: string): void => {
+    this.requestLogger.log(`removing preload worklet, workletId=${workletIdToRemove}`);
+    return this.judgementsWorkerService.removePreloadWorklet(workletIdToRemove);
   };
 
   public saveJudgement = async (

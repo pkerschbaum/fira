@@ -14,10 +14,16 @@ import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TUser } from '../persistence/entity/user.entity';
 import { TConfig } from '../persistence/entity/config.entity';
 import { TJudgement } from '../persistence/entity/judgement.entity';
-import { PreloadJudgementResponse, JudgementMode, PreloadJudgement } from '../../../commons';
+import {
+  PreloadJudgementResponse,
+  JudgementMode,
+  PreloadJudgement,
+  uniqueIdGenerator,
+} from '../../../commons';
 import { JudgementStatus } from '../typings/enums';
 
 type PreloadWorklet = {
+  workletId: string;
   userId: string;
   responsePromise: {
     resolve: (arg: PreloadJudgementResponse | PromiseLike<PreloadJudgementResponse>) => void;
@@ -72,20 +78,31 @@ export class JudgementsWorkerService {
   public addPreloadWorklet = (
     userId: string,
     logger: LoggerService,
-  ): Promise<PreloadJudgementResponse> => {
-    return new Promise<PreloadJudgementResponse>((resolve, reject) => {
-      this.preloadQueue.push({
-        userId,
-        responsePromise: { resolve, reject },
-        logger: createLogger(logger),
-      });
-      if (!this.workerActive) {
-        this.appLogger.log(`preload worker was paused, resuming...`);
-        this.workerActive = true;
-        // tslint:disable-next-line: no-floating-promises
-        this.processQueue();
-      }
-    });
+  ): { workletId: string; responsePromise: Promise<PreloadJudgementResponse> } => {
+    const workletId = uniqueIdGenerator.generate();
+    return {
+      workletId,
+      responsePromise: new Promise<PreloadJudgementResponse>((resolve, reject) => {
+        this.preloadQueue.push({
+          workletId,
+          userId,
+          responsePromise: { resolve, reject },
+          logger: createLogger(logger),
+        });
+        if (!this.workerActive) {
+          this.appLogger.log(`preload worker was paused, resuming...`);
+          this.workerActive = true;
+          // tslint:disable-next-line: no-floating-promises
+          this.processQueue();
+        }
+      }),
+    };
+  };
+
+  public removePreloadWorklet = (workletIdToRemove: string): void => {
+    this.preloadQueue = this.preloadQueue.filter(
+      (worklet) => worklet.workletId !== workletIdToRemove,
+    );
   };
 
   private processQueue = async (): Promise<void> => {
