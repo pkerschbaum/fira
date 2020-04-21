@@ -19,23 +19,34 @@ export class IncomingLoggerMiddleware implements NestMiddleware {
         } content-length=${req.get('content-length')}`,
       );
 
-      const afterResponse = () => {
-        try {
-          res.removeListener('finish', afterResponse);
-          res.removeListener('close', afterResponse);
+      const finishResponse = afterResponse('finish');
+      const closeResponse = afterResponse('close');
+      const requestLogger = this.requestLogger;
 
-          this.requestLogger.log(
-            `[RESPONSE OUTGOING] statuscode=${res.statusCode} content-length=${res.get(
-              'content-length',
-            )}`,
-          );
-        } catch {
-          // ignore
-        }
-      };
+      function afterResponse(event: 'finish' | 'close') {
+        return () => {
+          const requestGotCancelled = event === 'close';
 
-      res.on('finish', afterResponse);
-      res.on('close', afterResponse);
+          try {
+            res.removeListener('finish', finishResponse);
+            res.removeListener('close', closeResponse);
+            if (!requestGotCancelled) {
+              requestLogger.log(
+                `[RESPONSE OUTGOING] statuscode=${res.statusCode} content-length=${res.get(
+                  'content-length',
+                )}`,
+              );
+            } else {
+              requestLogger.log(`[REQUEST GOT CANCELLED]`);
+            }
+          } catch {
+            // ignore
+          }
+        };
+      }
+
+      res.on('finish', finishResponse);
+      res.on('close', closeResponse);
     } catch {
       // ignore
     }
