@@ -10,7 +10,7 @@ export class FeedbackService {
   constructor(private readonly feedbackDAO: FeedbackDAO, private readonly userDAO: UserDAO) {}
 
   public submitFeedback = async (userId: string, submitFeedback: SubmitFeedback): Promise<void> => {
-    const user = await this.userDAO.findUserOrFail({ id: userId });
+    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
     await this.feedbackDAO.saveFeedback({
       score: submitFeedback.score,
       text: submitFeedback.text,

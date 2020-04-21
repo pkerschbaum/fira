@@ -1,40 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { TUser, User } from './entity/user.entity';
-import { failIfUndefined } from './persistence.util';
+import { failIfUndefined, optionalTransaction, DAO } from './persistence.util';
 
 @Injectable()
-export class UserDAO {
+export class UserDAO implements DAO<User> {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    public readonly repository: Repository<User>,
   ) {}
 
-  public findUser = async (
-    criteria: { id: TUser['id'] },
-    transactionalEM?: EntityManager,
-  ): Promise<User | undefined> => {
-    const repository =
-      transactionalEM !== undefined ? transactionalEM.getRepository(User) : this.userRepository;
-
-    return await repository.findOne(criteria.id);
-  };
+  public findUser = optionalTransaction(User)(
+    async (
+      { criteria }: { criteria: { id: TUser['id'] } },
+      repository,
+    ): Promise<User | undefined> => {
+      return await repository.findOne(criteria.id);
+    },
+  );
 
   public findUserOrFail = failIfUndefined(this.findUser);
 
   public findUsers = async (criteria: { ids: Array<User['id']> }): Promise<User[]> => {
-    return await this.userRepository.findByIds(criteria.ids);
+    return await this.repository.findByIds(criteria.ids);
   };
 
   public saveUser = async (data: Pick<TUser, 'id'>): Promise<void> => {
     const dbEntry = new User();
     dbEntry.id = data.id;
-    await this.userRepository.save(dbEntry);
+    await this.repository.save(dbEntry);
   };
 
   public count = async (): Promise<number> => {
-    return await this.userRepository.count();
+    return await this.repository.count();
   };
 }
