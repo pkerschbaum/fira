@@ -145,7 +145,13 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
 
   public findNotPreloaded = optionalTransaction(JudgementPair)(
     async (
-      { criteria }: { criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] } },
+      {
+        criteria,
+        limit,
+      }: {
+        criteria: { userId: TUser['id']; priority?: TJudgementPair['priority'] };
+        limit: number;
+      },
       _,
       transactionalEM,
     ): Promise<PairQueryResult[]> => {
@@ -153,6 +159,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
         .select('jp.document_id, jp.query_id')
         .groupBy('jp.document_id, jp.query_id')
         .orderBy('jp.document_id, jp.query_id', 'ASC')
+        .limit(limit)
         .execute();
     },
   );
@@ -202,11 +209,13 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
       {
         criteria,
         excluding,
+        limit,
         targetFactor,
         dbConfig,
       }: {
         criteria: { priority: TJudgementPair['priority'] };
         excluding: { judgementPairs: PairQueryResult[] };
+        limit: number;
         targetFactor: number;
         dbConfig: TConfig;
       },
@@ -230,6 +239,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
           .setParameter('priority', criteria.priority)
           .groupBy('jp.document_id, jp.query_id')
           .orderBy('jp.document_id, jp.query_id', 'ASC')
+          .limit(limit)
           .execute()
       )
         .map((pair: CountQueryResult) => ({

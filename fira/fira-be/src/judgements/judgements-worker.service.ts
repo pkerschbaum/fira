@@ -259,7 +259,7 @@ export class JudgementsWorkerService {
 
         while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
           const pairCandidates: PairQueryResult[] = await this.judgementPairDAO.findNotPreloaded(
-            { criteria: { userId: user.id, priority: 'all' } },
+            { criteria: { userId: user.id, priority: 'all' }, limit: 1 },
             transactionalEntityManager,
           );
 
@@ -373,6 +373,7 @@ export class JudgementsWorkerService {
         {
           criteria: { priority: `${priority}` },
           excluding: { judgementPairs: preloadedPairs },
+          limit: remainingToPreload,
           targetFactor,
           dbConfig,
         },
