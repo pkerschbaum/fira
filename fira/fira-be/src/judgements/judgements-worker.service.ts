@@ -148,7 +148,7 @@ export class JudgementsWorkerService {
           { criteria: { id: worklet.userId } },
           transactionalEntityManager,
         );
-        const dbConfig = await this.configDAO.findConfigOrFail(transactionalEntityManager);
+        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEntityManager);
 
         // phase #1: determine how many judgements should, and can, be preloaded for the user,
         // and save preloaded judgements to the database
@@ -228,7 +228,7 @@ export class JudgementsWorkerService {
     const {
       countOfPairsWithPrioAll,
       numericPriorities,
-    } = await this.judgementPairDAO.getAvailablePriorities(transactionalEntityManager);
+    } = await this.judgementPairDAO.getAvailablePriorities({}, transactionalEntityManager);
 
     // if at least one pair with prio "all" exists, check if the user should get some of this
     // pairs as his next pairs preloaded
@@ -282,6 +282,9 @@ export class JudgementsWorkerService {
             dbConfig.judgementMode,
             dbConfig.rotateDocumentText,
           );
+
+          logger.log(`a pair with priority "all" got preloaded`);
+
           countJudgementsToPreload--;
           countPrioAllPairsMissing--;
         }
@@ -368,7 +371,7 @@ export class JudgementsWorkerService {
 
       const pairCandidates = await this.judgementPairDAO.getCandidatesByPriority(
         {
-          criteria: { priority },
+          criteria: { priority: `${priority}` },
           excluding: { judgementPairs: preloadedPairs },
           targetFactor,
           dbConfig,
@@ -421,7 +424,10 @@ export class JudgementsWorkerService {
       } else {
         // determine how often each variant - rotation or no-rotation - was used,
         // and set the variant which was used less often
-        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate(entityManager);
+        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate(
+          {},
+          entityManager,
+        );
         const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
         const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
         rotate = countRotate < countNoRotate;

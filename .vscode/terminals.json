@@ -9,13 +9,13 @@
     },
     {
       "name": "fira-be",
-      "cwd": "[workspaceFolder]/fira/fira-be",
+      "cwd": "[cwd]/fira/fira-be",
       "execute": false,
       "command": "npm run start:debug"
     },
     {
       "name": "fira-web",
-      "cwd": "[workspaceFolder]/fira/fira-web",
+      "cwd": "[cwd]/fira/fira-web",
       "execute": false,
       "command": "npm run start"
     }

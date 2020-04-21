@@ -205,7 +205,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
         targetFactor,
         dbConfig,
       }: {
-        criteria: { priority: number };
+        criteria: { priority: TJudgementPair['priority'] };
         excluding: { judgementPairs: PairQueryResult[] };
         targetFactor: number;
         dbConfig: TConfig;
@@ -224,7 +224,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
           .where(
             `jp.${COLUMN_PRIORITY} = :priority AND (jp.document_id, jp.query_id) NOT IN ( VALUES ` +
               `${excluding.judgementPairs
-                .map((p) => `(${p.document_id},${p.query_id})`)
+                .map((p) => `('${p.document_id}','${p.query_id}')`)
                 .join(',')} ) `,
           )
           .setParameter('priority', criteria.priority)

@@ -123,7 +123,7 @@ export class AdminService {
       judgementPairs: ImportJudgementPair[],
     ): Promise<ImportJudgementPairResult[]> => {
       // delete previous pairs
-      await this.judgementPairDAO.deleteJudgementPairs(transactionalEntityManager);
+      await this.judgementPairDAO.deleteJudgementPairs({}, transactionalEntityManager);
 
       // create partitions which are processed in parallel
       const partitions = partitionArray(judgementPairs, NUMBER_PARALLEL_IMPORTS);
