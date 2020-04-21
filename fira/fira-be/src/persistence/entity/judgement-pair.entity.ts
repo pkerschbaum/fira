@@ -16,6 +16,8 @@ export type TJudgementPair = {
 @Entity()
 @Index(['document'])
 @Index(['query'])
+@Index(['document', 'query'])
+@Index(['priority'])
 export class JudgementPair implements TJudgementPair {
   @ManyToOne(() => Document, {
     eager: true,

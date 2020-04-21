@@ -34,6 +34,7 @@ export type TJudgement = {
 @Index(['documentDocument', 'documentVersion'])
 @Index(['queryQuery', 'queryVersion'])
 @Index(['user'])
+@Index(['documentDocument', 'queryQuery'])
 @Index(['documentDocument', 'queryQuery', 'user'])
 export class Judgement implements TJudgement {
   @PrimaryGeneratedColumn()
