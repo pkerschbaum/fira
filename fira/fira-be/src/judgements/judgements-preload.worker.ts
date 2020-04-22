@@ -26,7 +26,7 @@ type PreloadWorklet = {
   logger: LoggerService;
 };
 
-const SERVICE_NAME = 'JudgementsWorkerService';
+const SERVICE_NAME = 'JudgementsPreloadWorker';
 
 const createLogger = (requestLogger: LoggerService) => ({
   log: (message: any) => {
@@ -43,7 +43,7 @@ const createLogger = (requestLogger: LoggerService) => ({
 });
 
 @Injectable()
-export class JudgementsWorkerService {
+export class JudgementsPreloadWorker {
   private preloadQueue: PreloadWorklet[] = [];
   private workerActive = false;
   private readonly appLogger: BaseLogger;

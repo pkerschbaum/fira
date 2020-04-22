@@ -10,7 +10,7 @@ import d3 = require('d3');
 
 import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
-import { JudgementsWorkerService } from './judgements-worker.service';
+import { JudgementsPreloadWorker } from './judgements-preload.worker';
 import { PersistenceService } from '../persistence/persistence.service';
 import { JudgementsDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
@@ -34,7 +34,7 @@ const SERVICE_NAME = 'JudgementsService';
 export class JudgementsService {
   constructor(
     private readonly requestLogger: RequestLogger,
-    private readonly judgementsWorkerService: JudgementsWorkerService,
+    private readonly judgementsPreloadWorker: JudgementsPreloadWorker,
     private readonly persistenceService: PersistenceService,
     private readonly judgementsDAO: JudgementsDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
@@ -65,7 +65,7 @@ export class JudgementsService {
         `no judgements should get preloaded for this user, userId=${user.id}, countJudgementsToPreload=${countJudgementsToPreload}`,
       );
     } else {
-      const worklet = this.judgementsWorkerService.addPreloadWorklet(user, this.requestLogger);
+      const worklet = this.judgementsPreloadWorker.addPreloadWorklet(user, this.requestLogger);
       workletPromise = worklet.responsePromise;
       workletId = worklet.workletId;
     }
@@ -121,7 +121,7 @@ export class JudgementsService {
 
   public removePreloadWorklet = (workletIdToRemove: string): void => {
     this.requestLogger.log(`removing preload worklet, workletId=${workletIdToRemove}`);
-    return this.judgementsWorkerService.removePreloadWorklet(workletIdToRemove);
+    return this.judgementsPreloadWorker.removePreloadWorklet(workletIdToRemove);
   };
 
   public saveJudgement = async (
