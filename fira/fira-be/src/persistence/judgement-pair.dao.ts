@@ -231,10 +231,14 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
             'j.document_document = jp.document_id AND j.query_query = jp.query_id',
           )
           .where(
-            `jp.${COLUMN_PRIORITY} = :priority AND (jp.document_id, jp.query_id) NOT IN ( VALUES ` +
-              `${excluding.judgementPairs
-                .map((p) => `('${p.document_id}','${p.query_id}')`)
-                .join(',')} ) `,
+            `jp.${COLUMN_PRIORITY} = :priority ${
+              excluding.judgementPairs.length === 0
+                ? ''
+                : `AND (jp.document_id, jp.query_id) NOT IN ( VALUES ` +
+                  `${excluding.judgementPairs
+                    .map((p) => `('${p.document_id}','${p.query_id}')`)
+                    .join(',')} ) `
+            }`,
           )
           .setParameter('priority', criteria.priority)
           .groupBy('jp.document_id, jp.query_id')
