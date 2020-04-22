@@ -83,13 +83,15 @@ export class JudgementsDAO implements DAO<Judgement> {
     status: JudgementStatus;
     havingCount: { min: number };
   }): Promise<number> => {
-    return await this.repository
-      .createQueryBuilder('j')
-      .select(`j.user_id AS user, count(*) AS count`)
-      .where({ status: criteria.status })
-      .groupBy(`j.user_id`)
-      .having(`count(*) >= ${criteria.havingCount.min}`)
-      .getCount();
+    return (
+      await this.repository
+        .createQueryBuilder('j')
+        .select(`j.user_id, count(*)`)
+        .where({ status: criteria.status })
+        .groupBy(`j.user_id`)
+        .having(`count(*) >= ${criteria.havingCount.min}`)
+        .execute()
+    ).length;
   };
 
   public countJudgementsGroupByRotate = optionalTransaction(Judgement)(async (_, repository) => {
