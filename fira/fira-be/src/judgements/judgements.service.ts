@@ -8,11 +8,16 @@ import {
 import moment = require('moment');
 import d3 = require('d3');
 
-import { JudgementsWorkerService, getRotateIndex } from './judgements-worker.service';
+import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
+import { JudgementsWorkerService } from './judgements-worker.service';
+import { PersistenceService } from '../persistence/persistence.service';
 import { JudgementsDAO } from '../persistence/judgements.dao';
+import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
 import { UserDAO } from '../persistence/user.dao';
 import { ConfigDAO } from '../persistence/config.dao';
+import { FeedbackDAO } from '../persistence/feedback.dao';
+import { TJudgement } from '../persistence/entity/judgement.entity';
 import { assertUnreachable } from '../util/types.util';
 import { JudgementStatus } from '../typings/enums';
 import {
@@ -20,6 +25,7 @@ import {
   PreloadJudgementResponse,
   ExportJudgement,
   Statistic,
+  PreloadJudgement,
 } from '../../../commons';
 
 const SERVICE_NAME = 'JudgementsService';
@@ -27,20 +33,90 @@ const SERVICE_NAME = 'JudgementsService';
 @Injectable({ scope: Scope.REQUEST })
 export class JudgementsService {
   constructor(
-    private readonly judgementsDAO: JudgementsDAO,
-    private readonly userDAO: UserDAO,
-    private readonly configDAO: ConfigDAO,
     private readonly requestLogger: RequestLogger,
     private readonly judgementsWorkerService: JudgementsWorkerService,
+    private readonly persistenceService: PersistenceService,
+    private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementPairDAO: JudgementPairDAO,
+    private readonly userDAO: UserDAO,
+    private readonly configDAO: ConfigDAO,
+    private readonly feedbackDAO: FeedbackDAO,
   ) {
     this.requestLogger.setContext(SERVICE_NAME);
   }
 
-  public addPreloadWorklet = (
+  public preload = async (
     userId: string,
-  ): { workletId: string; responsePromise: Promise<PreloadJudgementResponse> } => {
-    this.requestLogger.log(`adding preload worklet for userId=${userId}`);
-    return this.judgementsWorkerService.addPreloadWorklet(userId, this.requestLogger);
+  ): Promise<{ workletId?: string; responsePromise: Promise<PreloadJudgementResponse> }> => {
+    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
+
+    // phase #1: determine how many judgements should, and can, be preloaded for the user.
+    // if some should get preloaded, add a worklet to the worker and wait for it to get processed
+    const countOfOpenJudgements = await this.judgementsDAO.countJudgements({
+      criteria: { user, status: JudgementStatus.TO_JUDGE },
+    });
+    const countJudgementsToPreload =
+      config.application.judgementsPreloadSize - countOfOpenJudgements;
+
+    let workletPromise = Promise.resolve();
+    let workletId: string | undefined;
+    if (countJudgementsToPreload < 1) {
+      this.requestLogger.log(
+        `no judgements should get preloaded for this user, userId=${user.id}, countJudgementsToPreload=${countJudgementsToPreload}`,
+      );
+    } else {
+      const worklet = this.judgementsWorkerService.addPreloadWorklet(user, this.requestLogger);
+      workletPromise = worklet.responsePromise;
+      workletId = worklet.workletId;
+    }
+
+    // phase #2: after the user has preloaded as many judgements as possible,
+    // load all the data and return it to the client
+    const responsePromise: Promise<PreloadJudgementResponse> = workletPromise.then(
+      this.persistenceService.wrapInTransaction(this.requestLogger)(async (transactionalEM) => {
+        const countOfFeedbacks = await this.feedbackDAO.count(
+          { criteria: { user } },
+          transactionalEM,
+        );
+        const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
+          { criteria: { userId: user.id } },
+          transactionalEM,
+        );
+        const currentOpenJudgements = await this.judgementsDAO.findJudgements(
+          { criteria: { user, status: JudgementStatus.TO_JUDGE } },
+          transactionalEM,
+        );
+        const countCurrentFinishedJudgements = await this.judgementsDAO.countJudgements(
+          { criteria: { user, status: JudgementStatus.JUDGED } },
+          transactionalEM,
+        );
+
+        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEM);
+
+        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
+        const remainingUntilFirstFeedbackRequired =
+          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
+
+        this.requestLogger.log(
+          `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
+            `countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
+            `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
+        );
+
+        return {
+          judgements: mapJudgementsToResponse(currentOpenJudgements),
+          alreadyFinished: countCurrentFinishedJudgements,
+          remainingToFinish,
+          remainingUntilFirstFeedbackRequired,
+          countOfFeedbacks,
+          countOfNotPreloadedPairs,
+        };
+      }),
+    );
+
+    // return workletId and response promise to controller
+    // the controller will listen for connection aborts and remove the worklet, if an abort occurs
+    return { workletId, responsePromise };
   };
 
   public removePreloadWorklet = (workletIdToRemove: string): void => {
@@ -299,4 +375,30 @@ function constructCharacterRangesMap(textParts: string[]) {
   });
 
   return partsCharacterRanges;
+}
+
+function mapJudgementsToResponse(openJudgements: TJudgement[]) {
+  return openJudgements
+    .map((openJudgement) => {
+      // rotate text (annotation parts), if requested to do so
+      let annotationParts = openJudgement.document.annotateParts;
+      if (openJudgement.rotate) {
+        const rotateIndex = Math.floor(getRotateIndex(annotationParts.length));
+        annotationParts = annotationParts
+          .slice(rotateIndex, annotationParts.length)
+          .concat(annotationParts.slice(0, rotateIndex));
+      }
+
+      return {
+        id: openJudgement.id,
+        queryText: openJudgement.query.text,
+        docAnnotationParts: annotationParts,
+        mode: openJudgement.mode,
+      } as PreloadJudgement;
+    })
+    .sort((judg1, judg2) => judg1.id - judg2.id);
+}
+
+function getRotateIndex(countOfAnnotationParts: number) {
+  return countOfAnnotationParts / 2;
 }

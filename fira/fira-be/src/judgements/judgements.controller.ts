@@ -34,19 +34,24 @@ export class JudgementsController {
     @Req() request: Request,
   ): Promise<PreloadJudgementsResponseDto> {
     const jwtPayload = extractJwtPayload(authHeader);
-    const worklet = this.judgementsService.addPreloadWorklet(jwtPayload.preferred_username);
+    const result = await this.judgementsService.preload(jwtPayload.preferred_username);
 
-    // if the connection aborts before the response promise is settled, remove the worklet
-    let promiseSettled = false;
-    // tslint:disable-next-line: no-floating-promises
-    worklet.responsePromise.finally(() => (promiseSettled = true));
-    request.on('close', () => {
-      if (!promiseSettled) {
-        this.judgementsService.removePreloadWorklet(worklet.workletId);
-      }
-    });
+    const workletId = result.workletId;
+    if (workletId) {
+      /*
+       * at least one judgement must get preloaded using the worker.
+       * thus, register a listener so that in case of a connection abort, the worklet gets removed from
+       * the queue (but only if the response promise is not settled yet)
+       */
+      const closeHandler = () => {
+        this.judgementsService.removePreloadWorklet(workletId);
+        request.removeListener('close', closeHandler);
+      };
+      request.on('close', closeHandler);
+      return result.responsePromise.finally(() => request.removeListener('close', closeHandler));
+    }
 
-    return worklet.responsePromise;
+    return result.responsePromise;
   }
 
   @Put('v1/:id')

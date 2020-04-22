@@ -4,7 +4,6 @@ import { EntityManager } from 'typeorm';
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
 import { BaseLogger } from '../commons/logger/base-logger';
-import { UserDAO } from '../persistence/user.dao';
 import { ConfigDAO } from '../persistence/config.dao';
 import { DocumentDAO } from '../persistence/document.dao';
 import { DocumentVersionDAO } from '../persistence/document-version.dao';
@@ -12,23 +11,16 @@ import { QueryDAO } from '../persistence/query.dao';
 import { QueryVersionDAO } from '../persistence/query-version.dao';
 import { JudgementsDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
-import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TUser } from '../persistence/entity/user.entity';
 import { TConfig } from '../persistence/entity/config.entity';
-import { TJudgement } from '../persistence/entity/judgement.entity';
-import {
-  PreloadJudgementResponse,
-  JudgementMode,
-  PreloadJudgement,
-  uniqueIdGenerator,
-} from '../../../commons';
+import { JudgementMode, uniqueIdGenerator } from '../../../commons';
 import { JudgementStatus } from '../typings/enums';
 
 type PreloadWorklet = {
   workletId: string;
-  userId: string;
-  responsePromise: {
-    resolve: (arg: PreloadJudgementResponse | PromiseLike<PreloadJudgementResponse>) => void;
+  user: TUser;
+  responsePromiseExecutor: {
+    resolve: () => void;
     reject: (reason?: any) => void;
   };
   logger: LoggerService;
@@ -65,7 +57,6 @@ export class JudgementsWorkerService {
    */
   constructor(
     private readonly persistenceService: PersistenceService,
-    private readonly userDAO: UserDAO,
     private readonly configDAO: ConfigDAO,
     private readonly documentDAO: DocumentDAO,
     private readonly documentVersionDAO: DocumentVersionDAO,
@@ -73,24 +64,25 @@ export class JudgementsWorkerService {
     private readonly queryVersionDAO: QueryVersionDAO,
     private readonly judgementsDAO: JudgementsDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
-    private readonly feedbackDAO: FeedbackDAO,
   ) {
     this.appLogger = new BaseLogger();
     this.appLogger.setContext(SERVICE_NAME);
   }
 
   public addPreloadWorklet = (
-    userId: string,
+    user: TUser,
     logger: LoggerService,
-  ): { workletId: string; responsePromise: Promise<PreloadJudgementResponse> } => {
+  ): { workletId: string; responsePromise: Promise<void> } => {
+    logger.log(`adding preload worklet for userId=${user.id}`);
+
     const workletId = uniqueIdGenerator.generate();
     return {
       workletId,
-      responsePromise: new Promise<PreloadJudgementResponse>((resolve, reject) => {
+      responsePromise: new Promise<void>((resolve, reject) => {
         this.preloadQueue.push({
           workletId,
-          userId,
-          responsePromise: { resolve, reject },
+          user,
+          responsePromiseExecutor: { resolve, reject },
           logger: createLogger(logger),
         });
         if (!this.workerActive) {
@@ -115,12 +107,12 @@ export class JudgementsWorkerService {
       const worklet = this.preloadQueue.shift();
 
       if (worklet !== undefined) {
-        worklet.logger.log(`starting processing preload worklet... userId=${worklet.userId}`);
+        worklet.logger.log(`starting processing preload worklet... userId=${worklet.user.id}`);
         try {
-          const result = await this.preloadJudgements(worklet.logger)(worklet);
-          worklet.responsePromise.resolve(result);
+          await this.preloadJudgements(worklet.logger)(worklet);
+          worklet.responsePromiseExecutor.resolve();
         } catch (e) {
-          worklet.responsePromise.reject(e);
+          worklet.responsePromiseExecutor.reject(e);
         }
       }
     } finally {
@@ -138,210 +130,150 @@ export class JudgementsWorkerService {
   private preloadJudgements = (requestLogger: LoggerService) =>
     this.persistenceService.wrapInTransaction(requestLogger)(
       async (
-        transactionalEntityManager,
-        worklet: PreloadWorklet,
-      ): Promise<PreloadJudgementResponse> => {
-        const logger = worklet.logger;
-
-        // preparation: load data needed throughout the entire preload transaction
-        const user = await this.userDAO.findUserOrFail(
-          { criteria: { id: worklet.userId } },
-          transactionalEntityManager,
-        );
+        transactionalEntityManager: EntityManager,
+        { logger, user }: PreloadWorklet,
+      ): Promise<void> => {
         const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEntityManager);
 
-        // phase #1: determine how many judgements should, and can, be preloaded for the user,
-        // and save preloaded judgements to the database
-        await this.preloadAllJudgements({ transactionalEntityManager, logger, user, dbConfig });
-
-        // phase #2: after the user got preloaded as many judgements as possible,
-        // load all the data and return it to the client
-        const countOfFeedbacks = await this.feedbackDAO.count(
-          { criteria: { user } },
-          transactionalEntityManager,
-        );
-        const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
-          { criteria: { userId: user.id } },
-          transactionalEntityManager,
-        );
-        const currentOpenJudgements = await this.judgementsDAO.findJudgements(
+        const countOfOpenJudgements = await this.judgementsDAO.countJudgements(
           { criteria: { user, status: JudgementStatus.TO_JUDGE } },
           transactionalEntityManager,
         );
-        const countCurrentFinishedJudgements = await this.judgementsDAO.countJudgements(
-          { criteria: { user, status: JudgementStatus.JUDGED } },
+        let countJudgementsToPreload =
+          config.application.judgementsPreloadSize - countOfOpenJudgements;
+
+        if (countJudgementsToPreload < 1) {
+          logger.log(
+            `no judgements should get preloaded for this user, countJudgementsToPreload=${countJudgementsToPreload}`,
+          );
+          return;
+        }
+
+        // there is at least one judgement pair left for this user to annotate
+        // --> apply preload logic and store preloaded judgements
+        logger.log(
+          `preloading judgements for this user... countJudgementsToPreload=${countJudgementsToPreload}`,
+        );
+
+        // get available priorities
+        const {
+          countOfPairsWithPrioAll,
+          numericPriorities,
+        } = await this.judgementPairDAO.getAvailablePriorities({}, transactionalEntityManager);
+
+        // if at least one pair with prio "all" exists, check if the user should get some of this
+        // pairs as his next pairs preloaded
+        if (countOfPairsWithPrioAll > 0) {
+          const stepSizeToPreloadPrioAllPair = Math.floor(
+            dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
+          );
+          const countOfAllJudgements = await this.judgementsDAO.countJudgements(
+            { criteria: { user } },
+            transactionalEntityManager,
+          );
+          const countPrioAllPairsUserShouldHave = Math.min(
+            countOfPairsWithPrioAll,
+            Math.floor(
+              (countOfAllJudgements + countJudgementsToPreload) / stepSizeToPreloadPrioAllPair,
+            ),
+          );
+          if (countPrioAllPairsUserShouldHave > 0) {
+            const countPrioAllPairsUserActuallyHas = await this.judgementPairDAO.countPreloaded({
+              criteria: {
+                userId: user.id,
+                priority: 'all',
+              },
+            });
+
+            let countPrioAllPairsMissing =
+              countPrioAllPairsUserShouldHave - countPrioAllPairsUserActuallyHas;
+
+            while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
+              const pairCandidates: PairQueryResult[] = await this.judgementPairDAO.findNotPreloaded(
+                { criteria: { userId: user.id, priority: 'all' }, limit: 1 },
+                transactionalEntityManager,
+              );
+
+              if (pairCandidates.length < 1) {
+                logger.warn(
+                  `although the user should have got at least one judgement pair with priority=all preloaded, ` +
+                    `no such judgement pair which the user has not judged yet could be found. ` +
+                    `countPrioAllPairsUserShouldHave=${countPrioAllPairsUserShouldHave}, countPrioAllPairsUserActuallyHas=${countPrioAllPairsUserActuallyHas}`,
+                );
+                break;
+              }
+
+              const pairsToPersist = pairCandidates[0];
+
+              await this.persistPairs(
+                transactionalEntityManager,
+                logger,
+                [pairsToPersist],
+                user,
+                dbConfig.judgementMode,
+                dbConfig.rotateDocumentText,
+              );
+
+              logger.log(`a pair with priority "all" got preloaded`);
+
+              countJudgementsToPreload--;
+              countPrioAllPairsMissing--;
+            }
+          }
+        }
+
+        // judgements should get preloaded for this user. Only reason this could not be possible is that
+        // the user might have annotated every possible judgement pair already.
+        // --> determine how many judgement pairs the user has not annotated so far
+        let countRemainingPairsToPreload = await this.judgementPairDAO.countNotPreloaded(
+          { criteria: { userId: user.id } },
+          transactionalEntityManager,
+        );
+        if (countRemainingPairsToPreload < 1) {
+          logger.log(
+            `there are no judgement pairs left for this user to annotate, ` +
+              `countJudgementsToPreload=${countJudgementsToPreload}, countRemainingPairsToPreload=${countRemainingPairsToPreload}`,
+          );
+          return;
+        }
+
+        // query preloaded pairs once and update the list on-the-fly while searching for
+        // the right judgement pair candidates (because the query is quite expensive)
+        const preloadedPairs = await this.judgementPairDAO.findPreloaded(
+          { criteria: { userId: user.id } },
           transactionalEntityManager,
         );
 
-        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
-        const remainingUntilFirstFeedbackRequired =
-          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
-
-        logger.log(
-          `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
-            `countOfFeedbacks=${countOfFeedbacks}, remainingToFinish=${remainingToFinish}, ` +
-            `remainingUntilFirstFeedbackRequired=${remainingUntilFirstFeedbackRequired}`,
-        );
-
-        return {
-          judgements: mapJudgementsToResponse(currentOpenJudgements),
-          alreadyFinished: countCurrentFinishedJudgements,
-          remainingToFinish,
-          remainingUntilFirstFeedbackRequired,
-          countOfFeedbacks,
-          countOfNotPreloadedPairs,
-        };
-      },
-    );
-
-  private preloadAllJudgements = async ({
-    transactionalEntityManager,
-    logger,
-    user,
-    dbConfig,
-  }: {
-    transactionalEntityManager: EntityManager;
-    logger: LoggerService;
-    user: TUser;
-    dbConfig: TConfig;
-  }): Promise<void> => {
-    const countOfOpenJudgements = await this.judgementsDAO.countJudgements(
-      { criteria: { user, status: JudgementStatus.TO_JUDGE } },
-      transactionalEntityManager,
-    );
-    let countJudgementsToPreload = config.application.judgementsPreloadSize - countOfOpenJudgements;
-
-    if (countJudgementsToPreload < 1) {
-      logger.log(
-        `no judgements should get preloaded for this user, countJudgementsToPreload=${countJudgementsToPreload}`,
-      );
-      return;
-    }
-
-    // there is at least one judgement pair left for this user to annotate
-    // --> apply preload logic and store preloaded judgements
-    logger.log(
-      `preloading judgements for this user... countJudgementsToPreload=${countJudgementsToPreload}`,
-    );
-
-    // get available priorities
-    const {
-      countOfPairsWithPrioAll,
-      numericPriorities,
-    } = await this.judgementPairDAO.getAvailablePriorities({}, transactionalEntityManager);
-
-    // if at least one pair with prio "all" exists, check if the user should get some of this
-    // pairs as his next pairs preloaded
-    if (countOfPairsWithPrioAll > 0) {
-      const stepSizeToPreloadPrioAllPair = Math.floor(
-        dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
-      );
-      const countOfAllJudgements = await this.judgementsDAO.countJudgements(
-        { criteria: { user } },
-        transactionalEntityManager,
-      );
-      const countPrioAllPairsUserShouldHave = Math.min(
-        countOfPairsWithPrioAll,
-        Math.floor(
-          (countOfAllJudgements + countJudgementsToPreload) / stepSizeToPreloadPrioAllPair,
-        ),
-      );
-      if (countPrioAllPairsUserShouldHave > 0) {
-        const countPrioAllPairsUserActuallyHas = await this.judgementPairDAO.countPreloaded({
-          criteria: {
-            userId: user.id,
-            priority: 'all',
-          },
-        });
-
-        let countPrioAllPairsMissing =
-          countPrioAllPairsUserShouldHave - countPrioAllPairsUserActuallyHas;
-
-        while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
-          const pairCandidates: PairQueryResult[] = await this.judgementPairDAO.findNotPreloaded(
-            { criteria: { userId: user.id, priority: 'all' }, limit: 1 },
-            transactionalEntityManager,
-          );
-
-          if (pairCandidates.length < 1) {
-            logger.warn(
-              `although the user should have got at least one judgement pair with priority=all preloaded, ` +
-                `no such judgement pair which the user has not judged yet could be found. ` +
-                `countPrioAllPairsUserShouldHave=${countPrioAllPairsUserShouldHave}, countPrioAllPairsUserActuallyHas=${countPrioAllPairsUserActuallyHas}`,
-            );
-            break;
-          }
-
-          const pairsToPersist = pairCandidates[0];
-
-          await this.persistPairs(
+        let targetFactor = 1;
+        while (countJudgementsToPreload > 0) {
+          const countJudgementsGotPreloaded = await this.preloadNextJudgements({
             transactionalEntityManager,
             logger,
-            [pairsToPersist],
+            priorities: numericPriorities,
+            preloadedPairs,
+            targetFactor,
             user,
-            dbConfig.judgementMode,
-            dbConfig.rotateDocumentText,
+            countJudgementsToPreload,
+            dbConfig,
+          });
+
+          logger.log(
+            `round of preload complete, annotation target factor was: ${targetFactor}, ` +
+              `count judgements got preloaded: ${countJudgementsGotPreloaded}`,
           );
 
-          logger.log(`a pair with priority "all" got preloaded`);
+          countRemainingPairsToPreload -= countJudgementsGotPreloaded;
+          countJudgementsToPreload -= countJudgementsGotPreloaded;
+          targetFactor++;
 
-          countJudgementsToPreload--;
-          countPrioAllPairsMissing--;
+          // edge case: if the user now has judgements for EVERY possible judgement pair, stop
+          if (countRemainingPairsToPreload < 1) {
+            logger.log(`the user now has judgements for EVERY possible judgement pair --> stop`);
+            break;
+          }
         }
-      }
-    }
-
-    // judgements should get preloaded for this user. Only reason this could not be possible is that
-    // the user might have annotated every possible judgement pair already.
-    // --> determine how many judgement pairs the user has not annotated so far
-    let countRemainingPairsToPreload = await this.judgementPairDAO.countNotPreloaded(
-      { criteria: { userId: user.id } },
-      transactionalEntityManager,
+      },
     );
-    if (countRemainingPairsToPreload < 1) {
-      logger.log(
-        `there are no judgement pairs left for this user to annotate, ` +
-          `countJudgementsToPreload=${countJudgementsToPreload}, countRemainingPairsToPreload=${countRemainingPairsToPreload}`,
-      );
-      return;
-    }
-
-    // query preloaded pairs once and update the list on-the-fly while searching for
-    // the right judgement pair candidates (because the query is quite expensive)
-    const preloadedPairs = await this.judgementPairDAO.findPreloaded(
-      { criteria: { userId: user.id } },
-      transactionalEntityManager,
-    );
-
-    let targetFactor = 1;
-    while (countJudgementsToPreload > 0) {
-      const countJudgementsGotPreloaded = await this.preloadNextJudgements({
-        transactionalEntityManager,
-        logger,
-        priorities: numericPriorities,
-        preloadedPairs,
-        targetFactor,
-        user,
-        countJudgementsToPreload,
-        dbConfig,
-      });
-
-      logger.log(
-        `round of preload complete, annotation target factor was: ${targetFactor}, ` +
-          `count judgements got preloaded: ${countJudgementsGotPreloaded}`,
-      );
-
-      countRemainingPairsToPreload -= countJudgementsGotPreloaded;
-      countJudgementsToPreload -= countJudgementsGotPreloaded;
-      targetFactor++;
-
-      // edge case: if the user now has judgements for EVERY possible judgement pair, stop
-      if (countRemainingPairsToPreload < 1) {
-        logger.log(`the user now has judgements for EVERY possible judgement pair --> stop`);
-        break;
-      }
-    }
-  };
 
   private preloadNextJudgements = async ({
     transactionalEntityManager,
@@ -471,30 +403,4 @@ export class JudgementsWorkerService {
       );
     }
   };
-}
-
-function mapJudgementsToResponse(openJudgements: TJudgement[]) {
-  return openJudgements
-    .map((openJudgement) => {
-      // rotate text (annotation parts), if requested to do so
-      let annotationParts = openJudgement.document.annotateParts;
-      if (openJudgement.rotate) {
-        const rotateIndex = Math.floor(getRotateIndex(annotationParts.length));
-        annotationParts = annotationParts
-          .slice(rotateIndex, annotationParts.length)
-          .concat(annotationParts.slice(0, rotateIndex));
-      }
-
-      return {
-        id: openJudgement.id,
-        queryText: openJudgement.query.text,
-        docAnnotationParts: annotationParts,
-        mode: openJudgement.mode,
-      } as PreloadJudgement;
-    })
-    .sort((judg1, judg2) => judg1.id - judg2.id);
-}
-
-export function getRotateIndex(countOfAnnotationParts: number) {
-  return countOfAnnotationParts / 2;
 }
