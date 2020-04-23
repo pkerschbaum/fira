@@ -3,9 +3,10 @@ delete from judgement_pair;
 delete from query_version; delete from document_version;
 delete from query; delete from document;
 delete from judgement;
-delete from judgement where status = 'TO_JUDGE';
+delete from judgement where status = 'TO_JUDGE' and user_id = 'user02';
 delete from feedback;
 
+select * from config;
 select * from document;
 select * from query;
 select * from document_version;
@@ -29,3 +30,13 @@ where not exists(
 explain select j.* from judgement j
 left join judgement_pair jp on jp.document_id = j.document_document and jp.query_id = j.query_query
 where jp.priority = 'all';
+
+-- query#03: candidates
+select jp.document_id, jp.query_id, count(j.*)
+from judgement_pair jp
+left join judgement j on j.document_document = jp.document_id and j.query_query = jp.query_id
+where jp.priority = '2' and (jp.document_id, jp.query_id) not in (values ('0','1'))
+group by jp.document_id, jp.query_id
+having count(j.*) < 2
+order by count(j.*), jp.document_id, jp.query_id ASC
+limit 3

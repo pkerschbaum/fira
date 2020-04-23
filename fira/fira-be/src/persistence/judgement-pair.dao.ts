@@ -242,19 +242,14 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
           )
           .setParameter('priority', criteria.priority)
           .groupBy('jp.document_id, jp.query_id')
-          .orderBy('jp.document_id, jp.query_id', 'ASC')
+          .having(`count(j.*) < ${dbConfig.annotationTargetPerJudgPair * targetFactor}`)
+          .orderBy('count(j.*), jp.document_id, jp.query_id', 'ASC')
           .limit(limit)
           .execute()
-      )
-        .map((pair: CountQueryResult) => ({
-          ...pair,
-          count: Number(pair.count),
-        }))
-        .filter(
-          (pair: CountQueryResult) =>
-            pair.count < dbConfig.annotationTargetPerJudgPair * targetFactor,
-        )
-        .sort((p1: CountQueryResult, p2: CountQueryResult) => p1.count - p2.count);
+      ).map((pair: CountQueryResult) => ({
+        ...pair,
+        count: Number(pair.count),
+      }));
     },
   );
 }
