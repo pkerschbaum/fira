@@ -236,15 +236,86 @@ export class JudgementsService {
   };
 
   private exportJudgements = async (): Promise<ExportJudgement[]> => {
+    this.requestLogger.log(`loading judged judgements...`);
     const allJudgements = await this.judgementsDAO.findJudgements({
       criteria: {
         status: JudgementStatus.JUDGED,
       },
     });
+    this.requestLogger.log(`judged judgements loaded!`);
 
     return allJudgements.map((judgement) => {
       const partsAvailable = judgement.document.annotateParts;
-      const partsAnnotated = judgement.relevancePositions ?? [];
+      let partsAnnotated = judgement.relevancePositions ?? [];
+
+      // adjust partsAnnotated (for reason see commit 39775bc)
+      if (
+        judgement.rotate === true &&
+        partsAvailable.length % 2 === 1 &&
+        moment(judgement.judgedAt!).isSameOrBefore(moment('2020-04-13 09:00:00.000+02:00'))
+      ) {
+        const rotateIndex = Math.floor(getRotateIndex(judgement.document.annotateParts.length));
+        partsAnnotated = partsAnnotated.map((relevancePosition) => {
+          if (relevancePosition === rotateIndex) {
+            this.requestLogger.error(
+              `workaround for 39775bc: seems to catch too many entries, because one relevancePosition was equal to the rotateIndex - but should be off-by-one (more concrete: plus 1). ` +
+                `judgementId=${judgement.id}, documentId=${judgement.document.document.id}, queryId=${judgement.query.query.id}, rotate=${judgement.rotate}, ` +
+                `relevancePositions=${JSON.stringify(partsAnnotated)}, ` +
+                `dbJudgement.document.annotateParts=${JSON.stringify(
+                  judgement.document.annotateParts,
+                )}`,
+            );
+            throw new Error(
+              `workaround for 39775bc: seems to catch too many entries, because one relevancePosition was equal to the rotateIndex - but should be off-by-one (more concrete: plus 1)`,
+            );
+          }
+          if (relevancePosition < rotateIndex) {
+            return relevancePosition;
+          } else {
+            return relevancePosition - 1;
+          }
+        });
+
+        // apply some assertions
+        if (
+          partsAnnotated.length > judgement.document.annotateParts.length ||
+          partsAnnotated.some(
+            (position) => position >= judgement.document.annotateParts.length || position < 0,
+          )
+        ) {
+          this.requestLogger.error(
+            `workaround for 39775bc: at least one adjusted relevance position is out of bound, regarding the size of the document. ` +
+              `judgementId=${judgement.id}, documentId=${judgement.document.document.id}, queryId=${judgement.query.query.id}, rotate=${judgement.rotate}, ` +
+              `relevancePositions=${JSON.stringify(partsAnnotated)}, ` +
+              `dbJudgement.document.annotateParts=${JSON.stringify(
+                judgement.document.annotateParts,
+              )}`,
+          );
+          throw new BadRequestException(
+            `workaround for 39775bc: at least one adjusted relevance position is out of bound, regarding the size of the document`,
+          );
+        }
+
+        if (
+          partsAnnotated.some((position1, index1) =>
+            partsAnnotated.some(
+              (position2, index2) => position1 === position2 && index1 !== index2,
+            ),
+          )
+        ) {
+          this.requestLogger.error(
+            `workaround for 39775bc: there are multiple relevance positions with the same value. ` +
+              `judgementId=${judgement.id}, documentId=${judgement.document.document.id}, queryId=${judgement.query.query.id}, rotate=${judgement.rotate}, ` +
+              `relevancePositions=${JSON.stringify(partsAnnotated)}, ` +
+              `dbJudgement.document.annotateParts=${JSON.stringify(
+                judgement.document.annotateParts,
+              )}`,
+          );
+          throw new BadRequestException(
+            `workaround for 39775bc: there are multiple relevance positions with the same value`,
+          );
+        }
+      }
 
       const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
       let relevanceCharacterRanges = partsAnnotated.map(
