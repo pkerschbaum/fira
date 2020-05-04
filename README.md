@@ -1,4 +1,4 @@
-# Fira - Fine-grained Relevance Annotation
+# FiRA - Fine-grained Relevance Annotation
 
 ## How to run (in production mode)
 
