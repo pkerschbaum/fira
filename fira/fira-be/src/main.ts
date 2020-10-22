@@ -9,7 +9,6 @@ import { BaseLogger } from './commons/logger/base-logger';
 import { importInitialData } from './boot/import-initial-data';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { AdminService } from './admin/admin.service';
-import { RedirectClientFilter } from './filter/redirect-client.filter';
 
 const RUNNING_LOG_INTERVAL = 1000; // ms
 
@@ -21,13 +20,6 @@ async function bootstrap() {
   // set global prefix which is applied to all HTTP endpoints and the Swagger UI, but not to
   // the static path the web app is served with
   app.setGlobalPrefix(`${config.application.urlPaths.web}${config.application.urlPaths.api}`);
-
-  // define a filter which will serve index.html of the web app for every request, except when it starts
-  // with the urlPaths.api prefix. In that case, the request should be handled by an HTTP endpoint.
-  // Serving index.html is sufficient since the single page application will handle further routing on the client side
-  app.useGlobalFilters(
-    new RedirectClientFilter(app.get(HttpAdapterHost).httpAdapter.getHttpServer()),
-  );
 
   // now, import all data for Fira
   await importInitialData({

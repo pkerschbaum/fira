@@ -1,5 +1,5 @@
-import { ArgumentsHost, Catch, NotFoundException, HttpServer } from '@nestjs/common';
-import { BaseExceptionFilter } from '@nestjs/core';
+import { ArgumentsHost, Catch, NotFoundException } from '@nestjs/common';
+import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
 import { Response, Request } from 'express';
 import * as path from 'path';
 
@@ -11,8 +11,8 @@ import * as config from '../config';
 // Serving index.html is sufficient since the single page application will handle further routing on the client side
 @Catch(NotFoundException)
 export class RedirectClientFilter extends BaseExceptionFilter {
-  constructor(applicationRef: HttpServer) {
-    super(applicationRef);
+  constructor(adapterHost: HttpAdapterHost) {
+    super(adapterHost.httpAdapter);
   }
 
   catch(exception: any, host: ArgumentsHost) {

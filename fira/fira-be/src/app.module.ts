@@ -15,10 +15,12 @@ import { JudgementPair } from './persistence/entity/judgement-pair.entity';
 import { Feedback } from './persistence/entity/feedback.entity';
 import { JudgementsModule } from './judgements/judgements.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { CommonsModule } from './commons/commons.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { MgmtModule } from './mgmt/mgmt.module';
 import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middleware';
 import { LogExceptionsFilter } from './filter/log-exceptions.filter';
+import { RedirectClientFilter } from './filter/redirect-client.filter';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { LogExceptionsFilter } from './filter/log-exceptions.filter';
     AdminModule,
     JudgementsModule,
     FeedbackModule,
+    CommonsModule,
     PersistenceModule,
     MgmtModule,
   ],
@@ -53,6 +56,10 @@ import { LogExceptionsFilter } from './filter/log-exceptions.filter';
       provide: APP_FILTER,
       useClass: LogExceptionsFilter,
       scope: Scope.REQUEST,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: RedirectClientFilter,
     },
   ],
 })

@@ -2,7 +2,7 @@ import { Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/c
 import qs = require('qs');
 
 import * as config from '../config';
-import { AppHttpService } from '../commons/http.service';
+import { AppHttpClient } from '../commons/http.service';
 
 type KeycloakCertsResponse = {
   keys?: [
@@ -28,13 +28,15 @@ type KeycloakAuthResponse = {
 
 @Injectable()
 export class KeycloakClient {
-  constructor(private readonly httpService: AppHttpService) {}
+  constructor(private readonly httpService: AppHttpClient) {}
 
   public async getPublicKey() {
     return (
       await this.httpService.request<KeycloakCertsResponse>({
-        url: `${getEndpoint()}/protocol/openid-connect/certs`,
-        method: 'GET',
+        request: {
+          url: `${getEndpoint()}/protocol/openid-connect/certs`,
+          method: 'GET',
+        },
       })
     ).data;
   }
@@ -77,11 +79,13 @@ export class KeycloakClient {
   private async getToken(requestBody: KeycloakLoginRequest): Promise<KeycloakAuthResponse> {
     return (
       await this.httpService.request<KeycloakAuthResponse>({
-        url: `${getEndpoint()}/protocol/openid-connect/token`,
-        data: qs.stringify(requestBody),
-        method: 'POST',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+        request: {
+          url: `${getEndpoint()}/protocol/openid-connect/token`,
+          data: qs.stringify(requestBody),
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded;charset=utf-8',
+          },
         },
       })
     ).data;
@@ -102,11 +106,13 @@ export class KeycloakClient {
 
     try {
       await this.httpService.request({
-        url: `${getAdminEndpoint()}/users`,
-        data: requestBody,
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${accessToken}`,
+        request: {
+          url: `${getAdminEndpoint()}/users`,
+          data: requestBody,
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+          },
         },
       });
     } catch (e) {

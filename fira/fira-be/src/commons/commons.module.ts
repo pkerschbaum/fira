@@ -4,12 +4,12 @@ import { BaseLogger } from './logger/base-logger';
 import { TransientLogger } from './logger/transient-logger';
 import { RequestProperties } from './request-properties';
 import { RequestLogger } from './logger/request-logger';
-import { AppHttpService } from './http.service';
+import { AppHttpClient } from './http.service';
 
 @Global()
 @Module({
   imports: [HttpModule],
-  providers: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpService],
-  exports: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpService],
+  providers: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpClient],
+  exports: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpClient],
 })
 export class CommonsModule {}

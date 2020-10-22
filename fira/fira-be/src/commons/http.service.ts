@@ -4,34 +4,42 @@ import { AxiosRequestConfig } from 'axios';
 import { RequestLogger } from './logger/request-logger';
 import { uniqueIdGenerator } from '../../../commons';
 
-const SERVICE_NAME = 'HttpService';
+export type RequestConfig = AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> };
+export type ExceptionHandler = {
+  condition: (error: any) => boolean;
+  exception: (error: any) => Error;
+};
 
 @Injectable({ scope: Scope.REQUEST })
-export class AppHttpService {
+export class AppHttpClient {
   constructor(
     private readonly httpService: HttpService,
     private readonly requestLogger: RequestLogger,
   ) {
-    this.requestLogger.setContext(SERVICE_NAME);
+    this.requestLogger.setContext(this.constructor.name);
   }
 
-  async request<T>(
+  async request<T>({
+    request,
+    exceptionHandlers,
+  }: {
     /* method mandatory */
-    requestConfig: AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> },
-  ) {
+    request: RequestConfig;
+    exceptionHandlers?: ExceptionHandler[];
+  }) {
     const requestId = uniqueIdGenerator.generate();
 
-    // log request
+    // log request (fail-safe)
     try {
       this.requestLogger.log(
-        `[REQUEST OUTGOING] [request-id=${requestId}] ${requestConfig.method?.toUpperCase()} ${
-          requestConfig.url
+        `[REQUEST OUTGOING] [out-request-id=${requestId}] ${request.method?.toUpperCase()} ${
+          request.url
         }`,
       );
-      if (requestConfig.data) {
+      if (request.data) {
         this.requestLogger.debug(
-          `[REQUEST OUTGOING PAYLOAD] [request-id=${requestId}] ${JSON.stringify(
-            requestConfig.data,
+          `[REQUEST OUTGOING PAYLOAD] [out-request-id=${requestId}] ${JSON.stringify(
+            request.data,
           )}`,
         );
       }
@@ -40,20 +48,41 @@ export class AppHttpService {
     }
 
     // execute http request
-    const response = await this.httpService.request<T>(requestConfig).toPromise();
-
-    // log response
+    let responseStatus: number | undefined;
+    let responseData: any;
     try {
-      this.requestLogger.log(`[RESPONSE INCOMING] [request-id=${requestId}] ${response.status}`);
-      if (response.data) {
-        this.requestLogger.debug(
-          `[RESPONSE INCOMING PAYLOAD] [request-id=${requestId}] ${JSON.stringify(response.data)}`,
-        );
-      }
-    } catch {
-      // ignore
-    }
+      const response = await this.httpService.request<T>(request).toPromise();
+      responseStatus = response.status;
+      responseData = response.data;
+      return response;
+    } catch (e) {
+      responseStatus = e.response?.status;
+      responseData = e.response?.data;
 
-    return response;
+      // apply exception handler, if matching handler found
+      if (exceptionHandlers) {
+        const handler = exceptionHandlers.find((handler) => handler.condition(e));
+        if (handler) {
+          throw handler.exception(e);
+        }
+      }
+      throw e;
+    } finally {
+      // log response (fail-safe)
+      try {
+        this.requestLogger.log(
+          `[RESPONSE INCOMING] [out-request-id=${requestId}] status=${responseStatus}`,
+        );
+        if (responseData) {
+          this.requestLogger.debug(
+            `[RESPONSE INCOMING PAYLOAD] [out-request-id=${requestId}] ${JSON.stringify(
+              responseData,
+            )}`,
+          );
+        }
+      } catch {
+        // ignore
+      }
+    }
   }
 }

@@ -18,6 +18,12 @@
       "cwd": "[cwd]/fira/fira-web",
       "execute": false,
       "command": "npm run start"
+    },
+    {
+      "name": "fira-commons",
+      "cwd": "[cwd]/fira/commons",
+      "execute": false,
+      "command": "npm i"
     }
   ]
 }
