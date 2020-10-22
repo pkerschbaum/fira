@@ -17,7 +17,7 @@ export class UserDAO implements DAO<User> {
       { criteria }: { criteria: { id: TUser['id'] } },
       repository,
     ): Promise<User | undefined> => {
-      return await repository.findOne(criteria.id);
+      return await repository.findOne({ where: `"id" ILIKE '${criteria.id}'` });
     },
   );
 

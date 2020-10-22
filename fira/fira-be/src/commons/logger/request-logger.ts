@@ -1,4 +1,5 @@
-import { Injectable, Scope, LoggerService, Inject } from '@nestjs/common';
+import { Injectable, Scope, LoggerService } from '@nestjs/common';
+
 import { TransientLogger } from './transient-logger';
 import { RequestProperties } from '../request-properties';
 
@@ -16,30 +17,22 @@ export class RequestLogger implements LoggerService {
   }
 
   public log(message: any, context?: string): void {
-    this.transientLogger.log(
-      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
-      context ?? this.context,
-    );
+    this.transientLogger.log(this.formatMessage(message), context ?? this.context);
   }
 
   public debug(message: any, context?: string): void {
-    this.transientLogger.debug(
-      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
-      context ?? this.context,
-    );
+    this.transientLogger.debug(this.formatMessage(message), context ?? this.context);
   }
 
   public warn(message: any, context?: string): void {
-    this.transientLogger.warn(
-      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
-      context ?? this.context,
-    );
+    this.transientLogger.warn(this.formatMessage(message), context ?? this.context);
   }
 
   public error(message: any, context?: string): void {
-    this.transientLogger.error(
-      `[client-id=${this.requestProperties.getClientId()}] [request-id=${this.requestProperties.getRequestId()}] ${message}`,
-      context ?? this.context,
-    );
+    this.transientLogger.error(this.formatMessage(message), context ?? this.context);
+  }
+
+  private formatMessage(message: any): string {
+    return `[client-id=${this.requestProperties.getClientId()}] [in-request-id=${this.requestProperties.getRequestId()}] ${message}`;
   }
 }

@@ -87,8 +87,7 @@ docker run --rm \
 Run the application with [`./scripts/fira-dev-up.sh`](./scripts/fira-dev-up.sh).
 This will launch not only the essential services, but also PgAdmin to inspect the contents of the Postgres Databases.
 Further, all services normally not exposed from the docker network (e.g. keycloak, postgres database servers) will get exposed to the host system.
-This allows to connect the local instance of the fira backend to the services running in docker.  
-You can even run this command if the application was bootstrapped via the command for the production environment; only the admin tools will get additionally started.
+This allows to connect the local instance of the fira backend to the services running in docker.
 
 The PgAdmin Web UI is available at <http://localhost:8079> (or whatever port set with `PGADMIN_PUBLIC_PORT`). The Fira database is automatically added to PgAdmin. You only have to enter the password set with `FIRA_DB_PASSWORD` when connecting.
 

@@ -20,6 +20,7 @@ const renderApp = () =>
     document.getElementById('root'),
   );
 
+// register hot module replacement for development environment
 if (process.env.NODE_ENV !== 'production' && (module as any).hot) {
   (module as any).hot.accept('./App', renderApp);
 }

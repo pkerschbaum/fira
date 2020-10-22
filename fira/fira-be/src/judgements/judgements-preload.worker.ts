@@ -27,6 +27,7 @@ type PreloadWorklet = {
 };
 
 const SERVICE_NAME = 'JudgementsPreloadWorker';
+let singletonGotInstantiated = false;
 
 const createLogger = (requestLogger: LoggerService) => ({
   log: (message: any) => {
@@ -65,6 +66,10 @@ export class JudgementsPreloadWorker {
     private readonly judgementsDAO: JudgementsDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
   ) {
+    if (singletonGotInstantiated) {
+      throw new Error(`this class should be a singleton and thus get instantiated only once`);
+    }
+    singletonGotInstantiated = true;
     this.appLogger = new BaseLogger();
     this.appLogger.setContext(SERVICE_NAME);
   }
@@ -314,7 +319,7 @@ export class JudgementsPreloadWorker {
 
       if (pairCandidates.length === 0) {
         // all judgement-pairs with the given priority already satisfy the annotation target per
-        // judgement-pair, or the user already judged all the pairs with the given priority
+        // judgement-pair, or the user has already judged all the pairs with the given priority
         // --> try next priority
         continue;
       }

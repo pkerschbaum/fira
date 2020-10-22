@@ -9,7 +9,6 @@ import * as jwt from 'jsonwebtoken';
 import * as util from 'util';
 import { Request } from 'express';
 
-import { JwtPayload } from '../../commons';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 
 const verify = util.promisify(jwt.verify);
@@ -32,9 +31,8 @@ export class AuthGuard implements CanActivate {
 
     // get current public key and validate JWT token
     const publicKey = await this.identityMgmtService.loadPublicKey();
-    let jwtPayload: JwtPayload;
     try {
-      jwtPayload = (await verify(accessToken, publicKey)) as JwtPayload;
+      await verify(accessToken, publicKey);
     } catch (e) {
       if (e instanceof jwt.TokenExpiredError) {
         throw new UnauthorizedException(`token expired, expired at: ${e.expiredAt}`);

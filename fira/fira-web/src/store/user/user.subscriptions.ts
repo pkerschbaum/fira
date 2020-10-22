@@ -26,8 +26,10 @@ export const setupSubscriptions = (store: RootStore) => {
       }
 
       if (!currentUser) {
-        // if no user is present (e.g., logout was executed), clear scheduled refresh and browser storage
-        logger.info('no user present, clear scheduled refresh and browser storage');
+        logger.info(
+          'no user present (e.g., logout was executed), ' +
+            'clear scheduled refresh and browser storage',
+        );
         return browserStorage.clearUser();
       }
 

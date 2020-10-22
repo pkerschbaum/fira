@@ -56,7 +56,7 @@ export class RolesGuard implements CanActivate {
 
     // check if one of the roles supplied by the decorator is present in the token
     return requiredRoles.some((requiredRole) => {
-      return jwtPayload.resource_access?.[requiredRole.category]?.roles?.some(
+      return !!jwtPayload.resource_access?.[requiredRole.category]?.roles?.some(
         (actualRole) => actualRole === requiredRole.role,
       );
     });

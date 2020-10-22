@@ -1,9 +1,10 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
 
-const SERVICE_NAME = 'PersistenceService';
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
+
+let singletonGotInstantiated = false;
 
 @Injectable()
 export class PersistenceService {
@@ -12,7 +13,12 @@ export class PersistenceService {
    * [judgements-worker.service.ts](fira-be/src/judgements/judgements-worker.service.ts) for
    * further details.
    */
-  constructor(private readonly connection: Connection) {}
+  constructor(private readonly connection: Connection) {
+    if (singletonGotInstantiated) {
+      throw new Error(`this class should be a singleton and thus get instantiated only once`);
+    }
+    singletonGotInstantiated = true;
+  }
 
   public wrapInTransaction = (requestLogger: LoggerService) => <T, U extends any[]>(
     cb: (em: EntityManager, ...args: U) => Promise<T>,
@@ -31,7 +37,7 @@ export class PersistenceService {
           requestLogger.log(
             `transaction failed due to serialization failure, retrying...` +
               ` attemptNumber of last attempt was: ${attemptNumber}`,
-            SERVICE_NAME,
+            this.constructor.name,
           );
           attemptNumber++;
         }

@@ -1,5 +1,5 @@
 // based on: https://github.com/nestjs/nest/blob/master/packages/common/services/logger.service.ts
-import { Injectable, LogLevel, LoggerService, Optional, Global } from '@nestjs/common';
+import { Injectable, LogLevel, LoggerService, Optional } from '@nestjs/common';
 import { isObject } from 'util';
 import * as clc from 'cli-color';
 import moment = require('moment');

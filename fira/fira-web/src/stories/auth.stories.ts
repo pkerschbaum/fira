@@ -3,7 +3,7 @@ import { store } from '../store/store';
 import { createLogger } from '../logger/logger';
 import { actions as userActions } from '../store/user/user.slice';
 
-const logger = createLogger('auth.service');
+const logger = createLogger('auth.stories');
 
 export const authStories = {
   login: async (username: string, password: string) => {

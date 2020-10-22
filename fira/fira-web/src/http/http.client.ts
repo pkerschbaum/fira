@@ -51,7 +51,7 @@ async function request<T>(
     },
   };
 
-  return axiosClient.request<T>(deepmerge(requestConfig, additionalConfig));
+  return await axiosClient.request<T>(deepmerge(requestConfig, additionalConfig));
 }
 
 export const httpClient = {
@@ -233,6 +233,7 @@ export const httpClient = {
         await request<string>({
           url: `admin/v1/judgements/export/tsv`,
           method: 'GET',
+          timeout: 60000,
         })
       ).data;
     } catch (e) {

@@ -2,7 +2,6 @@ import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { PersistenceService } from './persistence.service';
-import { CommonsModule } from '../commons/commons.module';
 
 import { ConfigDAO } from './config.dao';
 import { UserDAO } from './user.dao';
@@ -25,7 +24,6 @@ import { Feedback } from './entity/feedback.entity';
 @Global()
 @Module({
   imports: [
-    CommonsModule,
     TypeOrmModule.forFeature([
       Config,
       User,

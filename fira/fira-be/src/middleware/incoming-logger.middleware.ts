@@ -13,6 +13,7 @@ export class IncomingLoggerMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: () => void) {
     try {
+      const incomingTimestamp = Date.now();
       this.requestLogger.log(
         `[REQUEST INCOMING] originalUrl=${req.originalUrl} method=${
           req.method
@@ -34,7 +35,7 @@ export class IncomingLoggerMiddleware implements NestMiddleware {
               requestLogger.log(
                 `[RESPONSE OUTGOING] statuscode=${res.statusCode} content-length=${res.get(
                   'content-length',
-                )}`,
+                )} duration=${Date.now() - incomingTimestamp}ms`,
               );
             } else {
               requestLogger.log(`[REQUEST GOT CANCELLED]`);
