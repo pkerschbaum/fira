@@ -43,9 +43,10 @@ KEYCLOAK_DB_PASSWORD=password
 FIRA_BE_PUBLIC_PORT=80
 
 # externally exposed ports (only applicable if the application is run in development mode)
-KEYCLOAK_PUBLIC_PORT=8080
 PGADMIN_PUBLIC_PORT=8079
+KEYCLOAK_PUBLIC_PORT=8078
 FIRA_DATABASE_PUBLIC_PORT=5432
+K6_GRAFANA_PUBLIC_PORT=8077
 
 # docker volumes for backend
 FIRA_BE_DATA_DIRECTORY=/c/data/fira-data/

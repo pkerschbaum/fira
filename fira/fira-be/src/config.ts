@@ -1,7 +1,11 @@
 import * as moment from 'moment';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import NamingStrategies = require('typeorm-naming-strategies');
+
+// load .env file of project root (for local development)
+dotenv.config();
 
 // URL_REGEX taken from https://stackoverflow.com/a/26766402/1700319
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
@@ -32,7 +36,7 @@ export const database: TypeOrmModuleOptions = {
 export const keycloak = {
   host: {
     protocol: 'http',
-    base: process.env.KEYCLOAK_HOST_BASE ?? 'localhost:8080',
+    base: process.env.KEYCLOAK_HOST_BASE ?? 'localhost:8078',
   },
   refetchInterval: moment.duration(1, 'day'),
   clientId: 'fira-be',
