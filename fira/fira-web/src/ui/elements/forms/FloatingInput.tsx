@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 
+import { assertUnreachable } from '../../../../../fira-commons';
+
 import styles from './FloatingInput.module.css';
-import { assertUnreachable } from '../../../util/types.util';
 
 type FloatingLabelInputProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,

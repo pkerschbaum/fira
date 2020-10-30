@@ -6,16 +6,14 @@ import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { KeycloakClient } from './keycloak.client';
 import { UserDAO } from '../persistence/user.dao';
+import { convertKey } from '../utils/keys.util';
 import {
   AuthResponse,
   ImportUserResponse,
   ImportUserRequest,
   uniqueIdGenerator,
-} from '../../../commons';
-import { ImportStatus } from '../typings/enums';
-import { convertKey } from '../util/keys.util';
-
-const SERVICE_NAME = 'IdentityManagementService';
+  ImportStatus,
+} from '../../../fira-commons';
 
 type Cache = {
   publicKey: {
@@ -33,7 +31,7 @@ export class IdentityManagementService {
     private readonly requestLogger: RequestLogger,
     private readonly userDAO: UserDAO,
   ) {
-    this.requestLogger.setContext(SERVICE_NAME);
+    this.requestLogger.setComponent(this.constructor.name);
   }
 
   public login = async (username: string, password: string): Promise<AuthResponse> => {

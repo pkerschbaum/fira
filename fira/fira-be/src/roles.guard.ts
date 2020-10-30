@@ -10,7 +10,7 @@ import * as jwt from 'jsonwebtoken';
 import * as util from 'util';
 import { Request } from 'express';
 
-import { JwtPayload } from '../../commons';
+import { JwtPayload } from '../../fira-commons';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { DecoratorElems } from './roles.decorator';
 
@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
     private readonly identityMgmtService: IdentityManagementService,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.get<DecoratorElems[]>('roles', context.getClass());
 
     // if no roles are required (i.e., decorator is absent for the route), allow access

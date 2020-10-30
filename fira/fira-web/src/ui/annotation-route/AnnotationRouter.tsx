@@ -6,9 +6,9 @@ import AnnotationInfo from './info-page/AnnotationInfo';
 import AnnotationFeedback from './feedback-page/AnnotationFeedback';
 import AnnotationFinished from './finished-page/AnnotationFinished';
 import AnnotationEverythingAnnotated from './everything-annotated-page/AnnotationEverythingAnnotated';
-import { useUserState } from '../../store/user/user.hooks';
-import { useAnnotationState } from '../../store/annotation/annotation.hooks';
-import { assertUnreachable } from '../../util/types.util';
+import { useUserState } from '../../state/user/user.hooks';
+import { useAnnotationState } from '../../state/annotation/annotation.hooks';
+import { assertUnreachable } from '../../../../fira-commons';
 
 const ANNOTATE_RELATIVE_URL = 'annotate';
 const INFO_RELATIVE_URL = 'info';

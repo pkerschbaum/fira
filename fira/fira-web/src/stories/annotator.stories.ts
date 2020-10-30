@@ -1,8 +1,8 @@
-import { createLogger } from '../logger/logger';
-import { store } from '../store/store';
+import { createLogger } from '../commons/logger';
+import { store } from '../state/store';
 import { httpClient } from '../http/http.client';
-import { actions as userActions } from '../store/user/user.slice';
-import { SubmitFeedback } from '../../../commons';
+import { actions as userActions } from '../state/user/user.slice';
+import { SubmitFeedback } from '../../../fira-commons';
 
 const logger = createLogger('annotators.service');
 

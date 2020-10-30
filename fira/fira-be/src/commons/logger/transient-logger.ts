@@ -1,29 +1,40 @@
-import { Injectable, Scope, LoggerService } from '@nestjs/common';
+import { Injectable, Scope } from '@nestjs/common';
 
-import { BaseLogger } from './base-logger';
+import { baseLogger, LogContext } from './base-logger';
+import { ObjectLiteral } from '../../../../fira-commons';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class TransientLogger implements LoggerService {
-  private context?: string;
+export class TransientLogger {
+  private component?: string;
 
-  constructor(private readonly baseLogger: BaseLogger) {}
+  public setComponent(component: string): void {
+    this.component = component;
+  }
 
-  error(message: any, trace?: string, context?: string): void {
-    this.baseLogger.error(message, trace, context || this.context);
+  public log(message: string, messageContext?: ObjectLiteral, logContext?: LogContext): void {
+    baseLogger.log(message, messageContext, { component: this.component, ...logContext });
   }
-  log(message: any, context?: string): void {
-    this.baseLogger.log(message, context || this.context);
+
+  public debug(message: string, messageContext?: ObjectLiteral, logContext?: LogContext): void {
+    baseLogger.debug(message, messageContext, { component: this.component, ...logContext });
   }
-  warn(message: any, context?: string): void {
-    this.baseLogger.warn(message, context || this.context);
+
+  public warn(message: string, messageContext?: ObjectLiteral, logContext?: LogContext): void {
+    baseLogger.warn(message, messageContext, { component: this.component, ...logContext });
   }
-  debug(message: any, context?: string): void {
-    this.baseLogger.debug(message, context || this.context);
+
+  public error(
+    message: string,
+    error?: any,
+    messageContext?: ObjectLiteral,
+    logContext?: LogContext,
+  ): void {
+    baseLogger.error(message, error, messageContext, { component: this.component, ...logContext });
   }
-  verbose(message: any, context?: string): void {
-    this.baseLogger.verbose(message, context || this.context);
-  }
-  setContext(context: string): void {
-    this.context = context;
+
+  public clone(): TransientLogger {
+    const clonedLogger = new TransientLogger();
+    clonedLogger.component = this.component;
+    return clonedLogger;
   }
 }

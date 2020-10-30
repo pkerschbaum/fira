@@ -3,7 +3,7 @@ import d3 = require('d3');
 
 import { FeedbackDAO } from '../persistence/feedback.dao';
 import { UserDAO } from '../persistence/user.dao';
-import { SubmitFeedback, ExportFeedback } from '../../../commons';
+import { SubmitFeedback, ExportFeedback } from '../../../fira-commons';
 
 @Injectable()
 export class FeedbackService {

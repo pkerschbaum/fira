@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { objects } from '../../../fira-commons';
 
 import { TFeedback, Feedback } from './entity/feedback.entity';
 import { TUser } from './entity/user.entity';
 import { failIfUndefined, optionalTransaction, DAO } from './persistence.util';
-import { undefinedIfEmpty } from '../util/objects';
 
 @Injectable()
 export class FeedbackDAO implements DAO<Feedback> {
@@ -30,7 +30,7 @@ export class FeedbackDAO implements DAO<Feedback> {
       if (criteria?.user !== undefined) {
         findConditions.user = criteria.user;
       }
-      return await repository.count({ where: undefinedIfEmpty(findConditions) });
+      return await repository.count({ where: objects.undefinedIfEmpty(findConditions) });
     },
   );
 

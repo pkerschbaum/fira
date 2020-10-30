@@ -1,6 +1,6 @@
 import { IsNumber, IsDefined, IsEnum, IsArray, ArrayUnique } from 'class-validator';
 
-import { RelevanceLevel, SaveJudgement } from '../../../../commons';
+import { RelevanceLevel, SaveJudgement } from '../../../../fira-commons';
 
 export class SaveJudgementRequestDto implements SaveJudgement {
   @IsEnum(RelevanceLevel)

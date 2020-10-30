@@ -4,7 +4,7 @@ import { ApiTags, ApiHeader } from '@nestjs/swagger';
 import { AuthGuard } from '../auth.guard';
 import { FeedbackService } from './feedback.service';
 import { SubmitFeedbackDto } from './dto/submit-feedback.dto';
-import { extractJwtPayload } from '../util/jwt.util';
+import { extractJwtPayload } from '../utils/jwt.util';
 
 @ApiTags('feedback')
 @Controller('feedback')
@@ -17,7 +17,7 @@ export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   @Post('v1')
-  async submitFeedback(
+  public async submitFeedback(
     @Body() submitFeedbackRequest: SubmitFeedbackDto,
     @Headers('authorization') authHeader: string,
   ): Promise<void> {

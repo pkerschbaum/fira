@@ -5,8 +5,8 @@ import { Repository, MoreThan, FindConditions } from 'typeorm';
 import { TJudgement, Judgement } from './entity/judgement.entity';
 import { TUser, User } from './entity/user.entity';
 import { JudgementStatus } from '../typings/enums';
-import { undefinedIfEmpty } from '../util/objects';
 import { optionalTransaction, DAO } from './persistence.util';
+import { objects } from '../../../fira-commons';
 
 @Injectable()
 export class JudgementsDAO implements DAO<Judgement> {
@@ -45,7 +45,7 @@ export class JudgementsDAO implements DAO<Judgement> {
       }
 
       return await repository.find({
-        where: undefinedIfEmpty(findConditions),
+        where: objects.undefinedIfEmpty(findConditions),
       });
     },
   );
@@ -74,7 +74,7 @@ export class JudgementsDAO implements DAO<Judgement> {
         findConditions.judgedAt = MoreThan(criteria.judgedAt.min);
       }
       return await repository.count({
-        where: undefinedIfEmpty(findConditions),
+        where: objects.undefinedIfEmpty(findConditions),
       });
     },
   );

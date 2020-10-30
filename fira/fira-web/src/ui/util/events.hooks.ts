@@ -1,7 +1,12 @@
 import { useEffect } from 'react';
 
 export function useKeyupEvent(keyFunctionMap: {
-  [keyCode: string]: (() => void) | { additionalKeys: Array<'ALT' | 'STRG'>; handler: () => void };
+  [keyCode: string]:
+    | (() => void)
+    | {
+        additionalKeys: Array<'ALT' | 'STRG'> | ReadonlyArray<'ALT' | 'STRG'>;
+        handler: () => void;
+      };
 }) {
   useEffect(() => {
     const keyUpHandler = (e: KeyboardEvent) => {

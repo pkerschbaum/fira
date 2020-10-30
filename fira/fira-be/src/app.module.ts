@@ -18,7 +18,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { CommonsModule } from './commons/commons.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { MgmtModule } from './mgmt/mgmt.module';
-import { IncomingLoggerMiddleware } from './middleware/incoming-logger.middleware';
+import { IncomingLoggerMiddleware } from './commons/incoming-logger.middleware';
 import { LogExceptionsFilter } from './filter/log-exceptions.filter';
 import { RedirectClientFilter } from './filter/redirect-client.filter';
 
@@ -64,7 +64,7 @@ import { RedirectClientFilter } from './filter/redirect-client.filter';
   ],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+  public configure(consumer: MiddlewareConsumer) {
     consumer.apply(IncomingLoggerMiddleware).forRoutes({
       path: '*',
       method: RequestMethod.ALL,

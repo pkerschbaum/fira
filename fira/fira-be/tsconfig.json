@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": true,
+    "declaration": false,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -11,8 +11,10 @@
     "outDir": "./dist",
     "incremental": true,
     "strict": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "allowJs": true,
+    "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "../fira-commons/**/*.js"],
   "exclude": ["node_modules", "dist"]
 }

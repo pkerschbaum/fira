@@ -10,7 +10,11 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { JudgementMode, PreloadJudgement, PreloadJudgementResponse } from '../../../../commons';
+import {
+  JudgementMode,
+  PreloadJudgement,
+  PreloadJudgementResponse,
+} from '../../../../fira-commons';
 
 export class PreloadJudgementsResponseDto implements PreloadJudgementResponse {
   @ArrayMinSize(1)

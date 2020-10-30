@@ -9,13 +9,13 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../typings/enums';
 import {
+  ImportStatus,
   ImportJudgementPairsReq,
   ImportJudgementPair,
   ImportJudgementPairResult,
   ImportJudgementPairsResp,
-} from '../../../../commons';
+} from '../../../../fira-commons';
 
 export class ImportJudgementPairsReqDto implements ImportJudgementPairsReq {
   @ArrayMinSize(1)

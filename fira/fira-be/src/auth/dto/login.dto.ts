@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-import { LoginRequest, AuthResponse } from '../../../../commons';
+import { LoginRequest, AuthResponse } from '../../../../fira-commons';
 
 export class LoginRequestDto implements LoginRequest {
   @IsString()

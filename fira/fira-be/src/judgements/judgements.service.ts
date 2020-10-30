@@ -18,7 +18,6 @@ import { UserDAO } from '../persistence/user.dao';
 import { ConfigDAO } from '../persistence/config.dao';
 import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TJudgement } from '../persistence/entity/judgement.entity';
-import { assertUnreachable } from '../util/types.util';
 import { JudgementStatus } from '../typings/enums';
 import {
   SaveJudgement,
@@ -26,9 +25,8 @@ import {
   ExportJudgement,
   Statistic,
   PreloadJudgement,
-} from '../../../commons';
-
-const SERVICE_NAME = 'JudgementsService';
+  assertUnreachable,
+} from '../../../fira-commons';
 
 @Injectable({ scope: Scope.REQUEST })
 export class JudgementsService {
@@ -42,7 +40,7 @@ export class JudgementsService {
     private readonly configDAO: ConfigDAO,
     private readonly feedbackDAO: FeedbackDAO,
   ) {
-    this.requestLogger.setContext(SERVICE_NAME);
+    this.requestLogger.setComponent(this.constructor.name);
   }
 
   public preload = async (
@@ -241,6 +239,8 @@ export class JudgementsService {
         status: JudgementStatus.JUDGED,
       },
     });
+
+    this.requestLogger.debug(`got db data, now mapping...`);
 
     return allJudgements.map((judgement) => {
       const partsAvailable = judgement.document.annotateParts;

@@ -1,7 +1,8 @@
 import React from 'react';
 
-import styles from './App.module.css';
 import MainRouter from './ui/MainRouter';
+
+import styles from './App.module.css';
 
 const App: React.FC = () => (
   <div className={styles.app}>

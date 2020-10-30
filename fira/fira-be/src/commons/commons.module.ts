@@ -1,15 +1,15 @@
 import { Module, Global, HttpModule } from '@nestjs/common';
 
-import { BaseLogger } from './logger/base-logger';
 import { TransientLogger } from './logger/transient-logger';
 import { RequestProperties } from './request-properties';
 import { RequestLogger } from './logger/request-logger';
-import { AppHttpClient } from './http.service';
+import { AppHttpClient } from './app-http-client';
+import { RequestHttpClient } from './request-http-client';
 
 @Global()
 @Module({
   imports: [HttpModule],
-  providers: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpClient],
-  exports: [BaseLogger, TransientLogger, RequestProperties, RequestLogger, AppHttpClient],
+  providers: [TransientLogger, RequestProperties, RequestLogger, AppHttpClient, RequestHttpClient],
+  exports: [TransientLogger, RequestProperties, RequestLogger, AppHttpClient, RequestHttpClient],
 })
 export class CommonsModule {}

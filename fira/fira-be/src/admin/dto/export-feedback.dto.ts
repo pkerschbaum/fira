@@ -1,7 +1,7 @@
 import { ValidateNested, IsInt, IsDefined, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { FeedbackScore, ExportFeedback, ExportFeedbackResponse } from '../../../../commons';
+import { FeedbackScore, ExportFeedback, ExportFeedbackResponse } from '../../../../fira-commons';
 
 export class ExportFeedbackResponseDto implements ExportFeedbackResponse {
   @ValidateNested({ each: true })

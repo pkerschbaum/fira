@@ -1,12 +1,12 @@
-import { Injectable, Scope, Inject, Optional } from '@nestjs/common';
+import { Injectable, Scope, Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 
-import { HEADER_CLIENT_ID, HEADER_REQUEST_ID } from '../../../commons';
+import { HEADER_CLIENT_ID, HEADER_REQUEST_ID } from '../../../fira-commons';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RequestProperties {
-  constructor(@Inject(REQUEST) private request: Request) {}
+  constructor(@Inject(REQUEST) private readonly request: Request) {}
 
   public getClientId(): string | undefined {
     try {

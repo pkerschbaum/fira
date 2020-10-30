@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { BaseLogger } from '../commons/logger/base-logger';
+import { TransientLogger } from '../commons/logger/transient-logger';
 import { TJudgementPair, JudgementPair, COLUMN_PRIORITY } from './entity/judgement-pair.entity';
 import { Judgement } from './entity/judgement.entity';
 import { TConfig } from './entity/config.entity';
@@ -10,9 +10,7 @@ import { TDocument } from './entity/document.entity';
 import { TQuery } from './entity/query.entity';
 import { TUser } from './entity/user.entity';
 import { optionalTransaction, DAO } from './persistence.util';
-import * as arrays from '../util/arrays';
-
-const CONTEXT = 'JudgementPairDAO';
+import { arrays } from '../../../fira-commons';
 
 export type PairQueryResult = {
   readonly document_id: TDocument['id'];
@@ -28,13 +26,14 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
   private readonly cache: {
     availablePriorities?: { countOfPairsWithPrioAll: number; numericPriorities: number[] };
   } = {};
-  private readonly baseLogger: BaseLogger;
+  private readonly logger: TransientLogger;
 
   constructor(
     @InjectRepository(JudgementPair)
     public readonly repository: Repository<JudgementPair>,
   ) {
-    this.baseLogger = new BaseLogger(CONTEXT);
+    this.logger = new TransientLogger();
+    this.logger.setComponent(this.constructor.name);
   }
 
   public count = async (): Promise<number> => {
@@ -67,7 +66,7 @@ export class JudgementPairDAO implements DAO<JudgementPair> {
       repository,
     ): Promise<{ countOfPairsWithPrioAll: number; numericPriorities: number[] }> => {
       if (this.cache.availablePriorities === undefined) {
-        this.baseLogger.log(`computing and caching available priorities...`);
+        this.logger.log(`computing and caching available priorities...`);
 
         const priorities = ((await repository
           .createQueryBuilder('judgement_pair')

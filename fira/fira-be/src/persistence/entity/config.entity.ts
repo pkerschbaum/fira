@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, Check, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-import { JudgementMode } from '../../../../commons';
+import { JudgementMode } from '../../../../fira-commons';
 
 const nameOfUniqueColumn = 'id';
 const uniqueValue = 1;

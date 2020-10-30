@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-import { RefreshRequest, AuthResponse } from '../../../../commons';
+import { RefreshRequest, AuthResponse } from '../../../../fira-commons';
 
 export class RefreshRequestDto implements RefreshRequest {
   @IsString()

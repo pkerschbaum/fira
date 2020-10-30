@@ -8,7 +8,7 @@ import {
   Index,
 } from 'typeorm';
 
-import { FeedbackScore } from '../../../../commons';
+import { FeedbackScore } from '../../../../fira-commons';
 import { User } from './user.entity';
 
 export type TFeedback = {

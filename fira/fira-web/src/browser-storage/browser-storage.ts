@@ -1,4 +1,4 @@
-import { createLogger } from '../logger/logger';
+import { createLogger } from '../commons/logger';
 
 type LocalStorageUser = {
   accessToken: string;

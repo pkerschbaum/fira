@@ -1,16 +1,16 @@
-import { createLogger } from '../logger/logger';
-import { browserStorage } from '../browser-storage/browser-storage';
-import { uniqueIdGenerator } from '../../../commons';
+import { createLogger } from '../commons/logger';
+import { browserStorage } from '../commons/browser-storage';
+import { uniqueIdGenerator, strings } from '../../../fira-commons';
 
 const logger = createLogger('create-client-id');
 
 export function createClientId() {
   const storedClientId = browserStorage.getClientId();
 
-  if (storedClientId) {
-    logger.info('stored clientId found, skipping creation of clientId');
+  if (!strings.isNullishOrEmpty(storedClientId)) {
+    logger.debug('stored clientId found, skipping creation of clientId');
   } else {
-    logger.info('no stored clientId found. creating and saving clientId...');
+    logger.debug('no stored clientId found. creating and saving clientId...');
     const newClientId = uniqueIdGenerator.generate();
     browserStorage.saveClientId(newClientId);
   }

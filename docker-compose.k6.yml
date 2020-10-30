@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.8"
 
 networks:
   k6:
@@ -19,7 +19,7 @@ services:
     networks:
       - grafana
     ports:
-      - '${K6_GRAFANA_PUBLIC_PORT}:3000'
+      - "${K6_GRAFANA_PUBLIC_PORT}:3000"
     environment:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_ANONYMOUS_ENABLED=true

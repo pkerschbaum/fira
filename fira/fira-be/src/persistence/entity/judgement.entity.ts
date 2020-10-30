@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 import { JudgementStatus } from '../../typings/enums';
-import { RelevanceLevel, JudgementMode } from '../../../../commons';
+import { RelevanceLevel, JudgementMode } from '../../../../fira-commons';
 import { DocumentVersion, Document } from './document.entity';
 import { QueryVersion, Query } from './query.entity';
 import { User } from './user.entity';

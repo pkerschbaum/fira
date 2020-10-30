@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 
 import styles from './Admin.module.css';
-import { JudgementMode, Statistic } from '../../../../commons';
+import { JudgementMode, Statistic } from '../../../../fira-commons';
 import { adminStories } from '../../stories/admin.stories';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { RootState } from '../../state/store';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
 import Line from '../elements/Line';

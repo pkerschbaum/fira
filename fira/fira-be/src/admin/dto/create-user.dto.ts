@@ -8,13 +8,13 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../typings/enums';
 import {
+  ImportStatus,
   ImportUserResponse,
   ImportUsersResponse,
   ImportUserRequest,
   ImportUsersRequest,
-} from '../../../../commons';
+} from '../../../../fira-commons';
 
 export class ImportUsersRequestDto implements ImportUsersRequest {
   @ArrayMinSize(1)

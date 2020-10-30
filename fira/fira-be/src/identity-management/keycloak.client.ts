@@ -2,7 +2,7 @@ import { Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/c
 import qs = require('qs');
 
 import * as config from '../config';
-import { AppHttpClient } from '../commons/http.service';
+import { AppHttpClient } from '../commons/app-http-client';
 
 type KeycloakCertsResponse = {
   keys?: [
@@ -28,11 +28,11 @@ type KeycloakAuthResponse = {
 
 @Injectable()
 export class KeycloakClient {
-  constructor(private readonly httpService: AppHttpClient) {}
+  constructor(private readonly httpClient: AppHttpClient) {}
 
   public async getPublicKey() {
     return (
-      await this.httpService.request<KeycloakCertsResponse>({
+      await this.httpClient.request<KeycloakCertsResponse>({
         request: {
           url: `${getEndpoint()}/protocol/openid-connect/certs`,
           method: 'GET',
@@ -78,7 +78,7 @@ export class KeycloakClient {
 
   private async getToken(requestBody: KeycloakLoginRequest): Promise<KeycloakAuthResponse> {
     return (
-      await this.httpService.request<KeycloakAuthResponse>({
+      await this.httpClient.request<KeycloakAuthResponse>({
         request: {
           url: `${getEndpoint()}/protocol/openid-connect/token`,
           data: qs.stringify(requestBody),
@@ -105,7 +105,7 @@ export class KeycloakClient {
     };
 
     try {
-      await this.httpService.request({
+      await this.httpClient.request({
         request: {
           url: `${getAdminEndpoint()}/users`,
           data: requestBody,

@@ -1,9 +1,14 @@
-version: "3.4"
+version: "3.8"
 
 services:
+  fira_appsvc:
+    environment:
+      - NODE_ENV=development
+
   postgres_fira:
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_duration=on"]
     ports:
-      - "${FIRA_DATABASE_PUBLIC_PORT}:5432"
+      - "${FIRA_DEV_PERSISTENT_DB_PUBLIC_PORT}:5432"
 
   keycloak:
     ports:
@@ -20,8 +25,8 @@ services:
     depends_on:
       - postgres_fira
     environment:
-      - PGADMIN_DEFAULT_EMAIL=${ADMIN_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${ADMIN_PASSWORD}
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
       - PGADMIN_SERVER_JSON_FILE=~/servers.json
 
 networks:

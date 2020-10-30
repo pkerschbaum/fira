@@ -15,8 +15,14 @@ export const application = {
   port: 80,
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
+  environment: process.env.NODE_ENV === 'development' ? 'development' : 'production',
   urlPaths: {
-    web: (process.env.FIRA_HOMEPAGE && URL_REGEX.exec(process.env.FIRA_HOMEPAGE)![5]) ?? '',
+    homepage: process.env.FIRA_HOMEPAGE ?? 'http://localhost:3000',
+    // extract path of URL via regex, e.g. "/path1/path2" from "http://localhost/path1/path2"
+    web:
+      (process.env.FIRA_HOMEPAGE === undefined
+        ? undefined
+        : URL_REGEX.exec(process.env.FIRA_HOMEPAGE)?.[5]) ?? '',
     api: '/api',
   },
   staticSourcesPath: path.join(__dirname, '..', 'client', 'build'),
@@ -24,11 +30,14 @@ export const application = {
 
 export const database: TypeOrmModuleOptions = {
   type: 'postgres',
-  host: process.env.DB_ADDR ?? 'localhost',
-  port: 5432,
-  username: process.env.DB_USER ?? 'fira',
-  password: process.env.DB_PASSWORD ?? 'password',
-  database: 'fira',
+  host: process.env.FIRA_PERSISTENT_DB_HOST ?? 'localhost',
+  port:
+    process.env.FIRA_PERSISTENT_DB_PORT !== undefined
+      ? Number(process.env.FIRA_PERSISTENT_DB_PORT)
+      : 5432,
+  username: process.env.FIRA_PERSISTENT_DB_USER ?? 'fira',
+  password: process.env.FIRA_PERSISTENT_DB_PASSWORD ?? 'password',
+  database: process.env.FIRA_PERSISTENT_DB_DATABASENAME ?? 'fira',
   synchronize: true,
   namingStrategy: new NamingStrategies.SnakeNamingStrategy(),
 } as const;
@@ -36,7 +45,7 @@ export const database: TypeOrmModuleOptions = {
 export const keycloak = {
   host: {
     protocol: 'http',
-    base: process.env.KEYCLOAK_HOST_BASE ?? 'localhost:8078',
+    base: process.env.KEYCLOAK_HOST_BASE ?? 'localhost:8077',
   },
   refetchInterval: moment.duration(1, 'day'),
   clientId: 'fira-be',

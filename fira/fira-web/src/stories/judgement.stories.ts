@@ -1,12 +1,12 @@
 import { httpClient } from '../http/http.client';
-import { createLogger } from '../logger/logger';
-import { store } from '../store/store';
+import { createLogger } from '../commons/logger';
+import { store } from '../state/store';
 import {
   actions as annotationActions,
   JudgementPairStatus,
-} from '../store/annotation/annotation.slice';
+} from '../state/annotation/annotation.slice';
 import { RateLevels } from '../typings/enums';
-import { RelevanceLevel } from '../../../commons';
+import { RelevanceLevel } from '../../../fira-commons';
 
 const logger = createLogger('judgements.service');
 

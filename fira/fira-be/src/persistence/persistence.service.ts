@@ -1,5 +1,8 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Connection, EntityManager } from 'typeorm';
+
+import { RequestLogger } from '../commons/logger/request-logger';
+import { TransientLogger } from '../commons/logger/transient-logger';
 
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
@@ -20,7 +23,10 @@ export class PersistenceService {
     singletonGotInstantiated = true;
   }
 
-  public wrapInTransaction = (requestLogger: LoggerService) => <T, U extends any[]>(
+  public wrapInTransaction = (requestLogger: TransientLogger | RequestLogger) => <
+    T,
+    U extends any[]
+  >(
     cb: (em: EntityManager, ...args: U) => Promise<T>,
   ) => {
     return async (...args: U) => {
@@ -37,7 +43,8 @@ export class PersistenceService {
           requestLogger.log(
             `transaction failed due to serialization failure, retrying...` +
               ` attemptNumber of last attempt was: ${attemptNumber}`,
-            this.constructor.name,
+            undefined,
+            { component: this.constructor.name },
           );
           attemptNumber++;
         }

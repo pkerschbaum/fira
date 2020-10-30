@@ -10,14 +10,14 @@ import { QueryVersionDAO } from '../persistence/query-version.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
 import { ConfigDAO } from '../persistence/config.dao';
 import {
+  ImportStatus,
   ImportAsset,
   ImportResult,
   ImportJudgementPair,
   ImportJudgementPairResult,
   UpdateConfig,
-} from '../../../commons';
-import { ImportStatus } from '../typings/enums';
-import { partitionArray, flatten } from '../util/arrays';
+  arrays,
+} from '../../../fira-commons';
 
 const NUMBER_PARALLEL_IMPORTS = 10;
 
@@ -37,7 +37,9 @@ export class AdminService {
   public importDocuments = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (transactionalEntityManager, documents: ImportAsset[]): Promise<ImportResult[]> => {
       // create partitions which are processed in parallel
-      const partitions = partitionArray(documents, NUMBER_PARALLEL_IMPORTS);
+      const partitions = arrays.partitionArray(documents, {
+        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
+      });
 
       // process partitions
       const results = await Promise.all(
@@ -73,14 +75,16 @@ export class AdminService {
       );
 
       // return flattened results
-      return flatten(results);
+      return arrays.flatten(results);
     },
   );
 
   public importQueries = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (transactionalEntityManager, queries: ImportAsset[]): Promise<ImportResult[]> => {
       // create partitions which are processed in parallel
-      const partitions = partitionArray(queries, NUMBER_PARALLEL_IMPORTS);
+      const partitions = arrays.partitionArray(queries, {
+        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
+      });
 
       // process partitions
       const results = await Promise.all(
@@ -113,7 +117,7 @@ export class AdminService {
       );
 
       // return flattened results
-      return flatten(results);
+      return arrays.flatten(results);
     },
   );
 
@@ -126,7 +130,9 @@ export class AdminService {
       await this.judgementPairDAO.deleteJudgementPairs({}, transactionalEntityManager);
 
       // create partitions which are processed in parallel
-      const partitions = partitionArray(judgementPairs, NUMBER_PARALLEL_IMPORTS);
+      const partitions = arrays.partitionArray(judgementPairs, {
+        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
+      });
 
       // process partitions
       const results = await Promise.all(
@@ -180,7 +186,7 @@ export class AdminService {
       );
 
       // return flattened results
-      return flatten(results);
+      return arrays.flatten(results);
     },
   );
 

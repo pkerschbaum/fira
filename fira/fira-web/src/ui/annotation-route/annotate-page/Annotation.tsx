@@ -2,16 +2,15 @@ import React, { useState, useRef } from 'react';
 
 import styles from './Annotation.module.css';
 import { RateLevels } from '../../../typings/enums';
-import { RelevanceLevel, JudgementMode } from '../../../../../commons';
+import { RelevanceLevel, JudgementMode, functions } from '../../../../../fira-commons';
 import { judgementStories } from '../../../stories/judgement.stories';
-import { noop } from '../../../util/functions';
 import Button from '../../elements/Button';
 import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
 import RateButton from './RateButton';
 import {
   useAnnotationState,
   useAnnotationActions,
-} from '../../../store/annotation/annotation.hooks';
+} from '../../../state/annotation/annotation.hooks';
 import AnnotationPart from './AnnotationPart';
 import JustifiedText from '../../layouts/JustifiedText';
 import Menu from '../../elements/Menu';
@@ -268,7 +267,7 @@ const Annotation: React.FC = () => {
                           })
                       : isInAnnotatedRange
                       ? () => setTooltipAnnotatePartIndex(partIdx)
-                      : noop
+                      : functions.noop
                   }
                   onTooltipClick={() => {
                     deleteRange({ annotationPartIndex: partIdx });

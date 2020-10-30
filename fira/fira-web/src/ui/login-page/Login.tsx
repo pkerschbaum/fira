@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import styles from './Login.module.css';
 import Form from '../elements/forms/Form';
 import { authStories } from '../../stories/auth.stories';
-import { RootState } from '../../store/store';
+import { RootState } from '../../state/store';
 
 const Login: React.FC = () => {
   const user = useSelector((state: RootState) => state.user);

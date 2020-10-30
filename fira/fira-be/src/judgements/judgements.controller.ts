@@ -16,7 +16,7 @@ import { JudgementsService } from './judgements.service';
 import { PreloadJudgementsResponseDto } from './dto/preload-judgements.dto';
 import { AuthGuard } from '../auth.guard';
 import { SaveJudgementRequestDto } from './dto/save-judgement.dto';
-import { extractJwtPayload } from '../util/jwt.util';
+import { extractJwtPayload } from '../utils/jwt.util';
 
 @ApiTags('judgements')
 @Controller('judgements')
@@ -29,7 +29,7 @@ export class JudgementsController {
   constructor(private readonly judgementsService: JudgementsService) {}
 
   @Post('v1/preload')
-  async preloadJudgements(
+  public async preloadJudgements(
     @Headers('authorization') authHeader: string,
     @Req() request: Request,
   ): Promise<PreloadJudgementsResponseDto> {
@@ -55,7 +55,7 @@ export class JudgementsController {
   }
 
   @Put('v1/:id')
-  async saveJudgement(
+  public async saveJudgement(
     @Body() saveJudgementRequest: SaveJudgementRequestDto,
     @Param('id') judgementId: string,
     @Headers('authorization') authHeader: string,

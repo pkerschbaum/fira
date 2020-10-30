@@ -1,6 +1,6 @@
 import { IsDefined, IsString, IsOptional, IsEnum } from 'class-validator';
 
-import { FeedbackScore, SubmitFeedback } from '../../../../commons';
+import { FeedbackScore, SubmitFeedback } from '../../../../fira-commons';
 
 export class SubmitFeedbackDto implements SubmitFeedback {
   @IsDefined()

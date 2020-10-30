@@ -1,6 +1,6 @@
 import { IsInt, IsEnum, IsBoolean, IsOptional } from 'class-validator';
 
-import { JudgementMode, UpdateConfig } from '../../../../commons';
+import { JudgementMode, UpdateConfig } from '../../../../fira-commons';
 
 export class UpdateConfigReqDto implements UpdateConfig {
   @IsOptional()

@@ -3,8 +3,8 @@ import deepmerge from 'deepmerge';
 
 import * as config from '../config';
 import { HttpException } from './http.exception';
-import { createLogger } from '../logger/logger';
-import { store } from '../store/store';
+import { createLogger } from '../commons/logger';
+import { store } from '../state/store';
 import { browserStorage } from '../browser-storage/browser-storage';
 import {
   HEADER_CLIENT_ID,
@@ -26,7 +26,7 @@ import {
   SubmitFeedback,
   HEADER_REQUEST_ID,
   uniqueIdGenerator,
-} from '../../../commons';
+} from '../../../fira-commons';
 
 const axiosClient = axios.create({
   baseURL: `${config.application.homepage}/api`,
@@ -65,7 +65,7 @@ export const httpClient = {
     } catch (e) {
       logger.error('login failed!', e);
       if (e.response?.status === 401) {
-        throw new HttpException('credentials invalid', 401);
+        throw new HttpException(401, 'credentials invalid');
       }
       throw e;
     }

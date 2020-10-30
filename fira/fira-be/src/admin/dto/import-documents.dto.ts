@@ -10,13 +10,13 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { ImportStatus } from '../../typings/enums';
 import {
+  ImportStatus,
   ImportAsset,
   ImportResult,
   ImportDocumentsReq,
   ImportDocumentsResp,
-} from '../../../../commons';
+} from '../../../../fira-commons';
 
 export class ImportDocumentsReqDto implements ImportDocumentsReq {
   @ArrayMinSize(1)

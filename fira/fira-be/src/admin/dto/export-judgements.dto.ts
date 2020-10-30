@@ -6,7 +6,7 @@ import {
   RelevanceLevel,
   ExportJudgement,
   ExportJudgementsResponse,
-} from '../../../../commons';
+} from '../../../../fira-commons';
 
 export class ExportJudgementsResponseDto implements ExportJudgementsResponse {
   @ValidateNested({ each: true })

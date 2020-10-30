@@ -2,12 +2,6 @@
   "autorun": true,
   "terminals": [
     {
-      "name": "docker",
-      "focus": true,
-      "execute": false,
-      "command": "./scripts/fira-dev-up.sh"
-    },
-    {
       "name": "fira-be",
       "cwd": "[cwd]/fira/fira-be",
       "execute": false,
@@ -21,9 +15,15 @@
     },
     {
       "name": "fira-commons",
-      "cwd": "[cwd]/fira/commons",
+      "cwd": "[cwd]/fira/fira-commons",
       "execute": false,
       "command": "npm i"
+    },
+    {
+      "name": "docker",
+      "focus": true,
+      "execute": false,
+      "command": "./scripts/dev-up.sh"
     }
   ]
 }

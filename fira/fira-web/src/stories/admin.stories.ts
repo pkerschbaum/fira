@@ -1,6 +1,6 @@
 import { httpClient } from '../http/http.client';
-import { createLogger } from '../logger/logger';
-import { UpdateConfig } from '../../../commons';
+import { createLogger } from '../commons/logger';
+import { UpdateConfig } from '../../../fira-commons';
 
 const logger = createLogger('admin.service');
 

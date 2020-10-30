@@ -1,0 +1,18 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./lib/prisma-client"
+  previewFeatures = ["transactionApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("FIRA_PERSISTENT_DB_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  username  String @unique
+  firstName String
+  lastName  String
+}

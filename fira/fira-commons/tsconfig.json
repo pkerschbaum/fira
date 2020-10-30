@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "target": "es5",
+    "sourceMap": true,
+    "incremental": true,
+    "strict": true,
+    "rootDir": ".",
+    "composite": true,
+    "outDir": "./dist",
+    "noErrorTruncation": true,
+    "downlevelIteration": true,
+    "jsx": "react"
+  },
+  "include": ["**/*", "**/*.js"],
+  "references": []
+}

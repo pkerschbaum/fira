@@ -1,4 +1,4 @@
-import { RelevanceLevel } from '../../../commons';
+import { RelevanceLevel } from '../../../fira-commons';
 
 // fira-web exclusive enums
 export enum UserRole {

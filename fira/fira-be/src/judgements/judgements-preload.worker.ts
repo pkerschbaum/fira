@@ -1,9 +1,10 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
 
 import * as config from '../config';
 import { PersistenceService } from '../persistence/persistence.service';
-import { BaseLogger } from '../commons/logger/base-logger';
+import { TransientLogger } from '../commons/logger/transient-logger';
+import { RequestLogger } from '../commons/logger/request-logger';
 import { ConfigDAO } from '../persistence/config.dao';
 import { DocumentDAO } from '../persistence/document.dao';
 import { DocumentVersionDAO } from '../persistence/document-version.dao';
@@ -13,7 +14,7 @@ import { JudgementsDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
 import { TUser } from '../persistence/entity/user.entity';
 import { TConfig } from '../persistence/entity/config.entity';
-import { JudgementMode, uniqueIdGenerator } from '../../../commons';
+import { JudgementMode, uniqueIdGenerator } from '../../../fira-commons';
 import { JudgementStatus } from '../typings/enums';
 
 type PreloadWorklet = {
@@ -23,31 +24,16 @@ type PreloadWorklet = {
     resolve: () => void;
     reject: (reason?: any) => void;
   };
-  logger: LoggerService;
+  logger: TransientLogger | RequestLogger;
 };
 
-const SERVICE_NAME = 'JudgementsPreloadWorker';
 let singletonGotInstantiated = false;
-
-const createLogger = (requestLogger: LoggerService) => ({
-  log: (message: any) => {
-    requestLogger.log(message, SERVICE_NAME);
-  },
-
-  warn: (message: any): void => {
-    requestLogger.warn(message, SERVICE_NAME);
-  },
-
-  error: (message: any): void => {
-    requestLogger.error(message, SERVICE_NAME);
-  },
-});
 
 @Injectable()
 export class JudgementsPreloadWorker {
   private preloadQueue: PreloadWorklet[] = [];
   private workerActive = false;
-  private readonly appLogger: BaseLogger;
+  private readonly appLogger: TransientLogger;
 
   /* NestJS does not have any mechanism to force a singleton-scope for a service. But the worker must
    * be a singleton in order to have only one worker processing all pending preloads in sequence. Whether
@@ -70,13 +56,13 @@ export class JudgementsPreloadWorker {
       throw new Error(`this class should be a singleton and thus get instantiated only once`);
     }
     singletonGotInstantiated = true;
-    this.appLogger = new BaseLogger();
-    this.appLogger.setContext(SERVICE_NAME);
+    this.appLogger = new TransientLogger();
+    this.appLogger.setComponent(this.constructor.name);
   }
 
   public addPreloadWorklet = (
     user: TUser,
-    logger: LoggerService,
+    logger: TransientLogger | RequestLogger,
   ): { workletId: string; responsePromise: Promise<void> } => {
     logger.log(`adding preload worklet for userId=${user.id}`);
 
@@ -84,17 +70,21 @@ export class JudgementsPreloadWorker {
     return {
       workletId,
       responsePromise: new Promise<void>((resolve, reject) => {
+        const clonedLogger = logger.clone();
+        clonedLogger.setComponent(this.constructor.name);
+
         this.preloadQueue.push({
           workletId,
           user,
           responsePromiseExecutor: { resolve, reject },
-          logger: createLogger(logger),
+          logger: clonedLogger,
         });
+
         if (!this.workerActive) {
           this.appLogger.log(`preload worker was paused, resuming...`);
           this.workerActive = true;
           // tslint:disable-next-line: no-floating-promises
-          this.processQueue();
+          void this.processQueue();
         }
       }),
     };
@@ -124,7 +114,7 @@ export class JudgementsPreloadWorker {
       if (this.preloadQueue.length > 0) {
         // continue working on queue
         // tslint:disable-next-line: no-floating-promises
-        this.processQueue();
+        void this.processQueue();
       } else {
         this.appLogger.log(`no preload worklets left in queue, pausing worker...`);
         this.workerActive = false;
@@ -132,7 +122,7 @@ export class JudgementsPreloadWorker {
     }
   };
 
-  private preloadJudgements = (requestLogger: LoggerService) =>
+  private preloadJudgements = (requestLogger: TransientLogger | RequestLogger) =>
     this.persistenceService.wrapInTransaction(requestLogger)(
       async (
         transactionalEntityManager: EntityManager,
@@ -291,7 +281,7 @@ export class JudgementsPreloadWorker {
     dbConfig,
   }: {
     transactionalEntityManager: EntityManager;
-    logger: LoggerService;
+    logger: TransientLogger | RequestLogger;
     priorities: number[];
     preloadedPairs: PairQueryResult[];
     targetFactor: number;
@@ -347,7 +337,7 @@ export class JudgementsPreloadWorker {
 
   private persistPairs = async (
     entityManager: EntityManager,
-    logger: LoggerService,
+    logger: TransientLogger | RequestLogger,
     pairs: PairQueryResult[],
     user: TUser,
     judgementMode: JudgementMode,
@@ -366,8 +356,8 @@ export class JudgementsPreloadWorker {
           {},
           entityManager,
         );
-        const countRotate = rotateStats.find((elem) => elem.rotate === true)?.count ?? 0;
-        const countNoRotate = rotateStats.find((elem) => elem.rotate === false)?.count ?? 0;
+        const countRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
+        const countNoRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
         rotate = countRotate < countNoRotate;
       }
 

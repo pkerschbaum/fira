@@ -5,11 +5,9 @@ import * as csvParse from 'csv-parse';
 
 import * as config from '../config';
 import { TransientLogger } from '../commons/logger/transient-logger';
-import { isEmpty } from '../util/strings';
-import { ImportStatus } from '../typings/enums';
-import { JudgementMode } from '../../../commons';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
+import { ImportStatus, JudgementMode, strings } from '../../../fira-commons';
 
 const COLUMN_USER_ID = 'user_id';
 const COLUMN_DOCUMENT_ID = 'doc_id';
@@ -42,7 +40,7 @@ export async function importInitialData({
     logger,
     assetType: 'users',
     getCountFn: imService.getCountOfUsers,
-    tsvSkipFn: (entry) => !entry[COLUMN_USER_ID] || isEmpty(entry[COLUMN_USER_ID]),
+    tsvSkipFn: (entry) => !entry[COLUMN_USER_ID] || strings.isEmpty(entry[COLUMN_USER_ID]),
     tsvMapFn: (entry) => ({ id: entry[COLUMN_USER_ID] }),
     importFn: async (assetsParsed) => {
       const { accessToken } = await imService.login(
@@ -126,7 +124,7 @@ export async function importInitialData({
         annotationTargetToRequireFeedback: Number(entry[COLUMN_ANNO_TARGET_TO_REQUIRE_FEEDBACK]),
       };
     },
-    importFn: (configs) => adminService.updateConfig(configs[0]),
+    importFn: async (configs) => adminService.updateConfig(configs[0]),
   });
 }
 
@@ -137,11 +135,11 @@ type ObjectLiteral = {
 type ImportResult = { status: ImportStatus };
 
 function isDocumentIdMissing(entry: ObjectLiteral) {
-  return !entry[COLUMN_DOCUMENT_ID] || isEmpty(entry[COLUMN_DOCUMENT_ID]!);
+  return !entry[COLUMN_DOCUMENT_ID] || strings.isEmpty(entry[COLUMN_DOCUMENT_ID]!);
 }
 
 function isQueryIdMissing(entry: ObjectLiteral) {
-  return !entry[COLUMN_QUERY_ID] || isEmpty(entry[COLUMN_QUERY_ID]!);
+  return !entry[COLUMN_QUERY_ID] || strings.isEmpty(entry[COLUMN_QUERY_ID]!);
 }
 
 async function importAsset<T>({
