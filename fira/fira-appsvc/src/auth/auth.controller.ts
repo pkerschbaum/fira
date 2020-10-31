@@ -16,7 +16,7 @@ import {
 export class AuthController {
   constructor(private readonly imService: IdentityManagementService) {}
 
-  @Post('v1/login')
+  @Post(loginSchema.shape.request.shape.url._type)
   @HttpCode(200)
   public async login(
     @Body(new ZodValidationPipe(loginSchema.shape.request.shape.data))
@@ -25,7 +25,7 @@ export class AuthController {
     return this.imService.login(loginRequest.username, loginRequest.password);
   }
 
-  @Post('v1/refresh')
+  @Post(refreshSchema.shape.request.shape.url._type)
   @HttpCode(200)
   public async refresh(
     @Body(new ZodValidationPipe(refreshSchema.shape.request.shape.data))

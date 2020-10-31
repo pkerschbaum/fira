@@ -17,7 +17,7 @@ import { basePaths, submitFeedbackReqSchema, SubmitFeedback } from '../../../fir
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  @Post('v1')
+  @Post(submitFeedbackReqSchema.shape.request.shape.url._type)
   public async submitFeedback(
     @Body(new ZodValidationPipe(submitFeedbackReqSchema.shape.request.shape.data))
     submitFeedbackRequest: SubmitFeedback['request']['data'],

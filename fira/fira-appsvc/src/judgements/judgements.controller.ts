@@ -8,7 +8,6 @@ import {
   Body,
   BadRequestException,
   Req,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -20,9 +19,12 @@ import { extractJwtPayload } from '../utils/jwt.util';
 import {
   basePaths,
   PreloadJudgements,
+  preloadJudgementsSchema,
   SubmitJudgement,
   submitJudgementSchema,
 } from '../../../fira-commons/src/rest';
+
+const submitJudgementPathParam = 'judgementId' as const;
 
 @ApiTags(basePaths.judgements)
 @Controller(basePaths.judgements)
@@ -34,7 +36,7 @@ import {
 export class JudgementsController {
   constructor(private readonly judgementsService: JudgementsService) {}
 
-  @Post('v1/preload')
+  @Post(preloadJudgementsSchema.shape.request.shape.url._type)
   public async preloadJudgements(
     @Headers('authorization') authHeader: string,
     @Req() request: Request,
@@ -60,11 +62,15 @@ export class JudgementsController {
     return result.responsePromise;
   }
 
-  @Put('v1/:id')
+  @Put(submitJudgementSchema.shape.request.shape.url._type)
   public async saveJudgement(
     @Body(new ZodValidationPipe(submitJudgementSchema.shape.request.shape.data))
     saveJudgementRequest: SubmitJudgement['request']['data'],
-    @Param('id', ParseIntPipe) judgementId: SubmitJudgement['request']['pathParams']['judgementId'],
+    @Param(
+      submitJudgementPathParam,
+      new ZodValidationPipe(submitJudgementSchema.shape.request.shape.pathParams.shape.judgementId),
+    )
+    judgementId: SubmitJudgement['request']['pathParams'][typeof submitJudgementPathParam],
     @Headers('authorization') authHeader: string,
   ): Promise<SubmitJudgement['response']> {
     const id: number = +judgementId;
