@@ -3,13 +3,16 @@ import d3 = require('d3');
 
 import { FeedbackDAO } from '../persistence/feedback.dao';
 import { UserDAO } from '../persistence/user.dao';
-import { SubmitFeedback, ExportFeedback } from '../../../fira-commons';
+import { feedbackSchema } from '../../../fira-commons';
 
 @Injectable()
 export class FeedbackService {
   constructor(private readonly feedbackDAO: FeedbackDAO, private readonly userDAO: UserDAO) {}
 
-  public submitFeedback = async (userId: string, submitFeedback: SubmitFeedback): Promise<void> => {
+  public submitFeedback = async (
+    userId: string,
+    submitFeedback: feedbackSchema.SubmitFeedback,
+  ): Promise<void> => {
     const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
     await this.feedbackDAO.saveFeedback({
       score: submitFeedback.score,
@@ -18,7 +21,7 @@ export class FeedbackService {
     });
   };
 
-  private exportFeedback = async (): Promise<ExportFeedback[]> => {
+  private exportFeedback = async (): Promise<feedbackSchema.ExportFeedback[]> => {
     const dbFeedbacks = await this.feedbackDAO.findFeedbacks();
     return dbFeedbacks.map((feedback) => ({
       id: feedback.id,

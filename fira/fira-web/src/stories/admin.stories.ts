@@ -1,6 +1,6 @@
-import { httpClient } from '../http/http.client';
 import { createLogger } from '../commons/logger';
-import { UpdateConfig } from '../../../fira-commons';
+import { adminClient } from '../http/admin.client';
+import { adminSchema } from '../../../fira-commons';
 
 const logger = createLogger('admin.service');
 
@@ -8,7 +8,7 @@ export const adminStories = {
   exportJudgements: async () => {
     logger.info(`executing export of judgements...`);
 
-    const response = await httpClient.exportJudgements();
+    const response = await adminClient.exportJudgements();
     saveTsv('judgements.tsv', response);
 
     logger.info(`export of judgements succeeded!`, { response });
@@ -17,16 +17,16 @@ export const adminStories = {
   exportFeedback: async () => {
     logger.info(`executing export of feedback...`);
 
-    const response = await httpClient.exportFeedback();
+    const response = await adminClient.exportFeedback();
     saveTsv('feedback.tsv', response);
 
     logger.info(`export of feedback succeeded!`, { response });
   },
 
-  updateConfig: async (config: UpdateConfig) => {
+  updateConfig: async (config: adminSchema.UpdateConfig) => {
     logger.info(`executing update of config...`);
 
-    await httpClient.updateConfig(config);
+    await adminClient.updateConfig(config);
 
     logger.info(`update of config succeeded!`);
   },
@@ -34,7 +34,7 @@ export const adminStories = {
   getStatistics: async () => {
     logger.info(`executing retrieval of statistics...`);
 
-    const response = await httpClient.getStatistics();
+    const response = await adminClient.loadStatistics();
 
     logger.info(`retrieval of statistics succeeded!`, { response });
     return response;

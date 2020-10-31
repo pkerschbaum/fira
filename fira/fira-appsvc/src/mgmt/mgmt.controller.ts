@@ -3,13 +3,13 @@ import { ApiTags } from '@nestjs/swagger';
 import * as os from 'os';
 
 import * as config from '../config';
-import { HealthResponseDto } from './dto/health.dto';
+import { basePaths, LoadHealth } from '../../../fira-commons/src/rest';
 
-@ApiTags('mgmt')
-@Controller('mgmt')
+@ApiTags(basePaths.mgmt)
+@Controller(basePaths.mgmt)
 export class MgmtController {
   @Get('v1/health')
-  getHealth(): HealthResponseDto {
+  public getHealth(): LoadHealth['response'] {
     const totalMB = Math.floor(os.totalmem() / 1024 / 1024);
     const freeMB = Math.floor(os.freemem() / 1024 / 1024);
 

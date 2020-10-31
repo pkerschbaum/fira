@@ -1,13 +1,14 @@
 import { Controller, UseGuards, Post, Headers, Body } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 
+import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { AuthGuard } from '../auth.guard';
 import { FeedbackService } from './feedback.service';
-import { SubmitFeedbackDto } from './dto/submit-feedback.dto';
 import { extractJwtPayload } from '../utils/jwt.util';
+import { basePaths, submitFeedbackReqSchema, SubmitFeedback } from '../../../fira-commons/src/rest';
 
-@ApiTags('feedback')
-@Controller('feedback')
+@ApiTags(basePaths.feedback)
+@Controller(basePaths.feedback)
 @ApiHeader({
   name: 'authorization',
   required: true,
@@ -18,9 +19,10 @@ export class FeedbackController {
 
   @Post('v1')
   public async submitFeedback(
-    @Body() submitFeedbackRequest: SubmitFeedbackDto,
+    @Body(new ZodValidationPipe(submitFeedbackReqSchema.shape.request.shape.data))
+    submitFeedbackRequest: SubmitFeedback['request']['data'],
     @Headers('authorization') authHeader: string,
-  ): Promise<void> {
+  ): Promise<SubmitFeedback['response']> {
     const jwtPayload = extractJwtPayload(authHeader);
     return this.feedbackService.submitFeedback(
       jwtPayload.preferred_username,

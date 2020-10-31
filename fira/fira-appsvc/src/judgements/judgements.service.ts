@@ -19,14 +19,7 @@ import { ConfigDAO } from '../persistence/config.dao';
 import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TJudgement } from '../persistence/entity/judgement.entity';
 import { JudgementStatus } from '../typings/enums';
-import {
-  SaveJudgement,
-  PreloadJudgementResponse,
-  ExportJudgement,
-  Statistic,
-  PreloadJudgement,
-  assertUnreachable,
-} from '../../../fira-commons';
+import { adminSchema, assertUnreachable, judgementsSchema } from '../../../fira-commons';
 
 @Injectable({ scope: Scope.REQUEST })
 export class JudgementsService {
@@ -45,7 +38,10 @@ export class JudgementsService {
 
   public preload = async (
     userId: string,
-  ): Promise<{ workletId?: string; responsePromise: Promise<PreloadJudgementResponse> }> => {
+  ): Promise<{
+    workletId?: string;
+    responsePromise: Promise<judgementsSchema.PreloadJudgementResponse>;
+  }> => {
     const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
 
     // phase #1: determine how many judgements should, and can, be preloaded for the user.
@@ -70,7 +66,7 @@ export class JudgementsService {
 
     // phase #2: after the user has preloaded as many judgements as possible,
     // load all the data and return it to the client
-    const responsePromise: Promise<PreloadJudgementResponse> = workletPromise.then(
+    const responsePromise: Promise<judgementsSchema.PreloadJudgementResponse> = workletPromise.then(
       this.persistenceService.wrapInTransaction(this.requestLogger)(async (transactionalEM) => {
         const countOfFeedbacks = await this.feedbackDAO.count(
           { criteria: { user } },
@@ -125,7 +121,7 @@ export class JudgementsService {
   public saveJudgement = async (
     userId: string,
     judgementId: number,
-    judgementData: SaveJudgement,
+    judgementData: judgementsSchema.SaveJudgement,
   ): Promise<void> => {
     const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
     const dbJudgement = await this.judgementsDAO.findJudgement({ user, judgementId });
@@ -233,7 +229,7 @@ export class JudgementsService {
     );
   };
 
-  private exportJudgements = async (): Promise<ExportJudgement[]> => {
+  private exportJudgements = async (): Promise<judgementsSchema.ExportJudgement[]> => {
     const allJudgements = await this.judgementsDAO.findJudgements({
       criteria: {
         status: JudgementStatus.JUDGED,
@@ -293,7 +289,7 @@ export class JudgementsService {
     });
   };
 
-  public getStatistics = async (): Promise<Statistic[]> => {
+  public getStatistics = async (): Promise<adminSchema.Statistic[]> => {
     this.requestLogger.log('getStatistics');
 
     const dbConfig = await this.configDAO.findConfigOrFail({});
@@ -394,7 +390,7 @@ function mapJudgementsToResponse(openJudgements: TJudgement[]) {
         queryText: openJudgement.query.text,
         docAnnotationParts: annotationParts,
         mode: openJudgement.mode,
-      } as PreloadJudgement;
+      } as judgementsSchema.PreloadJudgement;
     })
     .sort((judg1, judg2) => judg1.id - judg2.id);
 }

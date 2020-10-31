@@ -7,7 +7,7 @@ import * as config from '../config';
 import { TransientLogger } from '../commons/logger/transient-logger';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import { ImportStatus, JudgementMode, strings } from '../../../fira-commons';
+import { adminSchema, judgementsSchema, strings } from '../../../fira-commons';
 
 const COLUMN_USER_ID = 'user_id';
 const COLUMN_DOCUMENT_ID = 'doc_id';
@@ -102,7 +102,7 @@ export async function importInitialData({
   await importAsset<{
     annotationTargetPerUser: number;
     annotationTargetPerJudgPair: number;
-    judgementMode: JudgementMode;
+    judgementMode: judgementsSchema.JudgementMode;
     rotateDocumentText: boolean;
     annotationTargetToRequireFeedback: number;
   }>({
@@ -112,7 +112,7 @@ export async function importInitialData({
     tsvSkipFn: () => false, // don't skip anything
     tsvMapFn: (entry) => {
       const judgementModeStr = entry[COLUMN_JUDGEMENT_MODE];
-      if (!Object.values(JudgementMode).includes(judgementModeStr)) {
+      if (!Object.values(judgementsSchema.JudgementMode).includes(judgementModeStr)) {
         throw new Error(`${COLUMN_JUDGEMENT_MODE} has an invalid value`);
       }
 
@@ -132,7 +132,7 @@ type ObjectLiteral = {
   [key: string]: any;
 };
 
-type ImportResult = { status: ImportStatus };
+type ImportResult = { status: adminSchema.ImportStatus };
 
 function isDocumentIdMissing(entry: ObjectLiteral) {
   return !entry[COLUMN_DOCUMENT_ID] || strings.isEmpty(entry[COLUMN_DOCUMENT_ID]!);
@@ -207,7 +207,7 @@ async function tsvParse(
 
 function abortOnFailedImport(logger: TransientLogger, importResults: ImportResult[]) {
   const failedImports = importResults.filter(
-    (importResult) => importResult.status === ImportStatus.ERROR,
+    (importResult) => importResult.status === adminSchema.ImportStatus.ERROR,
   );
   if (failedImports.length > 0) {
     const exampleFailedImport = failedImports[0];

@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 
 import styles from './Annotation.module.css';
 import { RateLevels } from '../../../typings/enums';
-import { RelevanceLevel, JudgementMode, functions } from '../../../../../fira-commons';
 import { judgementStories } from '../../../stories/judgement.stories';
 import Button from '../../elements/Button';
 import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
@@ -15,6 +14,7 @@ import AnnotationPart from './AnnotationPart';
 import JustifiedText from '../../layouts/JustifiedText';
 import Menu from '../../elements/Menu';
 import Line from '../../elements/Line';
+import { functions, judgementsSchema } from '../../../../../fira-commons';
 
 const WHITESPACE = ' ';
 
@@ -69,7 +69,7 @@ const Annotation: React.FC = () => {
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
 
-  function createJudgementFn(relevanceLevel: RelevanceLevel) {
+  function createJudgementFn(relevanceLevel: judgementsSchema.RelevanceLevel) {
     return () => judgementStories.rateJudgementPair(relevanceLevel);
   }
 
@@ -111,13 +111,13 @@ const Annotation: React.FC = () => {
   const ratingRequired = !currentRateLevel;
   const currentSelectionNotFinished = currentJudgementPair.currentAnnotationStart !== undefined;
   const annotationIsAllowedInGeneral =
-    currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS;
+    currentJudgementPair.mode === judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS;
   const annotationIsRequired =
     annotationIsAllowedInGeneral &&
     !!currentRateLevel?.annotationRequired &&
     currentJudgementPair.annotatedRanges.length === 0;
   const annotationStatus =
-    currentRateLevel?.relevanceLevel === RelevanceLevel.MISLEADING_ANSWER
+    currentRateLevel?.relevanceLevel === judgementsSchema.RelevanceLevel.MISLEADING_ANSWER
       ? annotationIsRequired
         ? 'MISLEADING_REGION_REQUIRED'
         : 'ADDITIONAL_MISLEADING_REGIONS_ALLOWED'
@@ -229,7 +229,8 @@ const Annotation: React.FC = () => {
                * - and the part is not already part of a selected region
                */
               const canAnnotatePart =
-                currentJudgementPair.mode === JudgementMode.SCORING_AND_SELECT_SPANS &&
+                currentJudgementPair.mode ===
+                  judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS &&
                 textPart !== WHITESPACE &&
                 !isInAnnotatedRange;
 

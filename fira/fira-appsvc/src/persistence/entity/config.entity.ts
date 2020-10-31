@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, Check, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-import { JudgementMode } from '../../../../fira-commons';
+import { judgementsSchema } from '../../../../fira-commons';
 
 const nameOfUniqueColumn = 'id';
 const uniqueValue = 1;
@@ -9,7 +9,7 @@ export type TConfig = {
   id: number;
   annotationTargetPerUser: number;
   annotationTargetPerJudgPair: number;
-  judgementMode: JudgementMode;
+  judgementMode: judgementsSchema.JudgementMode;
   rotateDocumentText: boolean;
   annotationTargetToRequireFeedback: number;
   createdAt: Date;
@@ -31,8 +31,8 @@ export class Config implements TConfig {
   annotationTargetPerUser: number;
   @Column({ type: 'integer' })
   annotationTargetPerJudgPair: number;
-  @Column({ enum: JudgementMode })
-  judgementMode: JudgementMode;
+  @Column({ enum: judgementsSchema.JudgementMode })
+  judgementMode: judgementsSchema.JudgementMode;
   @Column({ type: 'boolean' })
   rotateDocumentText: boolean;
   @Column({ type: 'integer' })

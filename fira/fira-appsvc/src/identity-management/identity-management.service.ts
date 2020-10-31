@@ -7,13 +7,7 @@ import { RequestLogger } from '../commons/logger/request-logger';
 import { KeycloakClient } from './keycloak.client';
 import { UserDAO } from '../persistence/user.dao';
 import { convertKey } from '../utils/keys.util';
-import {
-  AuthResponse,
-  ImportUserResponse,
-  ImportUserRequest,
-  uniqueIdGenerator,
-  ImportStatus,
-} from '../../../fira-commons';
+import { adminSchema, authSchema, uniqueIdGenerator } from '../../../fira-commons';
 
 type Cache = {
   publicKey: {
@@ -34,7 +28,7 @@ export class IdentityManagementService {
     this.requestLogger.setComponent(this.constructor.name);
   }
 
-  public login = async (username: string, password: string): Promise<AuthResponse> => {
+  public login = async (username: string, password: string): Promise<authSchema.AuthResponse> => {
     const loginResponse = await this.keycloakClient.login(username, password);
 
     return {
@@ -43,7 +37,7 @@ export class IdentityManagementService {
     };
   };
 
-  public refresh = async (refreshToken: string): Promise<AuthResponse> => {
+  public refresh = async (refreshToken: string): Promise<authSchema.AuthResponse> => {
     const refreshResponse = await this.keycloakClient.refresh(refreshToken);
 
     return {
@@ -54,8 +48,8 @@ export class IdentityManagementService {
 
   public importUsers = async (
     accessToken: string,
-    users: ImportUserRequest[],
-  ): Promise<ImportUserResponse[]> => {
+    users: adminSchema.ImportUserRequest[],
+  ): Promise<adminSchema.ImportUserResponse[]> => {
     return Promise.all(
       users.map(async (user) => {
         const password = uniqueIdGenerator.generate({
@@ -67,7 +61,7 @@ export class IdentityManagementService {
           if ((await this.userDAO.findUsers({ ids: [user.id] })).length > 0) {
             return {
               id: user.id,
-              status: ImportStatus.ERROR,
+              status: adminSchema.ImportStatus.ERROR,
               error: 'User exists with same ID',
             };
           }
@@ -76,14 +70,14 @@ export class IdentityManagementService {
           await this.userDAO.saveUser({ id: user.id });
           return {
             id: user.id,
-            status: ImportStatus.SUCCESS,
+            status: adminSchema.ImportStatus.SUCCESS,
             username: user.id,
             password,
           };
         } catch (e) {
           return {
             id: user.id,
-            status: ImportStatus.ERROR,
+            status: adminSchema.ImportStatus.ERROR,
             error: e.toString(),
           };
         }

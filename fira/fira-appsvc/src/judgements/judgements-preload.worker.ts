@@ -14,8 +14,8 @@ import { JudgementsDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
 import { TUser } from '../persistence/entity/user.entity';
 import { TConfig } from '../persistence/entity/config.entity';
-import { JudgementMode, uniqueIdGenerator } from '../../../fira-commons';
 import { JudgementStatus } from '../typings/enums';
+import { judgementsSchema, uniqueIdGenerator } from '../../../fira-commons';
 
 type PreloadWorklet = {
   workletId: string;
@@ -340,7 +340,7 @@ export class JudgementsPreloadWorker {
     logger: TransientLogger | RequestLogger,
     pairs: PairQueryResult[],
     user: TUser,
-    judgementMode: JudgementMode,
+    judgementMode: judgementsSchema.JudgementMode,
     rotateDocumentText: boolean,
   ): Promise<void> => {
     for (const pair of pairs) {

@@ -9,6 +9,10 @@ export const application = {
   },
 } as const;
 
+export const http = {
+  timeout: 10000, // 10 sec
+};
+
 /**
  * E.g. if homepage is "http://localhost:8080/path1/path2" then:
  * - hostBase is "localhost:8080"

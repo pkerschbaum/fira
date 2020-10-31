@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as compression from 'compression';
 
@@ -50,10 +49,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
-
-  // validate all requests according to the Swagger schema
-  appLogger.log('setting up request validation pipe...');
-  app.useGlobalPipes(new ValidationPipe());
 
   // schedule logging
   setInterval(() => {

@@ -1,8 +1,8 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 
 import { RateLevels } from '../../typings/enums';
-import { RelevanceLevel, PreloadJudgement, assertUnreachable } from '../../../../fira-commons';
 import { actions as userActions } from '../user/user.slice';
+import { assertUnreachable, judgementsSchema } from '../../../../fira-commons';
 
 export enum JudgementPairStatus {
   TO_JUDGE = 'TO_JUDGE',
@@ -11,8 +11,8 @@ export enum JudgementPairStatus {
   SEND_FAILED = 'SEND_FAILED',
 }
 
-export type JudgementPair = PreloadJudgement & {
-  readonly relevanceLevel?: RelevanceLevel;
+export type JudgementPair = judgementsSchema.PreloadJudgement & {
+  readonly relevanceLevel?: judgementsSchema.RelevanceLevel;
   readonly currentAnnotationStart?: number;
   readonly annotatedRanges: Array<{ start: number; end: number }>;
   readonly status: JudgementPairStatus;
@@ -25,12 +25,12 @@ type AnnotationState = {
   readonly remainingUntilFirstFeedbackRequired?: number;
   readonly countOfFeedbacks?: number;
   readonly countOfNotPreloadedPairs?: number;
-  readonly currentJudgementPairId?: PreloadJudgement['id'];
+  readonly currentJudgementPairId?: judgementsSchema.PreloadJudgement['id'];
   readonly currentJudgementPairSelectedOnMs?: number; // unix timestamp
 };
 
 type PreloadJudgementsPayload = {
-  readonly judgements: PreloadJudgement[];
+  readonly judgements: judgementsSchema.PreloadJudgement[];
   readonly alreadyFinished: number;
   readonly remainingToFinish: number;
   readonly remainingUntilFirstFeedbackRequired: number;
@@ -39,7 +39,7 @@ type PreloadJudgementsPayload = {
 };
 
 type RateJudgementPairPayload = {
-  readonly relevanceLevel: RelevanceLevel;
+  readonly relevanceLevel: judgementsSchema.RelevanceLevel;
 };
 
 type SelectRangePayload = {
@@ -57,7 +57,7 @@ type DeleteRangePayload = {
 };
 
 type SetJudgementStatusPayload = {
-  readonly id: PreloadJudgement['id'];
+  readonly id: judgementsSchema.PreloadJudgement['id'];
   readonly status: JudgementPairStatus;
 };
 
@@ -208,7 +208,10 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
     }),
 );
 
-function areJudgementPairsEqual(jp1: PreloadJudgement, jp2: PreloadJudgement) {
+function areJudgementPairsEqual(
+  jp1: judgementsSchema.PreloadJudgement,
+  jp2: judgementsSchema.PreloadJudgement,
+) {
   return (
     jp1.queryText === jp2.queryText &&
     jp1.docAnnotationParts.length === jp2.docAnnotationParts.length &&

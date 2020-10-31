@@ -9,18 +9,18 @@ import {
 } from 'typeorm';
 
 import { JudgementStatus } from '../../typings/enums';
-import { RelevanceLevel, JudgementMode } from '../../../../fira-commons';
 import { DocumentVersion, Document } from './document.entity';
 import { QueryVersion, Query } from './query.entity';
 import { User } from './user.entity';
+import { judgementsSchema } from '../../../../fira-commons';
 
 export type TJudgement = {
   id: number;
   status: JudgementStatus;
-  relevanceLevel: RelevanceLevel | null;
+  relevanceLevel: judgementsSchema.RelevanceLevel | null;
   relevancePositions: number[] | null;
   rotate: boolean;
-  mode: JudgementMode;
+  mode: judgementsSchema.JudgementMode;
   document: DocumentVersion;
   query: QueryVersion;
   user: User;
@@ -41,14 +41,14 @@ export class Judgement implements TJudgement {
   id: number;
   @Column({ enum: JudgementStatus })
   status: JudgementStatus;
-  @Column({ enum: RelevanceLevel, nullable: true })
-  relevanceLevel: RelevanceLevel;
+  @Column({ enum: judgementsSchema.RelevanceLevel, nullable: true })
+  relevanceLevel: judgementsSchema.RelevanceLevel;
   @Column({ type: 'numeric', array: true, nullable: true })
   relevancePositions: number[] | null;
   @Column()
   rotate: boolean;
-  @Column({ enum: JudgementMode })
-  mode: JudgementMode;
+  @Column({ enum: judgementsSchema.JudgementMode })
+  mode: judgementsSchema.JudgementMode;
 
   @ManyToOne(() => DocumentVersion, {
     eager: true,

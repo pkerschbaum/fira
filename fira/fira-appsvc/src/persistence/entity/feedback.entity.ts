@@ -8,12 +8,12 @@ import {
   Index,
 } from 'typeorm';
 
-import { FeedbackScore } from '../../../../fira-commons';
 import { User } from './user.entity';
+import { feedbackSchema } from '../../../../fira-commons';
 
 export type TFeedback = {
   id: number;
-  score: FeedbackScore;
+  score: feedbackSchema.FeedbackScore;
   text: string | null;
   user: User;
   createdAt: Date;
@@ -25,8 +25,8 @@ export type TFeedback = {
 export class Feedback implements TFeedback {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ enum: FeedbackScore })
-  score: FeedbackScore;
+  @Column({ enum: feedbackSchema.FeedbackScore })
+  score: feedbackSchema.FeedbackScore;
   @Column({ type: 'text', nullable: true })
   text: string | null;
   @ManyToOne(() => User, {

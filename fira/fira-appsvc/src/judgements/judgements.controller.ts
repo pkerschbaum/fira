@@ -8,18 +8,24 @@ import {
   Body,
   BadRequestException,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Request } from 'express';
 
+import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { JudgementsService } from './judgements.service';
-import { PreloadJudgementsResponseDto } from './dto/preload-judgements.dto';
 import { AuthGuard } from '../auth.guard';
-import { SaveJudgementRequestDto } from './dto/save-judgement.dto';
 import { extractJwtPayload } from '../utils/jwt.util';
+import {
+  basePaths,
+  PreloadJudgements,
+  SubmitJudgement,
+  submitJudgementSchema,
+} from '../../../fira-commons/src/rest';
 
-@ApiTags('judgements')
-@Controller('judgements')
+@ApiTags(basePaths.judgements)
+@Controller(basePaths.judgements)
 @ApiHeader({
   name: 'authorization',
   required: true,
@@ -32,7 +38,7 @@ export class JudgementsController {
   public async preloadJudgements(
     @Headers('authorization') authHeader: string,
     @Req() request: Request,
-  ): Promise<PreloadJudgementsResponseDto> {
+  ): Promise<PreloadJudgements['response']> {
     const jwtPayload = extractJwtPayload(authHeader);
     const result = await this.judgementsService.preload(jwtPayload.preferred_username);
 
@@ -56,10 +62,11 @@ export class JudgementsController {
 
   @Put('v1/:id')
   public async saveJudgement(
-    @Body() saveJudgementRequest: SaveJudgementRequestDto,
-    @Param('id') judgementId: string,
+    @Body(new ZodValidationPipe(submitJudgementSchema.shape.request.shape.data))
+    saveJudgementRequest: SubmitJudgement['request']['data'],
+    @Param('id', ParseIntPipe) judgementId: SubmitJudgement['request']['pathParams']['judgementId'],
     @Headers('authorization') authHeader: string,
-  ): Promise<void> {
+  ): Promise<SubmitJudgement['response']> {
     const id: number = +judgementId;
     if (isNaN(id)) {
       throw new BadRequestException(

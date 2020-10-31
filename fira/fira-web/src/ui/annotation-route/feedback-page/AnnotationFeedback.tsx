@@ -4,17 +4,17 @@ import styles from './AnnotationFeedback.module.css';
 import Form from '../../elements/forms/Form';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { judgementStories } from '../../../stories/judgement.stories';
-import { FeedbackScore, SubmitFeedback } from '../../../../../fira-commons';
+import { feedbackSchema } from '../../../../../fira-commons';
 
 const FEEDBACK_SCORE_TEXTS = {
-  [FeedbackScore.VERY_GOOD]: 'Very good',
-  [FeedbackScore.GOOD]: 'Good',
-  [FeedbackScore.DECENT]: 'Decent',
-  [FeedbackScore.DONT_LIKE_IT]: `Don't like it`,
+  [feedbackSchema.FeedbackScore.VERY_GOOD]: 'Very good',
+  [feedbackSchema.FeedbackScore.GOOD]: 'Good',
+  [feedbackSchema.FeedbackScore.DECENT]: 'Decent',
+  [feedbackSchema.FeedbackScore.DONT_LIKE_IT]: `Don't like it`,
 } as const;
 
 const AnnotationFeedback: React.FC = () => {
-  async function submitFeedback(feedback: SubmitFeedback) {
+  async function submitFeedback(feedback: feedbackSchema.SubmitFeedback) {
     await annotatorStories.submitFeedback(feedback);
     await judgementStories.preloadJudgements();
   }
@@ -29,7 +29,7 @@ const AnnotationFeedback: React.FC = () => {
       </div>
       <Form
         initialValues={{
-          feedbackScore: FeedbackScore.VERY_GOOD,
+          feedbackScore: feedbackSchema.FeedbackScore.VERY_GOOD,
           feedbackText: '',
         }}
         onSubmit={async (values) => {
@@ -40,7 +40,7 @@ const AnnotationFeedback: React.FC = () => {
           {
             elementType: 'select',
             label: 'Rating',
-            childElements: Object.values(FeedbackScore).map((feedbackScore) => (
+            childElements: Object.values(feedbackSchema.FeedbackScore).map((feedbackScore) => (
               <option key={feedbackScore} value={feedbackScore}>
                 {FEEDBACK_SCORE_TEXTS[feedbackScore]}
               </option>

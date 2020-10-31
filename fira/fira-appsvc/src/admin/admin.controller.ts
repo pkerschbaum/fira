@@ -13,24 +13,32 @@ import {
 import { ApiTags, ApiHeader, ApiResponse } from '@nestjs/swagger';
 
 import * as config from '../config';
+import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { AdminService } from './admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import { ImportDocumentsReqDto, ImportDocumentsRespDto } from './dto/import-documents.dto';
-import { ImportUsersRequestDto, ImportUsersResponseDto } from './dto/create-user.dto';
-import { ImportQueriesReqDto, ImportQueriesRespDto } from './dto/import-queries.dto';
-import {
-  ImportJudgementPairsReqDto,
-  ImportJudgementPairsRespDto,
-} from './dto/import-judgement-pairs.dto';
-import { UpdateConfigReqDto } from './dto/update-config.dto';
 import { Roles } from '../roles.decorator';
 import { RolesGuard } from '../roles.guard';
 import { JudgementsService } from '../judgements/judgements.service';
 import { FeedbackService } from '../feedback/feedback.service';
-import { StatisticsResponseDto } from './dto/get-statistics.dto';
+import {
+  basePaths,
+  ImportDocuments,
+  importDocumentsSchema,
+  ImportJudgementPairs,
+  importJudgementPairsSchema,
+  ImportQueries,
+  importQueriesSchema,
+  ImportUsers,
+  importUsersSchema,
+  UpdateConfig,
+  updateConfigReqSchema,
+  ExportJudgements,
+  ExportFeedback,
+  LoadStatistics,
+} from '../../../fira-commons/src/rest';
 
-@ApiTags('admin')
-@Controller('admin')
+@ApiTags(basePaths.admin)
+@Controller(basePaths.admin)
 @Roles(config.keycloak.adminRole)
 @UseGuards(RolesGuard)
 @ApiHeader({
@@ -46,10 +54,11 @@ export class AdminController {
   ) {}
 
   @Post('v1/import/users')
-  async importUsers(
-    @Body() importUsersRequest: ImportUsersRequestDto,
+  public async importUsers(
+    @Body(new ZodValidationPipe(importUsersSchema.shape.request.shape.data))
+    importUsersRequest: ImportUsers['request']['data'],
     @Headers('authorization') authHeader: string,
-  ): Promise<ImportUsersResponseDto> {
+  ): Promise<ImportUsers['response']> {
     if (!authHeader) {
       throw new HttpException('access token required in header', 401);
     }
@@ -63,27 +72,30 @@ export class AdminController {
   }
 
   @Put('v1/import/documents')
-  async importDocuments(
-    @Body() importDocsRequest: ImportDocumentsReqDto,
-  ): Promise<ImportDocumentsRespDto> {
+  public async importDocuments(
+    @Body(new ZodValidationPipe(importDocumentsSchema.shape.request.shape.data))
+    importDocsRequest: ImportDocuments['request']['data'],
+  ): Promise<ImportDocuments['response']> {
     return {
       importedDocuments: await this.adminService.importDocuments(importDocsRequest.documents),
     };
   }
 
   @Put('v1/import/queries')
-  async importQueries(
-    @Body() importQueriesReq: ImportQueriesReqDto,
-  ): Promise<ImportQueriesRespDto> {
+  public async importQueries(
+    @Body(new ZodValidationPipe(importQueriesSchema.shape.request.shape.data))
+    importQueriesReq: ImportQueries['request']['data'],
+  ): Promise<ImportQueries['response']> {
     return {
       importedQueries: await this.adminService.importQueries(importQueriesReq.queries),
     };
   }
 
   @Put('v1/import/judgement-pairs')
-  async importJudgementPairs(
-    @Body() importJudgementPairsReq: ImportJudgementPairsReqDto,
-  ): Promise<ImportJudgementPairsRespDto> {
+  public async importJudgementPairs(
+    @Body(new ZodValidationPipe(importJudgementPairsSchema.shape.request.shape.data))
+    importJudgementPairsReq: ImportJudgementPairs['request']['data'],
+  ): Promise<ImportJudgementPairs['response']> {
     return {
       importedJudgementPairs: await this.adminService.importJudgementPairs(
         importJudgementPairsReq.judgementPairs,
@@ -93,7 +105,10 @@ export class AdminController {
 
   @Put('v1/config')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateConfig(@Body() updateConfigReq: UpdateConfigReqDto) {
+  public async updateConfig(
+    @Body(new ZodValidationPipe(updateConfigReqSchema.shape.request.shape.data))
+    updateConfigReq: UpdateConfig['request']['data'],
+  ) {
     await this.adminService.updateConfig(updateConfigReq);
   }
 
@@ -104,7 +119,7 @@ export class AdminController {
       'text/tab-separated-values': {},
     },
   })
-  async exportJudgementsTsv(): Promise<string> {
+  public async exportJudgementsTsv(): Promise<ExportJudgements['response']> {
     return await this.judgementsService.exportJudgementsTsv();
   }
 
@@ -115,12 +130,12 @@ export class AdminController {
       'text/tab-separated-values': {},
     },
   })
-  async exportFeedbackTsv(): Promise<string> {
+  public async exportFeedbackTsv(): Promise<ExportFeedback['response']> {
     return await this.feedbackService.exportFeedbackTsv();
   }
 
   @Get('v1/statistics')
-  async getStatistics(): Promise<StatisticsResponseDto> {
+  public async getStatistics(): Promise<LoadStatistics['response']> {
     return { statistics: await this.judgementsService.getStatistics() };
   }
 }

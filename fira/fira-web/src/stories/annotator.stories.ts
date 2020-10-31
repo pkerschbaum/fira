@@ -1,8 +1,8 @@
 import { createLogger } from '../commons/logger';
+import { feedbackClient } from '../http/feedback.client';
 import { store } from '../state/store';
-import { httpClient } from '../http/http.client';
 import { actions as userActions } from '../state/user/user.slice';
-import { SubmitFeedback } from '../../../fira-commons';
+import { feedbackSchema } from '../../../fira-commons';
 
 const logger = createLogger('annotators.service');
 
@@ -15,10 +15,10 @@ export const annotatorStories = {
     logger.info(`acknowledgement of page succeeded!`);
   },
 
-  submitFeedback: async (feedbackData: SubmitFeedback) => {
+  submitFeedback: async (feedbackData: feedbackSchema.SubmitFeedback) => {
     logger.info(`executing submission of feedback...`);
 
-    await httpClient.submitFeedback(feedbackData);
+    await feedbackClient.submitFeedback(feedbackData);
 
     logger.info(`submission of feedback succeeded!`);
   },

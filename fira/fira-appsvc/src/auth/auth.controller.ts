@@ -1,24 +1,36 @@
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
+import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
-import { RefreshRequestDto, RefreshResponseDto } from './dto/refresh.dto';
+import {
+  basePaths,
+  Login,
+  loginSchema,
+  Refresh,
+  refreshSchema,
+} from '../../../fira-commons/src/rest';
 
-@ApiTags('auth')
-@Controller('auth')
+@ApiTags(basePaths.auth)
+@Controller(basePaths.auth)
 export class AuthController {
   constructor(private readonly imService: IdentityManagementService) {}
 
   @Post('v1/login')
   @HttpCode(200)
-  async login(@Body() loginRequest: LoginRequestDto): Promise<LoginResponseDto> {
+  public async login(
+    @Body(new ZodValidationPipe(loginSchema.shape.request.shape.data))
+    loginRequest: Login['request']['data'],
+  ): Promise<Login['response']> {
     return this.imService.login(loginRequest.username, loginRequest.password);
   }
 
   @Post('v1/refresh')
   @HttpCode(200)
-  async refresh(@Body() refreshRequest: RefreshRequestDto): Promise<RefreshResponseDto> {
+  public async refresh(
+    @Body(new ZodValidationPipe(refreshSchema.shape.request.shape.data))
+    refreshRequest: Refresh['request']['data'],
+  ): Promise<Refresh['response']> {
     return this.imService.refresh(refreshRequest.refreshToken);
   }
 }

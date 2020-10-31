@@ -9,15 +9,7 @@ import { QueryDAO } from '../persistence/query.dao';
 import { QueryVersionDAO } from '../persistence/query-version.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
 import { ConfigDAO } from '../persistence/config.dao';
-import {
-  ImportStatus,
-  ImportAsset,
-  ImportResult,
-  ImportJudgementPair,
-  ImportJudgementPairResult,
-  UpdateConfig,
-  arrays,
-} from '../../../fira-commons';
+import { adminSchema, arrays, judgementsSchema } from '../../../fira-commons';
 
 const NUMBER_PARALLEL_IMPORTS = 10;
 
@@ -35,7 +27,10 @@ export class AdminService {
   ) {}
 
   public importDocuments = this.persistenceService.wrapInTransaction(this.requestLogger)(
-    async (transactionalEntityManager, documents: ImportAsset[]): Promise<ImportResult[]> => {
+    async (
+      transactionalEntityManager,
+      documents: adminSchema.ImportAsset[],
+    ): Promise<adminSchema.ImportResult[]> => {
       // create partitions which are processed in parallel
       const partitions = arrays.partitionArray(documents, {
         countOfPartitions: NUMBER_PARALLEL_IMPORTS,
@@ -44,7 +39,7 @@ export class AdminService {
       // process partitions
       const results = await Promise.all(
         partitions.map(async (partition) => {
-          const partitionResults: ImportResult[] = [];
+          const partitionResults: adminSchema.ImportResult[] = [];
 
           for (const document of partition) {
             try {
@@ -60,11 +55,11 @@ export class AdminService {
                 },
                 transactionalEntityManager,
               );
-              partitionResults.push({ id: document.id, status: ImportStatus.SUCCESS });
+              partitionResults.push({ id: document.id, status: adminSchema.ImportStatus.SUCCESS });
             } catch (e) {
               partitionResults.push({
                 id: document.id,
-                status: ImportStatus.ERROR,
+                status: adminSchema.ImportStatus.ERROR,
                 error: e.toString(),
               });
             }
@@ -80,7 +75,10 @@ export class AdminService {
   );
 
   public importQueries = this.persistenceService.wrapInTransaction(this.requestLogger)(
-    async (transactionalEntityManager, queries: ImportAsset[]): Promise<ImportResult[]> => {
+    async (
+      transactionalEntityManager,
+      queries: adminSchema.ImportAsset[],
+    ): Promise<adminSchema.ImportResult[]> => {
       // create partitions which are processed in parallel
       const partitions = arrays.partitionArray(queries, {
         countOfPartitions: NUMBER_PARALLEL_IMPORTS,
@@ -89,7 +87,7 @@ export class AdminService {
       // process partitions
       const results = await Promise.all(
         partitions.map(async (partition) => {
-          const partitionResults: ImportResult[] = [];
+          const partitionResults: adminSchema.ImportResult[] = [];
 
           for (const query of partition) {
             try {
@@ -102,11 +100,11 @@ export class AdminService {
                 },
                 transactionalEntityManager,
               );
-              partitionResults.push({ id: query.id, status: ImportStatus.SUCCESS });
+              partitionResults.push({ id: query.id, status: adminSchema.ImportStatus.SUCCESS });
             } catch (e) {
               partitionResults.push({
                 id: query.id,
-                status: ImportStatus.ERROR,
+                status: adminSchema.ImportStatus.ERROR,
                 error: e.toString(),
               });
             }
@@ -124,8 +122,8 @@ export class AdminService {
   public importJudgementPairs = this.persistenceService.wrapInTransaction(this.requestLogger)(
     async (
       transactionalEntityManager,
-      judgementPairs: ImportJudgementPair[],
-    ): Promise<ImportJudgementPairResult[]> => {
+      judgementPairs: adminSchema.ImportJudgementPair[],
+    ): Promise<adminSchema.ImportJudgementPairResult[]> => {
       // delete previous pairs
       await this.judgementPairDAO.deleteJudgementPairs({}, transactionalEntityManager);
 
@@ -137,7 +135,7 @@ export class AdminService {
       // process partitions
       const results = await Promise.all(
         partitions.map(async (partition) => {
-          const partitionResults: ImportJudgementPairResult[] = [];
+          const partitionResults: adminSchema.ImportJudgementPairResult[] = [];
 
           for (const judgementPair of partition) {
             try {
@@ -154,7 +152,7 @@ export class AdminService {
                 partitionResults.push({
                   documentId: judgementPair.documentId,
                   queryId: judgementPair.queryId,
-                  status: ImportStatus.ERROR,
+                  status: adminSchema.ImportStatus.ERROR,
                   error:
                     `either the document or the query (or both) could not be found. documentFound=${!!document}, queryFound=${!!query},` +
                     ` documentId=${judgementPair.documentId}, queryId=${judgementPair.queryId}`,
@@ -169,13 +167,13 @@ export class AdminService {
               partitionResults.push({
                 documentId: judgementPair.documentId,
                 queryId: judgementPair.queryId,
-                status: ImportStatus.SUCCESS,
+                status: adminSchema.ImportStatus.SUCCESS,
               });
             } catch (e) {
               partitionResults.push({
                 documentId: judgementPair.documentId,
                 queryId: judgementPair.queryId,
-                status: ImportStatus.ERROR,
+                status: adminSchema.ImportStatus.ERROR,
                 error: e.toString(),
               });
             }
@@ -190,7 +188,7 @@ export class AdminService {
     },
   );
 
-  public updateConfig = async (config: UpdateConfig): Promise<void> => {
+  public updateConfig = async (config: adminSchema.UpdateConfig): Promise<void> => {
     await this.configDAO.updateConfig(config);
   };
 
