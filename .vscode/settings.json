@@ -7,7 +7,7 @@
   ],
   "editor.formatOnSave": true,
   "eslint.workingDirectories": [
-    "fira/fira-be",
+    "fira/fira-appsvc",
     "fira/fira-web",
     "fira/fira-commons"
   ],

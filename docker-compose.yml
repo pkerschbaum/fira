@@ -26,7 +26,7 @@ services:
       - KEYCLOAK_ADMIN_USER=${ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
-      - ${FIRA_APPSVC_DATA_DIRECTORY}:/app/fira-be/data
+      - ${FIRA_APPSVC_DATA_DIRECTORY}:/app/fira-appsvc/data
 
   postgres_fira:
     image: postgres:12

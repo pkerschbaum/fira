@@ -6,7 +6,7 @@ This project uses [Nest](https://github.com/nestjs/nest), a progressive <a href=
 $ npm install
 ```
 
-Create a `.env` file in the root directory of fira-be (i.e., next to this readme) with the following content:
+Create a `.env` file in the root directory of fira-appsvc (i.e., next to this readme) with the following content:
 
 ```properties
 NODE_ENV=development

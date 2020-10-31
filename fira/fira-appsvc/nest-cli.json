@@ -5,5 +5,5 @@
     "tsConfigPath": "./tsconfig.json",
     "plugins": ["@nestjs/swagger/plugin"]
   },
-  "entryFile": "fira-be/src/main"
+  "entryFile": "fira-appsvc/src/main"
 }

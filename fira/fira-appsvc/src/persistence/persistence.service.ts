@@ -13,7 +13,7 @@ let singletonGotInstantiated = false;
 export class PersistenceService {
   /** This service must have a singleton-scope, thus it is important to pay attention when
    * adding or changing dependencies of this service. See comment of constructor of
-   * [judgements-worker.service.ts](fira-be/src/judgements/judgements-worker.service.ts) for
+   * [judgements-worker.service.ts](fira-appsvc/src/judgements/judgements-worker.service.ts) for
    * further details.
    */
   constructor(private readonly connection: Connection) {

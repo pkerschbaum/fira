@@ -4,7 +4,6 @@ import { AxiosRequestConfig } from 'axios';
 import { TransientLogger } from './logger/transient-logger';
 import { RequestLogger } from './logger/request-logger';
 import { uniqueIdGenerator, strings } from '../../../fira-commons';
-import { ExceptionHandler } from '../../../fira-commons/src/rest';
 
 /* method mandatory */
 export type RequestConfig = AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> };
@@ -12,6 +11,10 @@ export type Request = {
   request: RequestConfig;
   exceptionHandlers?: ExceptionHandler[];
   requestLogger?: RequestLogger;
+};
+type ExceptionHandler = {
+  condition: (error: any) => boolean;
+  exception: (error: any) => Error;
 };
 
 let singletonGotInstantiated = false;

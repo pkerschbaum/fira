@@ -1,12 +1,12 @@
 # Fira-Commons
 
-This module contains shared code for `fira-web` and `fira-be`.  
+This module contains shared code for `fira-web` and `fira-appsvc`.  
 Furthermore, the database schema is defined here.
 
 The migration files are located in the folder [`database`](database/).  
 [`knex.js` migrations](http://knexjs.org/#Migrations) are used to bootstrap and update the database schema.
 
-`fira-be` uses [Prisma](https://www.prisma.io/docs/) as the database client. The [schema file `schema.prisma`](prisma/schema.prisma) is equivalent to the database schema bootstrapped by the knex migrations. If the database schema changes, one can use `npx prisma introspect` to re-generate the schema.prisma file, so that it reflects the current database schema.
+`fira-appsvc` uses [Prisma](https://www.prisma.io/docs/) as the database client. The [schema file `schema.prisma`](prisma/schema.prisma) is equivalent to the database schema bootstrapped by the knex migrations. If the database schema changes, one can use `npx prisma introspect` to re-generate the schema.prisma file, so that it reflects the current database schema.
 
 ## How-To: Bootstrap database
 

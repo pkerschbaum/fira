@@ -2,8 +2,8 @@
   "autorun": true,
   "terminals": [
     {
-      "name": "fira-be",
-      "cwd": "[cwd]/fira/fira-be",
+      "name": "fira-appsvc",
+      "cwd": "[cwd]/fira/fira-appsvc",
       "execute": false,
       "command": "npm run start:debug"
     },

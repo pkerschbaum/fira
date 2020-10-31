@@ -40,31 +40,31 @@ FROM node:14.11.0 as build-env-appsvc
 COPY --from=build-env-commons /app/fira-commons /app/fira-commons
 
 # Switch workdir to the main app directory
-WORKDIR /app/fira-be
+WORKDIR /app/fira-appsvc
 
 # Install app dependencies
-COPY fira-be/package*.json ./
+COPY fira-appsvc/package*.json ./
 RUN npm install
 
 # Copy sources
-COPY fira-be/. ./
+COPY fira-appsvc/. ./
 COPY tsconfig.json ../
 
 # Create build
 RUN npm run build
 
 # Copy final build of web to appsvc
-COPY --from=build-env-web /app/fira-web/build ./dist/fira-be/client/build
+COPY --from=build-env-web /app/fira-web/build ./dist/fira-appsvc/client/build
 
 # Phase 4: copy final build of appsvc, i.e. the entire application, to a new image
 # This will get rid of any build artifacts (e.g. npm cache)
 FROM node:14.11.0
-WORKDIR /app/fira-be
+WORKDIR /app/fira-appsvc
 
 # Copy not only the final build, but also the commons directory (knex.js is installed in there. One 
 # connects to any appsvc instance in the cloud and uses knexjs to manually upgrade the database)
-COPY --from=build-env-appsvc /app/fira-be/dist ./dist
-COPY --from=build-env-appsvc /app/fira-be/node_modules ./node_modules
+COPY --from=build-env-appsvc /app/fira-appsvc/dist ./dist
+COPY --from=build-env-appsvc /app/fira-appsvc/node_modules ./node_modules
 COPY --from=build-env-appsvc /app/fira-commons ../fira-commons
 
 # Add and execute scrpts which wait for the keycloak server to start, then start the fira backend

@@ -1,5 +1,3 @@
-import { i18n } from '../..';
-
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 export function getRandomArbitrary(minInclusive: number, maxExclusive: number): number {
   return Math.random() * (maxExclusive - minInclusive) + minInclusive;
@@ -68,14 +66,6 @@ export function startWith(baseNumber: number) {
     },
     floor: () => {
       currentVal = roundToDecimals(currentVal, 0, { round: 'DOWN' });
-      return wrapper;
-    },
-    applyCurrencyFormat: () => {
-      currentVal = roundToDecimals(currentVal, i18n.CURRENCY_DECIMAL_PLACES);
-      return wrapper;
-    },
-    applyPercentageFormat: () => {
-      currentVal = roundToDecimals(currentVal, i18n.PERCENTAGE_DECIMAL_PLACES);
       return wrapper;
     },
     convertToDecimalNotation: () => {

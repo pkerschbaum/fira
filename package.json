@@ -6,12 +6,12 @@
     "lint-staged": "^10.5.0"
   },
   "scripts": {
-    "lint:one:js": "npm run lint --prefix fira/fira-be",
+    "lint:one:js": "npm run lint --prefix fira/fira-appsvc",
     "lint:two:js": "npm run lint --prefix fira/fira-web",
     "lint:three:js": "npm run lint --prefix fira/fira-commons"
   },
   "lint-staged": {
-    "fira/fira-be/**/*.ts": [
+    "fira/fira-appsvc/**/*.ts": [
       "npm run --silent lint:one:js",
       "git add"
     ],

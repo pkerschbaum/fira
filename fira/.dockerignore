@@ -13,5 +13,5 @@
 **/build
 
 # additional directories
-fira-be/data
+fira-appsvc/data
 fira-commons/database/prisma/lib
