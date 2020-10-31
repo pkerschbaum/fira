@@ -9,7 +9,7 @@ import {
   loginSchema,
   Refresh,
   refreshSchema,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 @ApiTags(basePaths.auth)
 @Controller(basePaths.auth)

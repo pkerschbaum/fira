@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import * as os from 'os';
 
 import * as config from '../config';
-import { basePaths, LoadHealth, loadHealthSchema } from '../../../fira-commons/src/rest';
+import { basePaths, LoadHealth, loadHealthSchema } from '../../../fira-commons/src/rest-api';
 
 @ApiTags(basePaths.mgmt)
 @Controller(basePaths.mgmt)

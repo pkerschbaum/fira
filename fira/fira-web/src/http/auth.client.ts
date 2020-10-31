@@ -9,7 +9,7 @@ import {
   ExceptionHandler,
   Login,
   Refresh,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 const REFRESH_RETRY_COUNT = 5;
 const REFRESH_RETRY_DELAY = 3 * 1000; // 3 seconds

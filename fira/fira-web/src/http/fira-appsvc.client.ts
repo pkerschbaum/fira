@@ -12,7 +12,7 @@ import {
   uniqueIdGenerator,
   objects,
 } from '../../../fira-commons';
-import { Query, QueryParams } from '../../../fira-commons/src/rest';
+import { Query, QueryParams } from '../../../fira-commons/src/rest-api';
 
 const appsvcBaseUrl = `${config.application.homepage}/api`;
 const appsvcTimeout = config.http.timeout;

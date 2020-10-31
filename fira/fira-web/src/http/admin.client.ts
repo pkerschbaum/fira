@@ -9,7 +9,7 @@ import {
   ImportQueries,
   ImportJudgementPairs,
   UpdateConfig,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 const request: AdminRequestor = async (
   request: AdminReqResp['request'],

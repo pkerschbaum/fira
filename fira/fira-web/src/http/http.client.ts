@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 
 import { HttpException } from './http.exception';
 import { ObjectLiteral } from '../../../fira-commons';
-import { ExceptionHandler } from '../../../fira-commons/src/rest';
+import { ExceptionHandler } from '../../../fira-commons/src/rest-api';
 
 /* method mandatory */
 export type Request = {

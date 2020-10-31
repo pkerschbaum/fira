@@ -17,11 +17,11 @@ export * from './src/util/id-generator.util';
 export * from './src/util/types.util';
 
 // schema
-import * as adminSchema from './src/rest/admin.schema';
-import * as authSchema from './src/rest/auth.schema';
-import * as feedbackSchema from './src/rest/feedback.schema';
-import * as judgementsSchema from './src/rest/judgements.schema';
-import * as mgmtSchema from './src/rest/mgmt.schema';
+import * as adminSchema from './src/rest-api/admin.schema';
+import * as authSchema from './src/rest-api/auth.schema';
+import * as feedbackSchema from './src/rest-api/feedback.schema';
+import * as judgementsSchema from './src/rest-api/judgements.schema';
+import * as mgmtSchema from './src/rest-api/mgmt.schema';
 
 export {
   // domain

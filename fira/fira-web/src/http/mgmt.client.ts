@@ -4,7 +4,7 @@ import {
   MgmtRequestor,
   MgmtReqRes,
   ExceptionHandler,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 const request: MgmtRequestor = async (
   request: MgmtReqRes['request'],

@@ -38,7 +38,7 @@ import {
   exportFeedbackSchema,
   LoadStatistics,
   loadStatisticsSchema,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 @ApiTags(basePaths.admin)
 @Controller(basePaths.admin)

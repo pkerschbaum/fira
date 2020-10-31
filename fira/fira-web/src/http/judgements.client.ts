@@ -5,7 +5,7 @@ import {
   JudgementsReqRes,
   ExceptionHandler,
   SubmitJudgement,
-} from '../../../fira-commons/src/rest';
+} from '../../../fira-commons/src/rest-api';
 
 const request: JudgementsRequestor = async (
   request: JudgementsReqRes['request'],
