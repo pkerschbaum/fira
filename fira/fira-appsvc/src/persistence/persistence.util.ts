@@ -10,6 +10,16 @@ export function failIfUndefined<T, U extends any[]>(cb: (...args: U) => Promise<
   };
 }
 
+export function failIfNull<T, U extends any[]>(cb: (...args: U) => Promise<T | null>) {
+  return async function f(this: any, ...args: U) {
+    const result = await cb.apply(this, args);
+    if (result === null) {
+      throw new Error(`entity not found`);
+    }
+    return result;
+  };
+}
+
 export type DAO<Entity> = {
   readonly repository: Repository<Entity>;
 };
