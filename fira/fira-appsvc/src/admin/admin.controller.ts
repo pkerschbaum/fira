@@ -56,7 +56,7 @@ export class AdminController {
     private readonly feedbackService: FeedbackService,
   ) {}
 
-  @Post(importUsersSchema.shape.request.shape.url._type)
+  @Post(importUsersSchema.shape.request.shape.url._def.value)
   public async importUsers(
     @Body(new ZodValidationPipe(importUsersSchema.shape.request.shape.data))
     importUsersRequest: ImportUsers['request']['data'],
@@ -74,7 +74,7 @@ export class AdminController {
     };
   }
 
-  @Put(importDocumentsSchema.shape.request.shape.url._type)
+  @Put(importDocumentsSchema.shape.request.shape.url._def.value)
   public async importDocuments(
     @Body(new ZodValidationPipe(importDocumentsSchema.shape.request.shape.data))
     importDocsRequest: ImportDocuments['request']['data'],
@@ -84,7 +84,7 @@ export class AdminController {
     };
   }
 
-  @Put(importQueriesSchema.shape.request.shape.url._type)
+  @Put(importQueriesSchema.shape.request.shape.url._def.value)
   public async importQueries(
     @Body(new ZodValidationPipe(importQueriesSchema.shape.request.shape.data))
     importQueriesReq: ImportQueries['request']['data'],
@@ -94,7 +94,7 @@ export class AdminController {
     };
   }
 
-  @Put(importJudgementPairsSchema.shape.request.shape.url._type)
+  @Put(importJudgementPairsSchema.shape.request.shape.url._def.value)
   public async importJudgementPairs(
     @Body(new ZodValidationPipe(importJudgementPairsSchema.shape.request.shape.data))
     importJudgementPairsReq: ImportJudgementPairs['request']['data'],
@@ -106,7 +106,7 @@ export class AdminController {
     };
   }
 
-  @Put(updateConfigReqSchema.shape.request.shape.url._type)
+  @Put(updateConfigReqSchema.shape.request.shape.url._def.value)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async updateConfig(
     @Body(new ZodValidationPipe(updateConfigReqSchema.shape.request.shape.data))
@@ -115,7 +115,7 @@ export class AdminController {
     await this.adminService.updateConfig(updateConfigReq);
   }
 
-  @Get(exportJudgementsSchema.shape.request.shape.url._type)
+  @Get(exportJudgementsSchema.shape.request.shape.url._def.value)
   @ApiResponse({
     status: 200,
     content: {
@@ -126,7 +126,7 @@ export class AdminController {
     return await this.judgementsService.exportJudgementsTsv();
   }
 
-  @Get(exportFeedbackSchema.shape.request.shape.url._type)
+  @Get(exportFeedbackSchema.shape.request.shape.url._def.value)
   @ApiResponse({
     status: 200,
     content: {
@@ -137,7 +137,7 @@ export class AdminController {
     return await this.feedbackService.exportFeedbackTsv();
   }
 
-  @Get(loadStatisticsSchema.shape.request.shape.url._type)
+  @Get(loadStatisticsSchema.shape.request.shape.url._def.value)
   public async getStatistics(): Promise<LoadStatistics['response']> {
     return { statistics: await this.judgementsService.getStatistics() };
   }

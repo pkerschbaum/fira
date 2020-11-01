@@ -8,7 +8,7 @@ import { basePaths, LoadHealth, loadHealthSchema } from '../../../fira-commons/s
 @ApiTags(basePaths.mgmt)
 @Controller(basePaths.mgmt)
 export class MgmtController {
-  @Get(loadHealthSchema.shape.request.shape.url._type)
+  @Get(loadHealthSchema.shape.request.shape.url._def.value)
   public getHealth(): LoadHealth['response'] {
     const totalMB = Math.floor(os.totalmem() / 1024 / 1024);
     const freeMB = Math.floor(os.freemem() / 1024 / 1024);

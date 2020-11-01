@@ -36,7 +36,7 @@ const submitJudgementPathParam = 'judgementId' as const;
 export class JudgementsController {
   constructor(private readonly judgementsService: JudgementsService) {}
 
-  @Post(preloadJudgementsSchema.shape.request.shape.url._type)
+  @Post(preloadJudgementsSchema.shape.request.shape.url._def.value)
   public async preloadJudgements(
     @Headers('authorization') authHeader: string,
     @Req() request: Request,
@@ -62,7 +62,7 @@ export class JudgementsController {
     return result.responsePromise;
   }
 
-  @Put(submitJudgementSchema.shape.request.shape.url._type)
+  @Put(submitJudgementSchema.shape.request.shape.url._def.value)
   public async saveJudgement(
     @Body(new ZodValidationPipe(submitJudgementSchema.shape.request.shape.data))
     saveJudgementRequest: SubmitJudgement['request']['data'],

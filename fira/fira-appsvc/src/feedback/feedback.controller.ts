@@ -21,7 +21,7 @@ import {
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  @Post(submitFeedbackReqSchema.shape.request.shape.url._type)
+  @Post(submitFeedbackReqSchema.shape.request.shape.url._def.value)
   public async submitFeedback(
     @Body(new ZodValidationPipe(submitFeedbackReqSchema.shape.request.shape.data))
     submitFeedbackRequest: SubmitFeedback['request']['data'],
