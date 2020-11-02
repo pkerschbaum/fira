@@ -1,33 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import d3 = require('d3');
 
-import { FeedbackDAO } from '../persistence/feedback.dao';
-import { UserDAO } from '../persistence/user.dao';
+import { FeedbacksDAO } from '../persistence/daos/feedbacks.dao';
 import { feedbackSchema } from '../../../fira-commons';
 
 @Injectable()
 export class FeedbackService {
-  constructor(private readonly feedbackDAO: FeedbackDAO, private readonly userDAO: UserDAO) {}
+  constructor(private readonly feedbacksDAO: FeedbacksDAO) {}
 
   public submitFeedback = async (
     userId: string,
     submitFeedback: feedbackSchema.SubmitFeedback,
   ): Promise<void> => {
-    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
-    await this.feedbackDAO.saveFeedback({
-      score: submitFeedback.score,
-      text: submitFeedback.text,
-      user,
+    await this.feedbacksDAO.create({
+      data: {
+        score: submitFeedback.score,
+        text: submitFeedback.text,
+        user: { connect: { id: userId } },
+      },
     });
   };
 
   private exportFeedback = async (): Promise<feedbackSchema.ExportFeedback[]> => {
-    const dbFeedbacks = await this.feedbackDAO.findFeedbacks();
+    const dbFeedbacks = await this.feedbacksDAO.findMany();
     return dbFeedbacks.map((feedback) => ({
       id: feedback.id,
-      score: feedback.score,
+      score: feedback.score as feedbackSchema.FeedbackScore,
       text: feedback.text ?? undefined,
-      userId: feedback.user.id,
+      userId: feedback.user_id,
     }));
   };
 

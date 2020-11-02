@@ -8,6 +8,7 @@ import {
   Body,
   BadRequestException,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -66,10 +67,7 @@ export class JudgementsController {
   public async saveJudgement(
     @Body(new ZodValidationPipe(submitJudgementSchema.shape.request.shape.data))
     saveJudgementRequest: SubmitJudgement['request']['data'],
-    @Param(
-      submitJudgementPathParam,
-      new ZodValidationPipe(submitJudgementSchema.shape.request.shape.pathParams.shape.judgementId),
-    )
+    @Param(submitJudgementPathParam, ParseIntPipe)
     judgementId: SubmitJudgement['request']['pathParams'][typeof submitJudgementPathParam],
     @Headers('authorization') authHeader: string,
   ): Promise<SubmitJudgement['response']> {

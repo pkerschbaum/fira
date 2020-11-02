@@ -48,6 +48,15 @@ const importJudgementPairResultSchema = z.object({
 });
 export type ImportJudgementPairResult = z.infer<typeof importJudgementPairResultSchema>;
 
+export const createConfigSchema = z.object({
+  annotationTargetPerUser: z.number().int(),
+  annotationTargetPerJudgPair: z.number().int(),
+  judgementMode: judgementModeSchema,
+  rotateDocumentText: z.boolean(),
+  annotationTargetToRequireFeedback: z.number().int(),
+});
+export type CreateConfig = z.infer<typeof createConfigSchema>;
+
 export const updateConfigSchema = z.object({
   annotationTargetPerUser: z.number().int().optional(),
   annotationTargetPerJudgPair: z.number().int().optional(),

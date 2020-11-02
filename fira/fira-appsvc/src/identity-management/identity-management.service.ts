@@ -5,7 +5,7 @@ import { Moment } from 'moment';
 import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { KeycloakClient } from './keycloak.client';
-import { UserDAO } from '../persistence/user.dao';
+import { UsersDAO } from '../persistence/daos/users.dao';
 import { convertKey } from '../utils/keys.util';
 import { adminSchema, authSchema, uniqueIdGenerator } from '../../../fira-commons';
 
@@ -23,7 +23,7 @@ export class IdentityManagementService {
   constructor(
     private readonly keycloakClient: KeycloakClient,
     private readonly requestLogger: RequestLogger,
-    private readonly userDAO: UserDAO,
+    private readonly usersDAO: UsersDAO,
   ) {
     this.requestLogger.setComponent(this.constructor.name);
   }
@@ -58,7 +58,7 @@ export class IdentityManagementService {
         });
 
         try {
-          if ((await this.userDAO.findUsers({ ids: [user.id] })).length > 0) {
+          if ((await this.usersDAO.findOne({ where: { id: user.id } })) !== null) {
             return {
               id: user.id,
               status: adminSchema.ImportStatus.ERROR,
@@ -67,7 +67,7 @@ export class IdentityManagementService {
           }
 
           await this.keycloakClient.createUser(accessToken, user.id, password);
-          await this.userDAO.saveUser({ id: user.id });
+          await this.usersDAO.create({ data: { id: user.id } });
           return {
             id: user.id,
             status: adminSchema.ImportStatus.SUCCESS,
@@ -117,6 +117,6 @@ export class IdentityManagementService {
   };
 
   public getCountOfUsers = async (): Promise<number> => {
-    return await this.userDAO.count();
+    return await this.usersDAO.count();
   };
 }

@@ -13,7 +13,12 @@ const request: JudgementsRequestor = async (
     exceptionHandlers?: ExceptionHandler[];
   },
 ) => {
-  const url = basePaths.judgements + '/' + request.url;
+  let url = basePaths.judgements + '/' + request.url;
+  if ('pathParams' in request && request.pathParams !== undefined) {
+    for (const [paramKey, paramValue] of Object.entries(request.pathParams)) {
+      url = url.replace(`:${paramKey}`, `${paramValue}`);
+    }
+  }
 
   return (
     await appsvcHttpClient.request({

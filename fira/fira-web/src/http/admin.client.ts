@@ -4,10 +4,6 @@ import {
   AdminRequestor,
   AdminReqResp,
   ExceptionHandler,
-  ImportUsers,
-  ImportDocuments,
-  ImportQueries,
-  ImportJudgementPairs,
   UpdateConfig,
 } from '../../../fira-commons/src/rest-api';
 
@@ -29,26 +25,6 @@ const request: AdminRequestor = async (
 };
 
 export const adminClient = {
-  importUsers: async (importUsersData: ImportUsers['request']['data']) => {
-    return await request({ url: 'v1/import/users', data: importUsersData, method: 'POST' });
-  },
-
-  importDocuments: async (importDocumentsData: ImportDocuments['request']['data']) => {
-    return await request({ url: 'v1/import/documents', data: importDocumentsData, method: 'PUT' });
-  },
-
-  importQueries: async (importQueriesData: ImportQueries['request']['data']) => {
-    return await request({ url: 'v1/import/queries', data: importQueriesData, method: 'PUT' });
-  },
-
-  importJudgementPairs: async (importPairsData: ImportJudgementPairs['request']['data']) => {
-    return await request({
-      url: 'v1/import/judgement-pairs',
-      data: importPairsData,
-      method: 'PUT',
-    });
-  },
-
   updateConfig: async (updateConfigData: UpdateConfig['request']['data']) => {
     return await request({
       url: 'v1/config',

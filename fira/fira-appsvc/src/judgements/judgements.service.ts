@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-  BadRequestException,
-  Scope,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Scope } from '@nestjs/common';
 import moment = require('moment');
 import d3 = require('d3');
 
@@ -12,14 +6,19 @@ import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { JudgementsPreloadWorker } from './judgements-preload.worker';
 import { PersistenceService } from '../persistence/persistence.service';
-import { JudgementDAO } from '../persistence/judgements.dao';
-import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
-import { UserDAO } from '../persistence/user.dao';
+import { JudgementsDAO } from '../persistence/daos/judgements.dao';
 import { ConfigsDAO } from '../persistence/daos/configs.dao';
-import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TJudgement } from '../persistence/entity/judgement.entity';
 import { JudgementStatus } from '../typings/enums';
-import { adminSchema, assertUnreachable, judgementsSchema } from '../../../fira-commons';
+import { adminSchema, judgementsSchema } from '../../../fira-commons';
+
+import { JudgementDAO } from '../persistence/judgements.dao';
+import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
+import { FeedbackDAO } from '../persistence/feedback.dao';
+import { UserDAO } from '../persistence/user.dao';
+import { ConfigDAO } from '../persistence/config.dao';
+
+const EXPORT_PAGE_SIZE = 200;
 
 @Injectable({ scope: Scope.REQUEST })
 export class JudgementsService {
@@ -27,11 +26,13 @@ export class JudgementsService {
     private readonly requestLogger: RequestLogger,
     private readonly judgementsPreloadWorker: JudgementsPreloadWorker,
     private readonly persistenceService: PersistenceService,
-    private readonly judgementsDAO: JudgementDAO,
+    private readonly judgementsDAO: JudgementsDAO,
+    private readonly configsDAO: ConfigsDAO,
+    private readonly judgementDAO: JudgementDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
-    private readonly userDAO: UserDAO,
-    private readonly configDAO: ConfigsDAO,
     private readonly feedbackDAO: FeedbackDAO,
+    private readonly userDAO: UserDAO,
+    private readonly configDAO: ConfigDAO,
   ) {
     this.requestLogger.setComponent(this.constructor.name);
   }
@@ -46,8 +47,8 @@ export class JudgementsService {
 
     // phase #1: determine how many judgements should, and can, be preloaded for the user.
     // if some should get preloaded, add a worklet to the worker and wait for it to get processed
-    const countOfOpenJudgements = await this.judgementsDAO.countJudgements({
-      criteria: { user, status: JudgementStatus.TO_JUDGE },
+    const countOfOpenJudgements = await this.judgementsDAO.count({
+      where: { status: JudgementStatus.TO_JUDGE, user_id: userId },
     });
     const countJudgementsToPreload =
       config.application.judgementsPreloadSize - countOfOpenJudgements;
@@ -76,21 +77,20 @@ export class JudgementsService {
           { criteria: { userId: user.id } },
           transactionalEM,
         );
-        const currentOpenJudgements = await this.judgementsDAO.findJudgements(
+        const currentOpenJudgements = await this.judgementDAO.findJudgements(
           { criteria: { user, status: JudgementStatus.TO_JUDGE } },
           transactionalEM,
         );
-        const countCurrentFinishedJudgements = await this.judgementsDAO.countJudgements(
+        const countCurrentFinishedJudgements = await this.judgementDAO.countJudgements(
           { criteria: { user, status: JudgementStatus.JUDGED } },
           transactionalEM,
         );
 
-        const dbConfig = await this.configDAO.findOrFail();
+        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEM);
 
-        const remainingToFinish =
-          dbConfig.annotation_target_per_user - countCurrentFinishedJudgements;
+        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
         const remainingUntilFirstFeedbackRequired =
-          dbConfig.annotation_target_to_require_feedback - countCurrentFinishedJudgements;
+          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
 
         this.requestLogger.log(
           `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
@@ -124,21 +124,30 @@ export class JudgementsService {
     judgementId: number,
     judgementData: judgementsSchema.SaveJudgement,
   ): Promise<void> => {
-    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
-    const dbJudgement = await this.judgementsDAO.findJudgement({ user, judgementId });
+    const dbJudgement = await this.judgementsDAO.findOne({
+      where: { id: judgementId },
+      include: { document_version_document_versionTojudgement: true },
+    });
 
     if (!dbJudgement) {
       throw new NotFoundException(
         `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
       );
     }
+    if (dbJudgement.user_id !== userId) {
+      throw new NotFoundException(
+        `the judgement does not belong to the given user id! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+
+    const annotateParts = dbJudgement.document_version_document_versionTojudgement.annotate_parts;
 
     // if relevance positions got rotated when sent to the client, then the server has to
     // revert the rotation
     let relevancePositions = judgementData.relevancePositions;
     if (dbJudgement.rotate) {
-      const rotateIndex = Math.ceil(getRotateIndex(dbJudgement.document.annotateParts.length));
-      const rotateIndex2 = Math.floor(getRotateIndex(dbJudgement.document.annotateParts.length));
+      const rotateIndex = Math.ceil(getRotateIndex(annotateParts.length));
+      const rotateIndex2 = Math.floor(getRotateIndex(annotateParts.length));
       relevancePositions = relevancePositions.map((relevancePosition) =>
         relevancePosition >= rotateIndex
           ? relevancePosition - rotateIndex
@@ -146,59 +155,35 @@ export class JudgementsService {
       );
     }
 
-    if (dbJudgement.status === JudgementStatus.TO_JUDGE) {
-      if (
-        relevancePositions.length > dbJudgement.document.annotateParts.length ||
-        relevancePositions.some(
-          (position) => position >= dbJudgement.document.annotateParts.length || position < 0,
-        )
-      ) {
-        this.requestLogger.error(
-          `at least one submitted relevance position is out of bound, regarding the size of the document. ` +
-            `judgementId=${dbJudgement.id}, documentId=${dbJudgement.document.document.id}, queryId=${dbJudgement.query.query.id}, rotate=${dbJudgement.rotate}, ` +
-            `relevancePositions=${JSON.stringify(relevancePositions)}, ` +
-            `dbJudgement.document.annotateParts=${JSON.stringify(
-              dbJudgement.document.annotateParts,
-            )}`,
-        );
-        throw new BadRequestException(
-          `at least one submitted relevance position is out of bound, regarding the size of the document`,
-        );
-      }
-
-      this.requestLogger.log(
-        `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
+    if (
+      relevancePositions.length > annotateParts.length ||
+      relevancePositions.some((position) => position >= annotateParts.length || position < 0)
+    ) {
+      this.requestLogger.error(
+        `at least one submitted relevance position is out of bound, regarding the size of the document. ` +
+          `judgementId=${dbJudgement.id}, documentId=${dbJudgement.document_document}, queryId=${dbJudgement.query_query}, rotate=${dbJudgement.rotate}, ` +
+          `relevancePositions=${JSON.stringify(relevancePositions)}, ` +
+          `dbJudgement.document.annotateParts=${JSON.stringify(annotateParts)}`,
       );
-
-      await this.judgementsDAO.saveJudgement({
-        data: {
-          id: judgementId,
-          status: JudgementStatus.JUDGED,
-          relevanceLevel: judgementData.relevanceLevel,
-          relevancePositions,
-          durationUsedToJudgeMs: judgementData.durationUsedToJudgeMs,
-          judgedAt: new Date(),
-        },
-      });
-    } else if (dbJudgement.status === JudgementStatus.JUDGED) {
-      // if all parameters are equal, return status OK, otherwise CONFLICT
-      if (
-        dbJudgement.relevanceLevel !== judgementData.relevanceLevel ||
-        (dbJudgement.relevancePositions === null && relevancePositions.length > 0) ||
-        dbJudgement.relevancePositions?.length !== relevancePositions.length ||
-        dbJudgement.relevancePositions.some(
-          (position1, index) => relevancePositions[index] !== position1,
-        ) ||
-        dbJudgement.durationUsedToJudgeMs !== judgementData.durationUsedToJudgeMs
-      ) {
-        throw new ConflictException(
-          `judgement with this id got already judged, with different data. judgementId=${judgementId}`,
-        );
-      }
-    } else {
-      // exhaustive check
-      assertUnreachable(dbJudgement.status);
+      throw new BadRequestException(
+        `at least one submitted relevance position is out of bound, regarding the size of the document`,
+      );
     }
+
+    this.requestLogger.log(
+      `open judgement got judged, id=${judgementId}, data=${JSON.stringify(judgementData)}`,
+    );
+
+    await this.judgementsDAO.update({
+      where: { id: judgementId },
+      data: {
+        status: JudgementStatus.JUDGED,
+        relevance_level: judgementData.relevanceLevel,
+        relevance_positions: relevancePositions,
+        duration_used_to_judge_ms: judgementData.durationUsedToJudgeMs,
+        judged_at: new Date(),
+      },
+    });
   };
 
   public exportJudgementsTsv = async (): Promise<string> => {
@@ -231,17 +216,33 @@ export class JudgementsService {
   };
 
   private exportJudgements = async (): Promise<judgementsSchema.ExportJudgement[]> => {
-    const allJudgements = await this.judgementsDAO.findJudgements({
-      criteria: {
-        status: JudgementStatus.JUDGED,
-      },
-    });
+    const allJudgements = [];
+
+    let skip = 0;
+    while (true) {
+      const judgementsPage = await this.judgementsDAO.findMany({
+        where: { status: JudgementStatus.JUDGED },
+        include: { document_version_document_versionTojudgement: true },
+        orderBy: { id: 'asc' },
+        skip,
+        take: EXPORT_PAGE_SIZE,
+      });
+      allJudgements.push(...judgementsPage);
+
+      if (judgementsPage.length === EXPORT_PAGE_SIZE) {
+        // there could be more entries in the table --> fetch next page
+        skip += EXPORT_PAGE_SIZE;
+      } else {
+        // fetched the last page --> stop
+        break;
+      }
+    }
 
     this.requestLogger.debug(`got db data, now mapping...`);
 
     return allJudgements.map((judgement) => {
-      const partsAvailable = judgement.document.annotateParts;
-      const partsAnnotated = judgement.relevancePositions ?? [];
+      const partsAvailable = judgement.document_version_document_versionTojudgement.annotate_parts;
+      const partsAnnotated = judgement.relevance_positions;
 
       const partsAvailableCharacterRanges = constructCharacterRangesMap(partsAvailable);
       let relevanceCharacterRanges = partsAnnotated.map(
@@ -277,15 +278,15 @@ export class JudgementsService {
 
       return {
         id: judgement.id,
-        relevanceLevel: judgement.relevanceLevel!,
+        relevanceLevel: judgement.relevance_level! as judgementsSchema.RelevanceLevel,
         relevanceCharacterRanges,
         rotate: judgement.rotate,
-        mode: judgement.mode,
-        durationUsedToJudgeMs: judgement.durationUsedToJudgeMs!,
-        judgedAtUnixTS: Math.round(judgement.judgedAt!.getTime() / 1000),
-        documentId: judgement.document.document.id,
-        queryId: judgement.query.query.id,
-        userId: judgement.user.id,
+        mode: judgement.mode as judgementsSchema.JudgementMode,
+        durationUsedToJudgeMs: judgement.duration_used_to_judge_ms!,
+        judgedAtUnixTS: Math.round(judgement.judged_at!.getTime() / 1000),
+        documentId: judgement.document_document,
+        queryId: judgement.query_query,
+        userId: judgement.user_id,
       };
     });
   };
@@ -293,32 +294,31 @@ export class JudgementsService {
   public getStatistics = async (): Promise<adminSchema.Statistic[]> => {
     this.requestLogger.log('getStatistics');
 
-    const dbConfig = await this.configDAO.findOrFail();
+    const dbConfig = await this.configsDAO.findFirstOrFail();
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
-    const countOfAllCompletedJudgements = await this.judgementsDAO.countJudgements({
-      criteria: {
-        status: JudgementStatus.JUDGED,
-      },
+    const countOfAllCompletedJudgements = await this.judgementsDAO.count({
+      where: { status: JudgementStatus.JUDGED },
     });
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
     // in the last 24 hours
-    const countOfAllCompletedJudgementsLast24Hours = await this.judgementsDAO.countJudgements({
-      criteria: {
+    const countOfAllCompletedJudgementsLast24Hours = await this.judgementsDAO.count({
+      where: {
         status: JudgementStatus.JUDGED,
-        judgedAt: { min: moment().subtract(24, 'hours').toDate() },
+        judged_at: { gte: moment().subtract(24, 'hours').toDate() },
       },
     });
 
     // count of users with at least 5 completed judgements
-    const countUsersWithAtLeast5ComplJudgements = await this.judgementsDAO.countJudgementsGroupByUser(
-      { status: JudgementStatus.JUDGED, havingCount: { min: 5 } },
-    );
+    const countUsersWithAtLeast5ComplJudgements = await this.judgementsDAO.countByUser({
+      where: { status: JudgementStatus.JUDGED },
+      havingCount: { min: 5 },
+    });
 
     // count of users who reached their annotation targets
-    const countUsersTargetReached = await this.judgementsDAO.countJudgementsGroupByUser({
-      status: JudgementStatus.JUDGED,
+    const countUsersTargetReached = await this.judgementsDAO.countByUser({
+      where: { status: JudgementStatus.JUDGED },
       havingCount: { min: dbConfig.annotation_target_per_user },
     });
 

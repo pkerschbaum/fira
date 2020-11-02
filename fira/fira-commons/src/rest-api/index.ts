@@ -64,62 +64,6 @@ export type Requestor<T extends { type: any; request: any; response: any }> = Un
 
 /* admin request/response types */
 
-export const importUsersSchema = z.object({
-  type: z.literal('import users'),
-  request: z.object({
-    url: z.literal('v1/import/users'),
-    method: z.literal('POST'),
-    data: z.object({
-      users: z.array(importUserRequestSchema).min(1),
-    }),
-  }),
-});
-export type ImportUsers = z.infer<typeof importUsersSchema> & {
-  response: { importedUsers: ImportUserResponse[] };
-};
-
-export const importDocumentsSchema = z.object({
-  type: z.literal('import documents'),
-  request: z.object({
-    url: z.literal('v1/import/documents'),
-    method: z.literal('PUT'),
-    data: z.object({
-      documents: z.array(importAssetSchema).min(1),
-    }),
-  }),
-});
-export type ImportDocuments = z.infer<typeof importDocumentsSchema> & {
-  response: { importedDocuments: ImportResult[] };
-};
-
-export const importQueriesSchema = z.object({
-  type: z.literal('import queries'),
-  request: z.object({
-    url: z.literal('v1/import/queries'),
-    method: z.literal('PUT'),
-    data: z.object({
-      queries: z.array(importAssetSchema).min(1),
-    }),
-  }),
-});
-export type ImportQueries = z.infer<typeof importQueriesSchema> & {
-  response: { importedQueries: ImportResult[] };
-};
-
-export const importJudgementPairsSchema = z.object({
-  type: z.literal('import judgementPairs'),
-  request: z.object({
-    url: z.literal('v1/import/judgement-pairs'),
-    method: z.literal('PUT'),
-    data: z.object({
-      judgementPairs: z.array(importJudgementPairSchema).min(1),
-    }),
-  }),
-});
-export type ImportJudgementPairs = z.infer<typeof importJudgementPairsSchema> & {
-  response: { importedJudgementPairs: ImportJudgementPairResult[] };
-};
-
 export const updateConfigReqSchema = z.object({
   type: z.literal('update config'),
   request: z.object({
@@ -159,15 +103,7 @@ export type LoadStatistics = z.infer<typeof loadStatisticsSchema> & {
   response: { statistics: Statistic[] };
 };
 
-export type AdminReqResp =
-  | ImportUsers
-  | ImportDocuments
-  | ImportQueries
-  | ImportJudgementPairs
-  | UpdateConfig
-  | ExportJudgements
-  | ExportFeedback
-  | LoadStatistics;
+export type AdminReqResp = UpdateConfig | ExportJudgements | ExportFeedback | LoadStatistics;
 export type AdminRequestor = Requestor<AdminReqResp>;
 
 /* auth request/response types */

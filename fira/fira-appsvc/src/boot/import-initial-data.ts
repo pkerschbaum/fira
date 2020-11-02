@@ -124,7 +124,7 @@ export async function importInitialData({
         annotationTargetToRequireFeedback: Number(entry[COLUMN_ANNO_TARGET_TO_REQUIRE_FEEDBACK]),
       };
     },
-    importFn: async (configs) => adminService.updateConfig(configs[0]),
+    importFn: async (configs) => adminService.createConfig(configs[0]),
   });
 }
 
@@ -167,12 +167,15 @@ async function importAsset<T>({
   const assetFileContent = await readFileFromDisk(assetType);
   const assetsParsed = (await tsvParse(assetFileContent, tsvSkipFn, tsvMapFn)) as T[];
 
-  const assetsImportResult = await importFn(assetsParsed);
-  if (assetsImportResult) {
-    abortOnFailedImport(logger, assetsImportResult);
+  try {
+    const assetsImportResult = await importFn(assetsParsed);
+    if (assetsImportResult) {
+      abortOnFailedImport(logger, assetsImportResult);
+    }
+  } catch (error) {
+    logger.error(`error occured while importing! assetType=${assetType}`, error);
+    throw error;
   }
-
-  logger.log(`import of ${assetType} successful!`);
 }
 
 async function readFileFromDisk(fileName: string) {

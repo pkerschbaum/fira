@@ -1,210 +1,153 @@
 import { Injectable } from '@nestjs/common';
 
 import * as config from '../config';
-import { PersistenceService } from '../persistence/persistence.service';
-import { RequestLogger } from '../commons/logger/request-logger';
-import { DocumentDAO } from '../persistence/document.dao';
-import { DocumentVersionDAO } from '../persistence/document-version.dao';
-import { QueryDAO } from '../persistence/query.dao';
-import { QueryVersionDAO } from '../persistence/query-version.dao';
-import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
-import { ConfigDAO } from '../persistence/config.dao';
-import { adminSchema, arrays, judgementsSchema } from '../../../fira-commons';
+import { DocumentsDAO } from '../persistence/daos/documents.dao';
+import { DocumentVersionsDAO } from '../persistence/daos/document-versions.dao';
+import { QueriesDAO } from '../persistence/daos/queries.dao';
+import { QueryVersionsDAO } from '../persistence/daos/query-versions.dao';
+import { JudgementPairsDAO } from '../persistence/daos/judgement-pairs.dao';
+import { ConfigsDAO } from '../persistence/daos/configs.dao';
+import { adminSchema, arrays } from '../../../fira-commons';
+import { PrismaClient } from '../../../fira-commons/database/prisma';
 
-const NUMBER_PARALLEL_IMPORTS = 10;
+const IMPORT_CHUNK_SIZE = 1000;
 
 @Injectable()
 export class AdminService {
   constructor(
-    private readonly persistenceService: PersistenceService,
-    private readonly documentDAO: DocumentDAO,
-    private readonly documentVersionDAO: DocumentVersionDAO,
-    private readonly queryDAO: QueryDAO,
-    private readonly queryVersionDAO: QueryVersionDAO,
-    private readonly judgementPairDAO: JudgementPairDAO,
-    private readonly configDAO: ConfigDAO,
-    private readonly requestLogger: RequestLogger,
+    private readonly prisma: PrismaClient,
+    private readonly documentsDAO: DocumentsDAO,
+    private readonly documentVersionsDAO: DocumentVersionsDAO,
+    private readonly queriesDAO: QueriesDAO,
+    private readonly queryVersionsDAO: QueryVersionsDAO,
+    private readonly judgementPairsDAO: JudgementPairsDAO,
+    private readonly configsDAO: ConfigsDAO,
   ) {}
 
-  public importDocuments = this.persistenceService.wrapInTransaction(this.requestLogger)(
-    async (
-      transactionalEntityManager,
-      documents: adminSchema.ImportAsset[],
-    ): Promise<adminSchema.ImportResult[]> => {
-      // create partitions which are processed in parallel
-      const partitions = arrays.partitionArray(documents, {
-        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
-      });
+  /**
+   * because of https://github.com/prisma/prisma/issues/3892, we have to split the whole dataset into
+   * multiple chunks, and import them one after the other sequentially.
+   * If any import of the chunks fails, we delete everything.
+   */
+  public importDocuments = async (documents: adminSchema.ImportAsset[]) => {
+    const partitions = arrays.partitionArray(documents, { itemsPerPartition: IMPORT_CHUNK_SIZE });
 
-      // process partitions
-      const results = await Promise.all(
-        partitions.map(async (partition) => {
-          const partitionResults: adminSchema.ImportResult[] = [];
+    try {
+      for (const partition of partitions) {
+        const createStatements = partition.map((document) =>
+          this.documentVersionsDAO.create({
+            data: {
+              document: { create: { id: document.id } },
+              text: document.text,
+              annotate_parts: document.text
+                .split(config.application.splitRegex)
+                .filter((part) => part !== ''),
+            },
+          }),
+        );
 
-          for (const document of partition) {
-            try {
-              await this.documentVersionDAO.saveDocumentVersion(
-                {
-                  data: {
-                    documentId: document.id,
-                    text: document.text,
-                    annotateParts: document.text
-                      .split(config.application.splitRegex)
-                      .filter((part) => part !== ''),
-                  },
-                },
-                transactionalEntityManager,
-              );
-              partitionResults.push({ id: document.id, status: adminSchema.ImportStatus.SUCCESS });
-            } catch (e) {
-              partitionResults.push({
-                id: document.id,
-                status: adminSchema.ImportStatus.ERROR,
-                error: e.toString(),
-              });
-            }
-          }
+        await this.prisma.$transaction(createStatements);
+      }
+    } catch (error) {
+      // if any import of the chunks fails, delete everything
+      await this.documentsDAO.deleteMany({});
+      throw error;
+    }
+  };
 
-          return partitionResults;
-        }),
-      );
+  /**
+   * See documentation of importDocuments
+   */
+  public importQueries = async (queries: adminSchema.ImportAsset[]) => {
+    const partitions = arrays.partitionArray(queries, { itemsPerPartition: IMPORT_CHUNK_SIZE });
 
-      // return flattened results
-      return arrays.flatten(results);
-    },
-  );
+    try {
+      for (const partition of partitions) {
+        const createStatements = partition.map((query) =>
+          this.queryVersionsDAO.create({
+            data: {
+              query: { create: { id: query.id } },
+              text: query.text,
+            },
+          }),
+        );
 
-  public importQueries = this.persistenceService.wrapInTransaction(this.requestLogger)(
-    async (
-      transactionalEntityManager,
-      queries: adminSchema.ImportAsset[],
-    ): Promise<adminSchema.ImportResult[]> => {
-      // create partitions which are processed in parallel
-      const partitions = arrays.partitionArray(queries, {
-        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
-      });
+        await this.prisma.$transaction(createStatements);
+      }
+    } catch (error) {
+      // if any import of the chunks fails, delete everything
+      await this.queriesDAO.deleteMany({});
+      throw error;
+    }
+  };
 
-      // process partitions
-      const results = await Promise.all(
-        partitions.map(async (partition) => {
-          const partitionResults: adminSchema.ImportResult[] = [];
+  /**
+   * See documentation of importDocuments
+   */
+  public importJudgementPairs = async (judgementPairs: adminSchema.ImportJudgementPair[]) => {
+    const partitions = arrays.partitionArray(judgementPairs, {
+      itemsPerPartition: IMPORT_CHUNK_SIZE,
+    });
 
-          for (const query of partition) {
-            try {
-              await this.queryVersionDAO.saveQueryVersion(
-                {
-                  data: {
-                    queryId: query.id,
-                    text: query.text,
-                  },
-                },
-                transactionalEntityManager,
-              );
-              partitionResults.push({ id: query.id, status: adminSchema.ImportStatus.SUCCESS });
-            } catch (e) {
-              partitionResults.push({
-                id: query.id,
-                status: adminSchema.ImportStatus.ERROR,
-                error: e.toString(),
-              });
-            }
-          }
+    try {
+      for (const partition of partitions) {
+        const createStatements = partition.map((judgementPair) =>
+          this.judgementPairsDAO.create({
+            data: {
+              document: { connect: { id: judgementPair.documentId } },
+              query: { connect: { id: judgementPair.queryId } },
+              priority: judgementPair.priority,
+            },
+          }),
+        );
 
-          return partitionResults;
-        }),
-      );
+        await this.prisma.$transaction(createStatements);
+      }
+    } catch (error) {
+      // if any import of the chunks fails, delete everything
+      await this.judgementPairsDAO.deleteMany({});
+      throw error;
+    }
+  };
 
-      // return flattened results
-      return arrays.flatten(results);
-    },
-  );
+  public createConfig = async (config: adminSchema.CreateConfig) => {
+    await this.configsDAO.create({
+      data: {
+        annotation_target_per_user: config.annotationTargetPerUser,
+        annotation_target_per_judg_pair: config.annotationTargetPerJudgPair,
+        judgement_mode: config.judgementMode,
+        rotate_document_text: config.rotateDocumentText,
+        annotation_target_to_require_feedback: config.annotationTargetToRequireFeedback,
+      },
+    });
+  };
 
-  public importJudgementPairs = this.persistenceService.wrapInTransaction(this.requestLogger)(
-    async (
-      transactionalEntityManager,
-      judgementPairs: adminSchema.ImportJudgementPair[],
-    ): Promise<adminSchema.ImportJudgementPairResult[]> => {
-      // delete previous pairs
-      await this.judgementPairDAO.deleteJudgementPairs({}, transactionalEntityManager);
-
-      // create partitions which are processed in parallel
-      const partitions = arrays.partitionArray(judgementPairs, {
-        countOfPartitions: NUMBER_PARALLEL_IMPORTS,
-      });
-
-      // process partitions
-      const results = await Promise.all(
-        partitions.map(async (partition) => {
-          const partitionResults: adminSchema.ImportJudgementPairResult[] = [];
-
-          for (const judgementPair of partition) {
-            try {
-              const documentPromise = this.documentDAO.findDocument(
-                { criteria: { id: judgementPair.documentId } },
-                transactionalEntityManager,
-              );
-              const query = await this.queryDAO.findQuery(
-                { criteria: { id: judgementPair.queryId } },
-                transactionalEntityManager,
-              );
-              const document = await documentPromise;
-              if (!document || !query) {
-                partitionResults.push({
-                  documentId: judgementPair.documentId,
-                  queryId: judgementPair.queryId,
-                  status: adminSchema.ImportStatus.ERROR,
-                  error:
-                    `either the document or the query (or both) could not be found. documentFound=${!!document}, queryFound=${!!query},` +
-                    ` documentId=${judgementPair.documentId}, queryId=${judgementPair.queryId}`,
-                });
-                continue;
-              }
-
-              await this.judgementPairDAO.saveJudgementPair(
-                { data: { document, query, priority: judgementPair.priority } },
-                transactionalEntityManager,
-              );
-              partitionResults.push({
-                documentId: judgementPair.documentId,
-                queryId: judgementPair.queryId,
-                status: adminSchema.ImportStatus.SUCCESS,
-              });
-            } catch (e) {
-              partitionResults.push({
-                documentId: judgementPair.documentId,
-                queryId: judgementPair.queryId,
-                status: adminSchema.ImportStatus.ERROR,
-                error: e.toString(),
-              });
-            }
-          }
-
-          return partitionResults;
-        }),
-      );
-
-      // return flattened results
-      return arrays.flatten(results);
-    },
-  );
-
-  public updateConfig = async (config: adminSchema.UpdateConfig): Promise<void> => {
-    await this.configDAO.updateConfig(config);
+  public updateConfig = async (config: adminSchema.UpdateConfig) => {
+    await this.configsDAO.update({
+      where: { id: 1 },
+      data: {
+        annotation_target_per_user: config.annotationTargetPerUser,
+        annotation_target_per_judg_pair: config.annotationTargetPerJudgPair,
+        judgement_mode: config.judgementMode,
+        rotate_document_text: config.rotateDocumentText,
+        annotation_target_to_require_feedback: config.annotationTargetToRequireFeedback,
+      },
+    });
   };
 
   public getCountOfDocuments = async (): Promise<number> => {
-    return await this.documentDAO.count();
+    return await this.documentsDAO.count();
   };
 
   public getCountOfQueries = async (): Promise<number> => {
-    return await this.queryDAO.count();
+    return await this.queriesDAO.count();
   };
 
   public getCountOfJudgPairs = async (): Promise<number> => {
-    return await this.judgementPairDAO.count();
+    return await this.judgementPairsDAO.count();
   };
 
   public getCountOfConfig = async (): Promise<number> => {
-    return await this.configDAO.count();
+    return await this.configsDAO.count();
   };
 }

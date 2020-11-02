@@ -15,6 +15,16 @@ import { JudgementDAO } from './judgements.dao';
 import { JudgementPairDAO } from './judgement-pair.dao';
 import { FeedbackDAO } from './feedback.dao';
 
+import { ConfigsDAO } from './daos/configs.dao';
+import { UsersDAO } from './daos/users.dao';
+import { DocumentsDAO } from './daos/documents.dao';
+import { DocumentVersionsDAO } from './daos/document-versions.dao';
+import { QueriesDAO } from './daos/queries.dao';
+import { QueryVersionsDAO } from './daos/query-versions.dao';
+import { JudgementsDAO } from './daos/judgements.dao';
+import { JudgementPairsDAO } from './daos/judgement-pairs.dao';
+import { FeedbacksDAO } from './daos/feedbacks.dao';
+
 import { Config } from './entity/config.entity';
 import { User } from './entity/user.entity';
 import { Document, DocumentVersion } from './entity/document.entity';
@@ -72,6 +82,28 @@ const prismaProvider = {
   },
 };
 
+const daos = [
+  ConfigDAO,
+  UserDAO,
+  DocumentDAO,
+  DocumentVersionDAO,
+  QueryDAO,
+  QueryVersionDAO,
+  JudgementDAO,
+  JudgementPairDAO,
+  FeedbackDAO,
+
+  ConfigsDAO,
+  UsersDAO,
+  DocumentsDAO,
+  DocumentVersionsDAO,
+  QueriesDAO,
+  QueryVersionsDAO,
+  JudgementsDAO,
+  JudgementPairsDAO,
+  FeedbacksDAO,
+];
+
 @Global()
 @Module({
   imports: [
@@ -87,31 +119,7 @@ const prismaProvider = {
       Feedback,
     ]),
   ],
-  providers: [
-    prismaProvider,
-    PersistenceService,
-    ConfigDAO,
-    UserDAO,
-    DocumentDAO,
-    DocumentVersionDAO,
-    QueryDAO,
-    QueryVersionDAO,
-    JudgementDAO,
-    JudgementPairDAO,
-    FeedbackDAO,
-  ],
-  exports: [
-    prismaProvider,
-    PersistenceService,
-    ConfigDAO,
-    UserDAO,
-    DocumentDAO,
-    DocumentVersionDAO,
-    QueryDAO,
-    QueryVersionDAO,
-    JudgementDAO,
-    JudgementPairDAO,
-    FeedbackDAO,
-  ],
+  providers: [prismaProvider, PersistenceService, ...daos],
+  exports: [prismaProvider, PersistenceService, ...daos],
 })
 export class PersistenceModule {}
