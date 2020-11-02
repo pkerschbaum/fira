@@ -11,7 +11,7 @@ import { DocumentDAO } from './document.dao';
 import { DocumentVersionDAO } from './document-version.dao';
 import { QueryDAO } from './query.dao';
 import { QueryVersionDAO } from './query-version.dao';
-import { JudgementsDAO } from './judgements.dao';
+import { JudgementDAO } from './judgements.dao';
 import { JudgementPairDAO } from './judgement-pair.dao';
 import { FeedbackDAO } from './feedback.dao';
 
@@ -96,7 +96,7 @@ const prismaProvider = {
     DocumentVersionDAO,
     QueryDAO,
     QueryVersionDAO,
-    JudgementsDAO,
+    JudgementDAO,
     JudgementPairDAO,
     FeedbackDAO,
   ],
@@ -109,7 +109,7 @@ const prismaProvider = {
     DocumentVersionDAO,
     QueryDAO,
     QueryVersionDAO,
-    JudgementsDAO,
+    JudgementDAO,
     JudgementPairDAO,
     FeedbackDAO,
   ],

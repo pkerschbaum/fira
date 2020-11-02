@@ -9,7 +9,7 @@ import { optionalTransaction, DAO } from './persistence.util';
 import { objects } from '../../../fira-commons';
 
 @Injectable()
-export class JudgementsDAO implements DAO<Judgement> {
+export class JudgementDAO implements DAO<Judgement> {
   constructor(
     @InjectRepository(Judgement)
     public readonly repository: Repository<Judgement>,

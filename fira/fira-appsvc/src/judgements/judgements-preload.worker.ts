@@ -10,7 +10,7 @@ import { DocumentDAO } from '../persistence/document.dao';
 import { DocumentVersionDAO } from '../persistence/document-version.dao';
 import { QueryDAO } from '../persistence/query.dao';
 import { QueryVersionDAO } from '../persistence/query-version.dao';
-import { JudgementsDAO } from '../persistence/judgements.dao';
+import { JudgementDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
 import { TUser } from '../persistence/entity/user.entity';
 import { TConfig } from '../persistence/entity/config.entity';
@@ -49,7 +49,7 @@ export class JudgementsPreloadWorker {
     private readonly documentVersionDAO: DocumentVersionDAO,
     private readonly queryDAO: QueryDAO,
     private readonly queryVersionDAO: QueryVersionDAO,
-    private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementsDAO: JudgementDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
   ) {
     if (singletonGotInstantiated) {

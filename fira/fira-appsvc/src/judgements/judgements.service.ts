@@ -12,10 +12,10 @@ import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { JudgementsPreloadWorker } from './judgements-preload.worker';
 import { PersistenceService } from '../persistence/persistence.service';
-import { JudgementsDAO } from '../persistence/judgements.dao';
+import { JudgementDAO } from '../persistence/judgements.dao';
 import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
 import { UserDAO } from '../persistence/user.dao';
-import { ConfigDAO } from '../persistence/config.dao';
+import { ConfigsDAO } from '../persistence/daos/configs.dao';
 import { FeedbackDAO } from '../persistence/feedback.dao';
 import { TJudgement } from '../persistence/entity/judgement.entity';
 import { JudgementStatus } from '../typings/enums';
@@ -27,10 +27,10 @@ export class JudgementsService {
     private readonly requestLogger: RequestLogger,
     private readonly judgementsPreloadWorker: JudgementsPreloadWorker,
     private readonly persistenceService: PersistenceService,
-    private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementsDAO: JudgementDAO,
     private readonly judgementPairDAO: JudgementPairDAO,
     private readonly userDAO: UserDAO,
-    private readonly configDAO: ConfigDAO,
+    private readonly configDAO: ConfigsDAO,
     private readonly feedbackDAO: FeedbackDAO,
   ) {
     this.requestLogger.setComponent(this.constructor.name);
@@ -85,11 +85,12 @@ export class JudgementsService {
           transactionalEM,
         );
 
-        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEM);
+        const dbConfig = await this.configDAO.findOrFail();
 
-        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
+        const remainingToFinish =
+          dbConfig.annotation_target_per_user - countCurrentFinishedJudgements;
         const remainingUntilFirstFeedbackRequired =
-          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
+          dbConfig.annotation_target_to_require_feedback - countCurrentFinishedJudgements;
 
         this.requestLogger.log(
           `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
@@ -292,7 +293,7 @@ export class JudgementsService {
   public getStatistics = async (): Promise<adminSchema.Statistic[]> => {
     this.requestLogger.log('getStatistics');
 
-    const dbConfig = await this.configDAO.findConfigOrFail({});
+    const dbConfig = await this.configDAO.findOrFail();
 
     // count of all judgements with status JUDGED (i.e., completed judgements)
     const countOfAllCompletedJudgements = await this.judgementsDAO.countJudgements({
@@ -318,7 +319,7 @@ export class JudgementsService {
     // count of users who reached their annotation targets
     const countUsersTargetReached = await this.judgementsDAO.countJudgementsGroupByUser({
       status: JudgementStatus.JUDGED,
-      havingCount: { min: dbConfig.annotationTargetPerUser },
+      havingCount: { min: dbConfig.annotation_target_per_user },
     });
 
     return [
