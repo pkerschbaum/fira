@@ -1,4 +1,6 @@
-import { EntityManager, ObjectLiteral, Repository, ObjectType, EntitySchema } from 'typeorm';
+import * as Knex from 'knex';
+
+import { ObjectLiteral } from '../../../fira-commons';
 
 export function failIfUndefined<T, U extends any[]>(cb: (...args: U) => Promise<T | undefined>) {
   return async function f(this: any, ...args: U) {
@@ -20,22 +22,10 @@ export function failIfNull<T, U extends any[]>(cb: (...args: U) => Promise<T | n
   };
 }
 
-export type DAO<Entity> = {
-  readonly repository: Repository<Entity>;
-};
-
-export function optionalTransaction<Entity>(
-  entity: ObjectType<Entity> | EntitySchema<Entity> | string,
+export function transactional<T, U extends ObjectLiteral>(
+  cb: (obj: U, trx: Knex.Transaction) => T,
 ) {
-  return function f<T, U extends ObjectLiteral>(
-    cb: (obj: U, repository: Repository<Entity>, transactionalEM?: EntityManager) => T,
-  ) {
-    return function cbWithRepo(this: DAO<Entity>, obj: U, transactionalEM?: EntityManager) {
-      const ownRepository = this.repository;
-      const repository =
-        transactionalEM !== undefined ? transactionalEM.getRepository(entity) : ownRepository;
-
-      return cb(obj, repository, transactionalEM);
-    };
+  return function cbWithClient(obj: U, trx: Knex.Transaction) {
+    return cb(obj, trx);
   };
 }

@@ -1,8 +1,6 @@
 import * as moment from 'moment';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import NamingStrategies = require('typeorm-naming-strategies');
 
 // load .env file of project root (for local development)
 dotenv.config();
@@ -28,18 +26,8 @@ export const application = {
   staticSourcesPath: path.join(__dirname, '..', 'client', 'build'),
 } as const;
 
-export const database: TypeOrmModuleOptions = {
-  type: 'postgres',
-  host: process.env.FIRA_PERSISTENT_DB_HOST ?? 'localhost',
-  port:
-    process.env.FIRA_PERSISTENT_DB_PORT !== undefined
-      ? Number(process.env.FIRA_PERSISTENT_DB_PORT)
-      : 5432,
-  username: process.env.FIRA_PERSISTENT_DB_USER ?? 'fira',
-  password: process.env.FIRA_PERSISTENT_DB_PASSWORD ?? 'password',
-  database: process.env.FIRA_PERSISTENT_DB_DATABASENAME ?? 'fira',
-  synchronize: true,
-  namingStrategy: new NamingStrategies.SnakeNamingStrategy(),
+export const database: { connectionString: string } = {
+  connectionString: process.env.FIRA_PERSISTENT_DB_URL ?? ``,
 } as const;
 
 export const keycloak = {

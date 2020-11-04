@@ -1,19 +1,11 @@
 import { Module, Global } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import * as Knex from 'knex';
 
+import * as config from '../config';
 import { TransientLogger } from '../commons/logger/transient-logger';
+import { KnexClient, KNEX_CLIENT } from './persistence.constants';
 import { PersistenceService } from './persistence.service';
 import { PrismaClient, PrismaClientOptions } from '../../../fira-commons/database/prisma';
-
-import { ConfigDAO } from './config.dao';
-import { UserDAO } from './user.dao';
-import { DocumentDAO } from './document.dao';
-import { DocumentVersionDAO } from './document-version.dao';
-import { QueryDAO } from './query.dao';
-import { QueryVersionDAO } from './query-version.dao';
-import { JudgementDAO } from './judgements.dao';
-import { JudgementPairDAO } from './judgement-pair.dao';
-import { FeedbackDAO } from './feedback.dao';
 
 import { ConfigsDAO } from './daos/configs.dao';
 import { UsersDAO } from './daos/users.dao';
@@ -24,14 +16,6 @@ import { QueryVersionsDAO } from './daos/query-versions.dao';
 import { JudgementsDAO } from './daos/judgements.dao';
 import { JudgementPairsDAO } from './daos/judgement-pairs.dao';
 import { FeedbacksDAO } from './daos/feedbacks.dao';
-
-import { Config } from './entity/config.entity';
-import { User } from './entity/user.entity';
-import { Document, DocumentVersion } from './entity/document.entity';
-import { Query, QueryVersion } from './entity/query.entity';
-import { Judgement } from './entity/judgement.entity';
-import { JudgementPair } from './entity/judgement-pair.entity';
-import { Feedback } from './entity/feedback.entity';
 
 let prisma: PrismaClient<PrismaClientOptions, 'info' | 'warn' | 'error'>;
 const prismaProvider = {
@@ -78,21 +62,43 @@ const prismaProvider = {
         return result;
       });
     }
+
     return prisma;
   },
 };
 
-const daos = [
-  ConfigDAO,
-  UserDAO,
-  DocumentDAO,
-  DocumentVersionDAO,
-  QueryDAO,
-  QueryVersionDAO,
-  JudgementDAO,
-  JudgementPairDAO,
-  FeedbackDAO,
+let knexClient: KnexClient;
+const knexProvider = {
+  provide: KNEX_CLIENT,
+  inject: [TransientLogger],
+  useFactory: (logger: TransientLogger) => {
+    if (knexClient === undefined) {
+      logger.setComponent(`KnexClient`);
 
+      knexClient = Knex({
+        client: 'pg',
+        connection: config.database.connectionString,
+        log: {
+          debug: (message: { method: string; sql: string; bindings: any[] }) => {
+            logger.debug(`Executing Statement`, {
+              method: message.method,
+              sql: message.sql,
+              bindings: message.bindings,
+            });
+          },
+          deprecate: (method, alternative) => logger.debug(`deprecated`, { method, alternative }),
+          warn: (message) => logger.warn(message),
+          error: (message) => logger.error(message),
+        },
+        debug: process.env.NODE_ENV === 'development',
+      });
+    }
+
+    return knexClient;
+  },
+};
+
+const daos = [
   ConfigsDAO,
   UsersDAO,
   DocumentsDAO,
@@ -106,20 +112,7 @@ const daos = [
 
 @Global()
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Config,
-      User,
-      Document,
-      DocumentVersion,
-      Query,
-      QueryVersion,
-      Judgement,
-      JudgementPair,
-      Feedback,
-    ]),
-  ],
-  providers: [prismaProvider, PersistenceService, ...daos],
-  exports: [prismaProvider, PersistenceService, ...daos],
+  providers: [prismaProvider, knexProvider, PersistenceService, ...daos],
+  exports: [prismaProvider, knexProvider, PersistenceService, ...daos],
 })
 export class PersistenceModule {}

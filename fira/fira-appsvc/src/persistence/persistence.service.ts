@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Connection, EntityManager } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import * as Knex from 'knex';
 
 import { RequestLogger } from '../commons/logger/request-logger';
 import { TransientLogger } from '../commons/logger/transient-logger';
+import { KNEX_CLIENT, KnexClient } from './persistence.constants';
 
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
@@ -16,7 +17,7 @@ export class PersistenceService {
    * [judgements-worker.service.ts](fira-appsvc/src/judgements/judgements-worker.service.ts) for
    * further details.
    */
-  constructor(private readonly connection: Connection) {
+  constructor(@Inject(KNEX_CLIENT) private readonly knexClient: KnexClient) {
     if (singletonGotInstantiated) {
       throw new Error(`this class should be a singleton and thus get instantiated only once`);
     }
@@ -27,14 +28,14 @@ export class PersistenceService {
     T,
     U extends any[]
   >(
-    cb: (em: EntityManager, ...args: U) => Promise<T>,
+    cb: (trx: Knex.Transaction, ...args: U) => Promise<T>,
   ) => {
     return async (...args: U) => {
       let attemptNumber = 1;
       while (true) {
         try {
-          return await this.connection.transaction('SERIALIZABLE', (transactionalEntityManager) => {
-            return cb(transactionalEntityManager, ...args);
+          return await this.knexClient.transaction(async (trx) => {
+            return cb(trx, ...args);
           });
         } catch (e) {
           if (e.code !== POSTGRES_SERIALIZATION_FAILURE_CODE || attemptNumber >= MAX_ATTEMPTS) {

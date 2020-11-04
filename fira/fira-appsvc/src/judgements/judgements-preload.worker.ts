@@ -1,25 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from 'typeorm';
+import * as Knex from 'knex';
 
 import * as config from '../config';
-import { PersistenceService } from '../persistence/persistence.service';
 import { TransientLogger } from '../commons/logger/transient-logger';
 import { RequestLogger } from '../commons/logger/request-logger';
-import { ConfigDAO } from '../persistence/config.dao';
-import { DocumentDAO } from '../persistence/document.dao';
-import { DocumentVersionDAO } from '../persistence/document-version.dao';
-import { QueryDAO } from '../persistence/query.dao';
-import { QueryVersionDAO } from '../persistence/query-version.dao';
-import { JudgementDAO } from '../persistence/judgements.dao';
-import { JudgementPairDAO, PairQueryResult } from '../persistence/judgement-pair.dao';
-import { TUser } from '../persistence/entity/user.entity';
-import { TConfig } from '../persistence/entity/config.entity';
+import { PersistenceService } from '../persistence/persistence.service';
+import { JudgementsDAO } from '../persistence/daos/judgements.dao';
+import { JudgementPairsDAO, PairQueryResult } from '../persistence/daos/judgement-pairs.dao';
+import { DocumentVersionsDAO } from '../persistence/daos/document-versions.dao';
+import { QueryVersionsDAO } from '../persistence/daos/query-versions.dao';
+import { httpUtils } from '../utils/http.utils';
 import { JudgementStatus } from '../typings/enums';
 import { judgementsSchema, uniqueIdGenerator } from '../../../fira-commons';
+import { config as dbConfig, user } from '../../../fira-commons/database/prisma';
 
 type PreloadWorklet = {
   workletId: string;
-  user: TUser;
+  user: user;
   responsePromiseExecutor: {
     resolve: () => void;
     reject: (reason?: any) => void;
@@ -44,13 +41,10 @@ export class JudgementsPreloadWorker {
    */
   constructor(
     private readonly persistenceService: PersistenceService,
-    private readonly configDAO: ConfigDAO,
-    private readonly documentDAO: DocumentDAO,
-    private readonly documentVersionDAO: DocumentVersionDAO,
-    private readonly queryDAO: QueryDAO,
-    private readonly queryVersionDAO: QueryVersionDAO,
-    private readonly judgementsDAO: JudgementDAO,
-    private readonly judgementPairDAO: JudgementPairDAO,
+    private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementPairsDAO: JudgementPairsDAO,
+    private readonly documentVersionsDAO: DocumentVersionsDAO,
+    private readonly queryVersionsDAO: QueryVersionsDAO,
   ) {
     if (singletonGotInstantiated) {
       throw new Error(`this class should be a singleton and thus get instantiated only once`);
@@ -61,7 +55,7 @@ export class JudgementsPreloadWorker {
   }
 
   public addPreloadWorklet = (
-    user: TUser,
+    user: user,
     logger: TransientLogger | RequestLogger,
   ): { workletId: string; responsePromise: Promise<void> } => {
     logger.log(`adding preload worklet for userId=${user.id}`);
@@ -124,15 +118,17 @@ export class JudgementsPreloadWorker {
 
   private preloadJudgements = (requestLogger: TransientLogger | RequestLogger) =>
     this.persistenceService.wrapInTransaction(requestLogger)(
-      async (
-        transactionalEntityManager: EntityManager,
-        { logger, user }: PreloadWorklet,
-      ): Promise<void> => {
-        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEntityManager);
+      async (trx, { logger, user }: PreloadWorklet): Promise<void> => {
+        const dbConfig = httpUtils.throwIfNullish(await trx(`config`).first());
 
-        const countOfOpenJudgements = await this.judgementsDAO.countJudgements(
-          { criteria: { user, status: JudgementStatus.TO_JUDGE } },
-          transactionalEntityManager,
+        const countOfOpenJudgements = await this.judgementPairsDAO.countTrx(
+          {
+            where: {
+              user_id: user.id,
+              status: JudgementStatus.TO_JUDGE,
+            },
+          },
+          trx,
         );
         let countJudgementsToPreload =
           config.application.judgementsPreloadSize - countOfOpenJudgements;
@@ -154,17 +150,19 @@ export class JudgementsPreloadWorker {
         const {
           countOfPairsWithPrioAll,
           numericPriorities,
-        } = await this.judgementPairDAO.getAvailablePriorities({}, transactionalEntityManager);
+        } = await this.judgementPairsDAO.getAvailablePriorities({}, trx);
 
         // if at least one pair with prio "all" exists, check if the user should get some of this
         // pairs as his next pairs preloaded
         if (countOfPairsWithPrioAll > 0) {
           const stepSizeToPreloadPrioAllPair = Math.floor(
-            dbConfig.annotationTargetPerUser / countOfPairsWithPrioAll,
+            dbConfig.annotation_target_per_user / countOfPairsWithPrioAll,
           );
-          const countOfAllJudgements = await this.judgementsDAO.countJudgements(
-            { criteria: { user } },
-            transactionalEntityManager,
+          const countOfAllJudgements = await this.judgementPairsDAO.countTrx(
+            {
+              where: { user_id: user.id },
+            },
+            trx,
           );
           const countPrioAllPairsUserShouldHave = Math.min(
             countOfPairsWithPrioAll,
@@ -173,20 +171,23 @@ export class JudgementsPreloadWorker {
             ),
           );
           if (countPrioAllPairsUserShouldHave > 0) {
-            const countPrioAllPairsUserActuallyHas = await this.judgementPairDAO.countPreloaded({
-              criteria: {
-                userId: user.id,
-                priority: 'all',
+            const countPrioAllPairsUserActuallyHas = await this.judgementPairsDAO.countPreloaded(
+              {
+                where: {
+                  user_id: user.id,
+                  priority: 'all',
+                },
               },
-            });
+              trx,
+            );
 
             let countPrioAllPairsMissing =
               countPrioAllPairsUserShouldHave - countPrioAllPairsUserActuallyHas;
 
             while (countPrioAllPairsMissing > 0 && countJudgementsToPreload > 0) {
-              const pairCandidates: PairQueryResult[] = await this.judgementPairDAO.findNotPreloaded(
-                { criteria: { userId: user.id, priority: 'all' }, limit: 1 },
-                transactionalEntityManager,
+              const pairCandidates: PairQueryResult[] = await this.judgementPairsDAO.findNotPreloaded(
+                { where: { user_id: user.id, priority: 'all' }, limit: 1 },
+                trx,
               );
 
               if (pairCandidates.length < 1) {
@@ -201,12 +202,12 @@ export class JudgementsPreloadWorker {
               const pairsToPersist = pairCandidates[0];
 
               await this.persistPairs(
-                transactionalEntityManager,
+                trx,
                 logger,
                 [pairsToPersist],
                 user,
-                dbConfig.judgementMode,
-                dbConfig.rotateDocumentText,
+                dbConfig.judgement_mode as judgementsSchema.JudgementMode,
+                dbConfig.rotate_document_text,
               );
 
               logger.log(`a pair with priority "all" got preloaded`);
@@ -220,9 +221,9 @@ export class JudgementsPreloadWorker {
         // judgements should get preloaded for this user. Only reason this could not be possible is that
         // the user might have annotated every possible judgement pair already.
         // --> determine how many judgement pairs the user has not annotated so far
-        let countRemainingPairsToPreload = await this.judgementPairDAO.countNotPreloaded(
-          { criteria: { userId: user.id } },
-          transactionalEntityManager,
+        let countRemainingPairsToPreload = await this.judgementPairsDAO.countNotPreloaded(
+          { where: { user_id: user.id } },
+          trx,
         );
         if (countRemainingPairsToPreload < 1) {
           logger.log(
@@ -234,15 +235,15 @@ export class JudgementsPreloadWorker {
 
         // query preloaded pairs once and update the list on-the-fly while searching for
         // the right judgement pair candidates (because the query is quite expensive)
-        const preloadedPairs = await this.judgementPairDAO.findPreloaded(
-          { criteria: { userId: user.id } },
-          transactionalEntityManager,
+        const preloadedPairs = await this.judgementPairsDAO.findPreloaded(
+          { where: { user_id: user.id } },
+          trx,
         );
 
         let targetFactor = 1;
         while (countJudgementsToPreload > 0) {
           const countJudgementsGotPreloaded = await this.preloadNextJudgements({
-            transactionalEntityManager,
+            trx,
             logger,
             priorities: numericPriorities,
             preloadedPairs,
@@ -271,7 +272,7 @@ export class JudgementsPreloadWorker {
     );
 
   private preloadNextJudgements = async ({
-    transactionalEntityManager,
+    trx,
     logger,
     priorities,
     preloadedPairs,
@@ -280,14 +281,14 @@ export class JudgementsPreloadWorker {
     countJudgementsToPreload,
     dbConfig,
   }: {
-    transactionalEntityManager: EntityManager;
+    trx: Knex.Transaction;
     logger: TransientLogger | RequestLogger;
     priorities: number[];
     preloadedPairs: PairQueryResult[];
     targetFactor: number;
-    user: TUser;
+    user: user;
     countJudgementsToPreload: number;
-    dbConfig: TConfig;
+    dbConfig: dbConfig;
   }): Promise<number> => {
     let remainingToPreload = countJudgementsToPreload;
     for (const priority of priorities) {
@@ -296,15 +297,15 @@ export class JudgementsPreloadWorker {
         break;
       }
 
-      const pairCandidates = await this.judgementPairDAO.getCandidatesByPriority(
+      const pairCandidates = await this.judgementPairsDAO.getCandidatesByPriority(
         {
-          criteria: { priority: `${priority}` },
+          where: { priority: `${priority}` },
           excluding: { judgementPairs: preloadedPairs },
           limit: remainingToPreload,
           targetFactor,
           dbConfig,
         },
-        transactionalEntityManager,
+        trx,
       );
 
       if (pairCandidates.length === 0) {
@@ -316,12 +317,12 @@ export class JudgementsPreloadWorker {
 
       const pairsToPersist = pairCandidates.slice(0, remainingToPreload);
       await this.persistPairs(
-        transactionalEntityManager,
+        trx,
         logger,
         pairsToPersist,
         user,
-        dbConfig.judgementMode,
-        dbConfig.rotateDocumentText,
+        dbConfig.judgement_mode as judgementsSchema.JudgementMode,
+        dbConfig.rotate_document_text,
       );
 
       // after the pairs got persisted, add them to the list of preloaded pairs
@@ -336,10 +337,10 @@ export class JudgementsPreloadWorker {
   };
 
   private persistPairs = async (
-    entityManager: EntityManager,
+    trx: Knex.Transaction,
     logger: TransientLogger | RequestLogger,
     pairs: PairQueryResult[],
-    user: TUser,
+    user: user,
     judgementMode: judgementsSchema.JudgementMode,
     rotateDocumentText: boolean,
   ): Promise<void> => {
@@ -352,49 +353,47 @@ export class JudgementsPreloadWorker {
       } else {
         // determine how often each variant - rotation or no-rotation - was used,
         // and set the variant which was used less often
-        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate(
-          {},
-          entityManager,
-        );
+        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate({}, trx);
         const countRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
         const countNoRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
         rotate = countRotate < countNoRotate;
       }
 
       // gather data and persist judgement
-      const dbDocument = await this.documentDAO.findDocumentOrFail(
-        { criteria: { id: pair.document_id } },
-        entityManager,
+      const dbDocumentVersion = httpUtils.throwIfNullish(
+        await this.documentVersionsDAO.findFirst({
+          where: { document_id: pair.document_id },
+        }),
       );
-      const dbQuery = await this.queryDAO.findQueryOrFail(
-        { criteria: { id: pair.query_id } },
-        entityManager,
-      );
-      const dbDocumentVersion = await this.documentVersionDAO.findCurrentDocumentVersion(
-        { criteria: { dbDocument } },
-        entityManager,
-      );
-      const dbQueryVersion = await this.queryVersionDAO.findCurrentQueryVersion(
-        { criteria: { dbQuery } },
-        entityManager,
+      const dbQueryVersion = httpUtils.throwIfNullish(
+        await this.queryVersionsDAO.findFirst({
+          where: { query_id: pair.query_id },
+        }),
       );
 
       logger.log(
-        `persisting judgement, documentId=${dbDocument.id}, queryId=${dbQuery.id}, rotate=${rotate}, mode=${judgementMode}, userId=${user.id}`,
+        `persisting judgement, documentId=${pair.document_id}, queryId=${pair.query_id}, rotate=${rotate}, mode=${judgementMode}, userId=${user.id}`,
       );
 
-      await this.judgementsDAO.saveJudgement(
+      await this.judgementsDAO.createTrx(
         {
           data: {
             status: JudgementStatus.TO_JUDGE,
             rotate,
             mode: judgementMode,
-            document: dbDocumentVersion,
-            query: dbQueryVersion,
-            user,
+            document_document: dbDocumentVersion.document_id,
+            document_version: dbDocumentVersion.document_version,
+            query_query: dbQueryVersion.query_id,
+            query_version: dbQueryVersion.query_version,
+            user_id: user.id,
+
+            relevance_level: null,
+            relevance_positions: [],
+            duration_used_to_judge_ms: null,
+            judged_at: null,
           },
         },
-        entityManager,
+        trx,
       );
     }
   };

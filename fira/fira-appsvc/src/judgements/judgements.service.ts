@@ -5,18 +5,15 @@ import d3 = require('d3');
 import * as config from '../config';
 import { RequestLogger } from '../commons/logger/request-logger';
 import { JudgementsPreloadWorker } from './judgements-preload.worker';
-import { PersistenceService } from '../persistence/persistence.service';
 import { JudgementsDAO } from '../persistence/daos/judgements.dao';
+import { JudgementPairsDAO } from '../persistence/daos/judgement-pairs.dao';
+import { FeedbacksDAO } from '../persistence/daos/feedbacks.dao';
 import { ConfigsDAO } from '../persistence/daos/configs.dao';
-import { TJudgement } from '../persistence/entity/judgement.entity';
+import { UsersDAO } from '../persistence/daos/users.dao';
 import { JudgementStatus } from '../typings/enums';
+import { httpUtils } from '../utils/http.utils';
 import { adminSchema, judgementsSchema } from '../../../fira-commons';
-
-import { JudgementDAO } from '../persistence/judgements.dao';
-import { JudgementPairDAO } from '../persistence/judgement-pair.dao';
-import { FeedbackDAO } from '../persistence/feedback.dao';
-import { UserDAO } from '../persistence/user.dao';
-import { ConfigDAO } from '../persistence/config.dao';
+import { judgementGetPayload } from '../../../fira-commons/database/prisma';
 
 const EXPORT_PAGE_SIZE = 200;
 
@@ -25,14 +22,11 @@ export class JudgementsService {
   constructor(
     private readonly requestLogger: RequestLogger,
     private readonly judgementsPreloadWorker: JudgementsPreloadWorker,
-    private readonly persistenceService: PersistenceService,
     private readonly judgementsDAO: JudgementsDAO,
+    private readonly judgementPairsDAO: JudgementPairsDAO,
+    private readonly feedbacksDAO: FeedbacksDAO,
     private readonly configsDAO: ConfigsDAO,
-    private readonly judgementDAO: JudgementDAO,
-    private readonly judgementPairDAO: JudgementPairDAO,
-    private readonly feedbackDAO: FeedbackDAO,
-    private readonly userDAO: UserDAO,
-    private readonly configDAO: ConfigDAO,
+    private readonly userDAO: UsersDAO,
   ) {
     this.requestLogger.setComponent(this.constructor.name);
   }
@@ -43,7 +37,7 @@ export class JudgementsService {
     workletId?: string;
     responsePromise: Promise<judgementsSchema.PreloadJudgementResponse>;
   }> => {
-    const user = await this.userDAO.findUserOrFail({ criteria: { id: userId } });
+    const user = await this.userDAO.findOneOrFail({ where: { id: userId } });
 
     // phase #1: determine how many judgements should, and can, be preloaded for the user.
     // if some should get preloaded, add a worklet to the worker and wait for it to get processed
@@ -68,29 +62,37 @@ export class JudgementsService {
     // phase #2: after the user has preloaded as many judgements as possible,
     // load all the data and return it to the client
     const responsePromise: Promise<judgementsSchema.PreloadJudgementResponse> = workletPromise.then(
-      this.persistenceService.wrapInTransaction(this.requestLogger)(async (transactionalEM) => {
-        const countOfFeedbacks = await this.feedbackDAO.count(
-          { criteria: { user } },
-          transactionalEM,
-        );
-        const countOfNotPreloadedPairs = await this.judgementPairDAO.countNotPreloaded(
-          { criteria: { userId: user.id } },
-          transactionalEM,
-        );
-        const currentOpenJudgements = await this.judgementDAO.findJudgements(
-          { criteria: { user, status: JudgementStatus.TO_JUDGE } },
-          transactionalEM,
-        );
-        const countCurrentFinishedJudgements = await this.judgementDAO.countJudgements(
-          { criteria: { user, status: JudgementStatus.JUDGED } },
-          transactionalEM,
-        );
+      async () => {
+        const countOfFeedbacks = await this.feedbacksDAO.count({ where: { user_id: userId } });
 
-        const dbConfig = await this.configDAO.findConfigOrFail({}, transactionalEM);
+        const judgementsOfUser = await this.judgementsDAO.findMany({
+          where: { user_id: userId },
+          select: { document_document: true, query_query: true },
+        });
+        const queryWhere = judgementsOfUser.map((j) => ({
+          AND: { document_id: j.document_document, query_id: j.query_query },
+        }));
+        const countOfNotPreloadedPairs = await this.judgementPairsDAO.count({
+          where: { NOT: { OR: queryWhere } },
+        });
 
-        const remainingToFinish = dbConfig.annotationTargetPerUser - countCurrentFinishedJudgements;
+        const currentOpenJudgements = await this.judgementsDAO.findMany({
+          where: { user_id: userId, status: JudgementStatus.TO_JUDGE },
+          include: {
+            document_version_document_versionTojudgement: true,
+            query_version_judgementToquery_version: true,
+          },
+        });
+        const countCurrentFinishedJudgements = await this.judgementsDAO.count({
+          where: { user_id: userId, status: JudgementStatus.JUDGED },
+        });
+
+        const dbConfig = httpUtils.throwIfNullish(await this.configsDAO.findFirst());
+
+        const remainingToFinish =
+          dbConfig.annotation_target_per_user - countCurrentFinishedJudgements;
         const remainingUntilFirstFeedbackRequired =
-          dbConfig.annotationTargetToRequireFeedback - countCurrentFinishedJudgements;
+          dbConfig.annotation_target_to_require_feedback - countCurrentFinishedJudgements;
 
         this.requestLogger.log(
           `judgements stats for user: open=${currentOpenJudgements.length}, finished=${countCurrentFinishedJudgements}, ` +
@@ -106,7 +108,7 @@ export class JudgementsService {
           countOfFeedbacks,
           countOfNotPreloadedPairs,
         };
-      }),
+      },
     );
 
     // return workletId and response promise to controller
@@ -374,11 +376,21 @@ function constructCharacterRangesMap(textParts: string[]) {
   return partsCharacterRanges;
 }
 
-function mapJudgementsToResponse(openJudgements: TJudgement[]) {
+function mapJudgementsToResponse(
+  openJudgements: Array<
+    judgementGetPayload<{
+      include: {
+        document_version_document_versionTojudgement: true;
+        query_version_judgementToquery_version: true;
+      };
+    }>
+  >,
+): judgementsSchema.PreloadJudgement[] {
   return openJudgements
     .map((openJudgement) => {
       // rotate text (annotation parts), if requested to do so
-      let annotationParts = openJudgement.document.annotateParts;
+      let annotationParts =
+        openJudgement.document_version_document_versionTojudgement.annotate_parts;
       if (openJudgement.rotate) {
         const rotateIndex = Math.floor(getRotateIndex(annotationParts.length));
         annotationParts = annotationParts
@@ -388,10 +400,10 @@ function mapJudgementsToResponse(openJudgements: TJudgement[]) {
 
       return {
         id: openJudgement.id,
-        queryText: openJudgement.query.text,
+        queryText: openJudgement.query_version_judgementToquery_version.text,
         docAnnotationParts: annotationParts,
-        mode: openJudgement.mode,
-      } as judgementsSchema.PreloadJudgement;
+        mode: openJudgement.mode as judgementsSchema.JudgementMode,
+      };
     })
     .sort((judg1, judg2) => judg1.id - judg2.id);
 }
