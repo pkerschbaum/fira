@@ -65,6 +65,7 @@ WORKDIR /app/fira-appsvc
 # connects to any appsvc instance in the cloud and uses knexjs to manually upgrade the database)
 COPY --from=build-env-appsvc /app/fira-appsvc/dist ./dist
 COPY --from=build-env-appsvc /app/fira-appsvc/node_modules ./node_modules
+COPY --from=build-env-appsvc /app/fira-appsvc/knex-migrations ./knex-migrations
 COPY --from=build-env-appsvc /app/fira-commons ../fira-commons
 
 # Add and execute scrpts which wait for the keycloak server to start, then start the fira backend
