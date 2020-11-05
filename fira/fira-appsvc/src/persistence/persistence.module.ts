@@ -79,12 +79,25 @@ const knexProvider = {
         client: 'pg',
         connection: config.database.connectionString,
         log: {
-          debug: (message: { method: string; sql: string; bindings: any[] }) => {
-            logger.debug(`Executing Statement`, {
-              method: message.method,
-              sql: message.sql,
-              bindings: message.bindings,
-            });
+          debug: (
+            message:
+              | { method: string; sql: string; bindings: any[] }
+              | Array<{ sql: string; bindings: any[] }>,
+          ) => {
+            if (Array.isArray(message)) {
+              for (const elem of message) {
+                logger.debug(`Executing Statement`, {
+                  sql: elem.sql,
+                  bindings: elem.bindings,
+                });
+              }
+            } else {
+              logger.debug(`Executing Statement`, {
+                method: message.method,
+                sql: message.sql,
+                bindings: message.bindings,
+              });
+            }
           },
           deprecate: (method, alternative) => logger.debug(`deprecated`, { method, alternative }),
           warn: (message) => logger.warn(message),
@@ -97,6 +110,10 @@ const knexProvider = {
     return knexClient;
   },
 };
+
+export async function initializeDbSchema() {
+  await knexClient.migrate.latest();
+}
 
 const daos = [
   ConfigsDAO,

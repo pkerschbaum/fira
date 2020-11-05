@@ -6,6 +6,7 @@ import * as config from './config';
 import { AppModule } from './app.module';
 import { TransientLogger } from './commons/logger/transient-logger';
 import { baseLogger } from './commons/logger/base-logger';
+import { initializeDbSchema } from './persistence/persistence.module';
 import { importInitialData } from './boot/import-initial-data';
 import { IdentityManagementService } from './identity-management/identity-management.service';
 import { AdminService } from './admin/admin.service';
@@ -33,7 +34,12 @@ async function bootstrap() {
   // the static path the web app is served with
   app.setGlobalPrefix(`${config.application.urlPaths.web}${config.application.urlPaths.api}`);
 
+  // initialize DB schema
+  appLogger.log('initializing database schema...');
+  await initializeDbSchema();
+
   // now, import all data for Fira
+  appLogger.log('importing data for Fira...');
   await importInitialData({
     logger: appLogger,
     imService: await app.resolve(IdentityManagementService),
