@@ -355,7 +355,7 @@ export class JudgementsPreloadWorker {
         // and set the variant which was used less often
         const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate({}, trx);
         const countRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
-        const countNoRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
+        const countNoRotate = rotateStats.find((elem) => !elem.rotate)?.count ?? 0;
         rotate = countRotate < countNoRotate;
       }
 

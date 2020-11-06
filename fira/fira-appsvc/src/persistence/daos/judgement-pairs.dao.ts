@@ -62,9 +62,7 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
 
   public countTrx = transactional(
     async ({ where }: { where: { user_id: string; status?: JudgementStatus } }, trx) => {
-      return httpUtils.throwIfNullish(
-        (await trx(`judgement`).where(where).count({ count: '*' }))[0].count,
-      );
+      return Number((await trx(`judgement`).count({ count: '*' }).where(where))[0]?.count ?? 0);
     },
   );
 
@@ -75,9 +73,13 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
   });
 
   public countPreloaded = transactional(
-    async ({ where }: { where: { user_id: string; priority: string } }, trx): Promise<number> => {
-      return httpUtils.throwIfNullish(
-        await this.preloaded({ where }, trx).groupBy('document_id', 'query_id').count(),
+    async ({ where }: { where: { user_id: string; priority: string } }, trx) => {
+      return Number(
+        (
+          await this.preloaded({ where }, trx)
+            .count({ count: '*' })
+            .groupBy('document_id', 'query_id')
+        )[0]?.count ?? 0,
       );
     },
   );
@@ -119,8 +121,14 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
   );
 
   public countNotPreloaded = transactional(
-    async ({ where }: { where: { user_id: string; priority?: string } }, trx): Promise<number> => {
-      return await this.notPreloaded({ where }, trx).groupBy('document_id', 'query_id').count();
+    async ({ where }: { where: { user_id: string; priority?: string } }, trx) => {
+      return Number(
+        (
+          await this.notPreloaded({ where }, trx)
+            .count({ count: '*' })
+            .groupBy('document_id', 'query_id')
+        )[0]?.count ?? 0,
+      );
     },
   );
 

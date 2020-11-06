@@ -26,9 +26,9 @@ export class JudgementsDAO extends BaseDAO<ENTITY> {
   }: {
     where: { status: JudgementStatus };
     havingCount: { min: number };
-  }): Promise<number> => {
+  }) => {
     return (
-      await this.prisma.$queryRaw`
+      await this.prisma.$queryRaw<Array<{ user_id: string; count: string | number }>>`
           select "j"."user_id", count(*) from judgement j 
           where "j"."status" = ${where.status} 
           group by "j"."user_id" 
@@ -39,8 +39,9 @@ export class JudgementsDAO extends BaseDAO<ENTITY> {
 
   public countJudgementsGroupByRotate = transactional(async (_, trx) => {
     return ((await trx(`judgement`)
-      .select('rotate', trx.raw('count("judgement".*)'))
-      .groupBy('rotate')) as Array<{ rotate: boolean; count: string }>).map((elem) => ({
+      .select('rotate')
+      .count({ count: '*' })
+      .groupBy('rotate')) as Array<{ rotate: boolean; count: string | number }>).map((elem) => ({
       ...elem,
       count: Number(elem.count),
     }));

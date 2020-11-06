@@ -13,9 +13,3 @@ declare module 'knex/types/tables' {
     judgement: DbJudgement;
   }
 }
-
-declare module 'knex/types/result' {
-  interface Registry {
-    Count: number;
-  }
-}

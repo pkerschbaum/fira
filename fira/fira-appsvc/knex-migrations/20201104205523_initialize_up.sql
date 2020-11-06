@@ -6,7 +6,7 @@ CREATE TABLE "public"."config" (
   "rotate_document_text" boolean NOT NULL,
   "annotation_target_to_require_feedback" integer NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   CONSTRAINT "PK_d0ee79a681413d50b0a4f98cf7b" PRIMARY KEY ("id"),
   /* only one config instance should be present at any time: */
   CONSTRAINT "CHK_691cac5233ac17092f34e759d1" CHECK ("id" = 1)
@@ -29,7 +29,7 @@ CREATE TABLE "public"."document_version" (
   "text" character varying NOT NULL,
   "annotate_parts" text [] NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   "document_id" character varying NOT NULL,
   CONSTRAINT "PK_a50fac903ff5f90d82f21d769eb" PRIMARY KEY ("document_version", "document_id"),
   CONSTRAINT "FK_99e07676aba693e25611b1f6c12" FOREIGN KEY ("document_id") REFERENCES "public"."document" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -47,7 +47,7 @@ CREATE TABLE "public"."query_version" (
   "query_version" integer NOT NULL DEFAULT 1,
   "text" character varying NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   "query_id" character varying NOT NULL,
   CONSTRAINT "PK_ce90264a17e7f26b5e60828c5e5" PRIMARY KEY ("query_version", "query_id"),
   CONSTRAINT "FK_bf5ccc0a1aa4efe299d4b4223aa" FOREIGN KEY ("query_id") REFERENCES "public"."query" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -58,7 +58,7 @@ CREATE UNIQUE INDEX "IDX_ce90264a17e7f26b5e60828c5e" ON "public"."query_version"
 CREATE TABLE "public"."judgement_pair" (
   "priority" character varying NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   "document_id" character varying NOT NULL,
   "query_id" character varying NOT NULL,
   CONSTRAINT "PK_0413dd612cce83f587b8974c0f9" PRIMARY KEY ("document_id", "query_id"),
@@ -84,7 +84,7 @@ CREATE TABLE "public"."judgement" (
   "duration_used_to_judge_ms" integer,
   "judged_at" timestamp with time zone,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   "document_version" integer NOT NULL,
   "document_document" character varying NOT NULL,
   "query_version" integer NOT NULL,
@@ -115,7 +115,7 @@ CREATE TABLE "public"."feedback" (
   "score" character varying NOT NULL,
   "text" text,
   "created_at" timestamp NOT NULL DEFAULT now(),
-  "updated_at" timestamp NOT NULL,
+  "updated_at" timestamp NOT NULL DEFAULT now(),
   "user_id" character varying NOT NULL,
   CONSTRAINT "PK_8389f9e087a57689cd5be8b2b13" PRIMARY KEY ("id"),
   CONSTRAINT "FK_121c67d42dd543cca0809f59901" FOREIGN KEY ("user_id") REFERENCES "public"."user" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION
