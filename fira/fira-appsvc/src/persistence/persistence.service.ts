@@ -35,6 +35,7 @@ export class PersistenceService {
       while (true) {
         try {
           return await this.knexClient.transaction(async (trx) => {
+            await trx.raw('set transaction isolation level serializable');
             return cb(trx, ...args);
           });
         } catch (e) {
