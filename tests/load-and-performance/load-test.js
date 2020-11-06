@@ -1,7 +1,7 @@
 import http from "k6/http";
 import { check, fail, group } from "k6";
 
-const FIRA_BE_BASE = "http://fira-appsvc:80/fira-trec/api";
+const FIRA_BE_BASE = "http://fira_appsvc:80/fira-trec/api";
 const DEFAULT_HEADERS = {
   "Content-Type": "application/json",
 };
@@ -98,19 +98,21 @@ export default function () {
       durationUsedToJudgeMs: 0,
     });
 
-    const res = http.put(
-      http.url`${FIRA_BE_BASE}/judgements/v1/${results.preload.judgements[0].id}`,
-      payload,
-      { headers }
-    );
-    if (
-      !check(res, {
-        "status was 200": (r) => r.status == 200,
-      })
-    ) {
-      fail(
-        `status code of PUT judgements was wrong. res: ${responseToStr(res)}`
+    for (let i = 0; i < 2 && i < results.preload.judgements.length; i++) {
+      const res = http.put(
+        http.url`${FIRA_BE_BASE}/judgements/v1/${results.preload.judgements[i].id}`,
+        payload,
+        { headers }
       );
+      if (
+        !check(res, {
+          "status was 200": (r) => r.status == 200,
+        })
+      ) {
+        fail(
+          `status code of PUT judgements was wrong. res: ${responseToStr(res)}`
+        );
+      }
     }
   });
 }
