@@ -12,7 +12,7 @@ import { QueryVersionsDAO } from '../persistence/daos/query-versions.dao';
 import { httpUtils } from '../utils/http.utils';
 import { JudgementStatus } from '../typings/enums';
 import { judgementsSchema, uniqueIdGenerator } from '../../../fira-commons';
-import { config as dbConfig, user } from '../../../fira-commons/database/prisma';
+import { user } from '../../../fira-commons/database/prisma';
 
 type PreloadWorklet = {
   workletId: string;
@@ -147,10 +147,10 @@ export class JudgementsPreloadWorker {
         );
 
         // get available priorities
-        const {
-          countOfPairsWithPrioAll,
-          numericPriorities,
-        } = await this.judgementPairsDAO.getAvailablePriorities({}, trx);
+        const { countOfPairsWithPrioAll } = await this.judgementPairsDAO.getAvailablePriorities(
+          {},
+          trx,
+        );
 
         // if at least one pair with prio "all" exists, check if the user should get some of this
         // pairs as his next pairs preloaded
@@ -218,123 +218,43 @@ export class JudgementsPreloadWorker {
           }
         }
 
-        // judgements should get preloaded for this user. Only reason this could not be possible is that
-        // the user might have annotated every possible judgement pair already.
-        // --> determine how many judgement pairs the user has not annotated so far
-        let countRemainingPairsToPreload = await this.judgementPairsDAO.countNotPreloaded(
-          { where: { user_id: user.id } },
-          trx,
-        );
-        if (countRemainingPairsToPreload < 1) {
-          logger.log(
-            `there are no judgement pairs left for this user to annotate, ` +
-              `countJudgementsToPreload=${countJudgementsToPreload}, countRemainingPairsToPreload=${countRemainingPairsToPreload}`,
-          );
+        if (countJudgementsToPreload < 1) {
           return;
         }
 
-        // query preloaded pairs once and update the list on-the-fly while searching for
-        // the right judgement pair candidates (because the query is quite expensive)
         const preloadedPairs = await this.judgementPairsDAO.findPreloaded(
           { where: { user_id: user.id } },
           trx,
         );
 
-        let targetFactor = 1;
-        while (countJudgementsToPreload > 0) {
-          const countJudgementsGotPreloaded = await this.preloadNextJudgements({
-            trx,
-            logger,
-            priorities: numericPriorities,
-            preloadedPairs,
-            targetFactor,
-            user,
-            countJudgementsToPreload,
+        // get next judgement pairs which should get judged, and have not been judged by this user
+        const pairCandidates = await this.judgementPairsDAO.getCandidatesByPriority(
+          {
+            limit: countJudgementsToPreload,
+            excluding: { judgementPairs: preloadedPairs },
             dbConfig,
-          });
+          },
+          trx,
+        );
 
+        if (pairCandidates.length < countJudgementsToPreload) {
           logger.log(
-            `round of preload complete, annotation target factor was: ${targetFactor}, ` +
-              `count judgements got preloaded: ${countJudgementsGotPreloaded}`,
+            `could not satisfy countJudgementsToPreload. Either the user judged every possible judgement pair, ` +
+              `or all judgement pairs are currently locked because of concurrent preload executions`,
           );
-
-          countRemainingPairsToPreload -= countJudgementsGotPreloaded;
-          countJudgementsToPreload -= countJudgementsGotPreloaded;
-          targetFactor++;
-
-          // edge case: if the user now has judgements for EVERY possible judgement pair, stop
-          if (countRemainingPairsToPreload < 1) {
-            logger.log(`the user now has judgements for EVERY possible judgement pair --> stop`);
-            break;
-          }
+          return;
         }
+
+        await this.persistPairs(
+          trx,
+          logger,
+          pairCandidates,
+          user,
+          dbConfig.judgement_mode as judgementsSchema.JudgementMode,
+          dbConfig.rotate_document_text,
+        );
       },
     );
-
-  private preloadNextJudgements = async ({
-    trx,
-    logger,
-    priorities,
-    preloadedPairs,
-    targetFactor,
-    user,
-    countJudgementsToPreload,
-    dbConfig,
-  }: {
-    trx: Knex.Transaction;
-    logger: TransientLogger | RequestLogger;
-    priorities: number[];
-    preloadedPairs: PairQueryResult[];
-    targetFactor: number;
-    user: user;
-    countJudgementsToPreload: number;
-    dbConfig: dbConfig;
-  }): Promise<number> => {
-    let remainingToPreload = countJudgementsToPreload;
-    for (const priority of priorities) {
-      if (remainingToPreload < 1) {
-        // enough open judgements generated
-        break;
-      }
-
-      const pairCandidates = await this.judgementPairsDAO.getCandidatesByPriority(
-        {
-          where: { priority: `${priority}` },
-          excluding: { judgementPairs: preloadedPairs },
-          limit: remainingToPreload,
-          targetFactor,
-          dbConfig,
-        },
-        trx,
-      );
-
-      if (pairCandidates.length === 0) {
-        // all judgement-pairs with the given priority already satisfy the annotation target per
-        // judgement-pair, or the user has already judged all the pairs with the given priority
-        // --> try next priority
-        continue;
-      }
-
-      const pairsToPersist = pairCandidates.slice(0, remainingToPreload);
-      await this.persistPairs(
-        trx,
-        logger,
-        pairsToPersist,
-        user,
-        dbConfig.judgement_mode as judgementsSchema.JudgementMode,
-        dbConfig.rotate_document_text,
-      );
-
-      // after the pairs got persisted, add them to the list of preloaded pairs
-      for (const persistedPair of pairsToPersist) {
-        preloadedPairs.push(persistedPair);
-      }
-      remainingToPreload -= pairsToPersist.length;
-    }
-
-    const countJudgementsGotPreloaded = countJudgementsToPreload - remainingToPreload;
-    return countJudgementsGotPreloaded;
-  };
 
   private persistPairs = async (
     trx: Knex.Transaction,

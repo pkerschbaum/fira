@@ -4,7 +4,6 @@ import { TransientLogger } from '../../commons/logger/transient-logger';
 import { BaseDAO } from '../base.dao';
 import { transactional } from '../persistence.util';
 import { JudgementStatus } from '../../typings/enums';
-import { httpUtils } from '../../utils/http.utils';
 import { arrays } from '../../../../fira-commons';
 import { config, judgement_pair, PrismaClient } from '../../../../fira-commons/database/prisma';
 
@@ -14,10 +13,6 @@ const ENTITY = 'judgement_pair';
 export type PairQueryResult = {
   readonly document_id: string;
   readonly query_id: string;
-};
-
-export type CountQueryResult = PairQueryResult & {
-  readonly count: number;
 };
 
 @Injectable()
@@ -120,18 +115,6 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
     },
   );
 
-  public countNotPreloaded = transactional(
-    async ({ where }: { where: { user_id: string; priority?: string } }, trx) => {
-      return Number(
-        (
-          await this.notPreloaded({ where }, trx)
-            .count({ count: '*' })
-            .groupBy('document_id', 'query_id')
-        )[0]?.count ?? 0,
-      );
-    },
-  );
-
   private notPreloaded = transactional(
     ({ where }: { where: { user_id: string; priority?: string } }, trx) => {
       return trx(`judgement_pair`)
@@ -150,51 +133,39 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
   public getCandidatesByPriority = transactional(
     async (
       {
-        where,
         excluding,
         limit,
-        targetFactor,
         dbConfig,
       }: {
-        where: { priority: string };
         excluding: { judgementPairs: Array<Pick<judgement_pair, 'document_id' | 'query_id'>> };
         limit: number;
-        targetFactor: number;
         dbConfig: config;
       },
       trx,
-    ): Promise<CountQueryResult[]> => {
-      return (
-        await trx(`judgement_pair`)
-          .select('document_id', 'query_id', trx.raw('count(judgement.*)'))
-          .leftJoin(`judgement`, function () {
-            this.on(`judgement.document_document`, `=`, `judgement_pair.document_id`).andOn(
-              `judgement.query_query`,
-              `=`,
-              `judgement_pair.query_id`,
-            );
-          })
-          .where({ priority: where.priority })
-          .andWhereRaw(
-            excluding.judgementPairs.length === 0
-              ? 'TRUE = TRUE'
-              : `("judgement_pair"."document_id", "judgement_pair"."query_id") NOT IN ( VALUES ` +
-                  `${excluding.judgementPairs
-                    .map((p) => `('${p.document_id}','${p.query_id}')`)
-                    .join(',')} ) `,
-          )
-          .groupBy('document_id', 'query_id')
-          .havingRaw(`count("judgement".*) < ?`, [
-            dbConfig.annotation_target_per_judg_pair * targetFactor,
-          ])
-          .orderByRaw(
-            `count("judgement".*), "judgement_pair"."document_id", "judgement_pair"."query_id" ASC`,
-          )
-          .limit(limit)
-      ).map((pair) => ({
-        ...pair,
-        count: Number((pair as any).count),
-      }));
+    ) => {
+      return await trx(`judgement_pair`)
+        .select(
+          'document_id',
+          'query_id',
+          trx.raw(
+            `cnt_of_judgements / ${dbConfig.annotation_target_per_judg_pair} target_reached_n_times`,
+          ),
+        )
+        .whereNot({ priority: 'all' })
+        .andWhereRaw(
+          excluding.judgementPairs.length === 0
+            ? 'TRUE = TRUE'
+            : `("judgement_pair"."document_id", "judgement_pair"."query_id") NOT IN ( VALUES ` +
+                `${excluding.judgementPairs
+                  .map((p) => `('${p.document_id}','${p.query_id}')`)
+                  .join(',')} ) `,
+        )
+        .orderByRaw(
+          `target_reached_n_times ASC, "judgement_pair"."priority" DESC, cnt_of_judgements, "judgement_pair"."document_id", "judgement_pair"."query_id" ASC`,
+        )
+        .limit(limit)
+        .forUpdate()
+        .skipLocked();
     },
   );
 }

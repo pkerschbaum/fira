@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const sqlScriptUp = fs.readFileSync(path.join(__dirname, './20201104205523_initialize_up.sql'), {
+const sqlScriptUp = fs.readFileSync(path.join(__dirname, './20201104205523_initialize_db_up.sql'), {
   encoding: 'utf-8',
 });
 
