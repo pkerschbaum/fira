@@ -8,21 +8,9 @@ import { KNEX_CLIENT, KnexClient } from './persistence.constants';
 const MAX_ATTEMPTS = 5;
 const POSTGRES_SERIALIZATION_FAILURE_CODE = '40001';
 
-let singletonGotInstantiated = false;
-
 @Injectable()
 export class PersistenceService {
-  /** This service must have a singleton-scope, thus it is important to pay attention when
-   * adding or changing dependencies of this service. See comment of constructor of
-   * [judgements-worker.service.ts](fira-appsvc/src/judgements/judgements-worker.service.ts) for
-   * further details.
-   */
-  constructor(@Inject(KNEX_CLIENT) private readonly knexClient: KnexClient) {
-    if (singletonGotInstantiated) {
-      throw new Error(`this class should be a singleton and thus get instantiated only once`);
-    }
-    singletonGotInstantiated = true;
-  }
+  constructor(@Inject(KNEX_CLIENT) private readonly knexClient: KnexClient) {}
 
   public wrapInTransaction = (requestLogger: TransientLogger | RequestLogger) => <
     T,
@@ -35,7 +23,6 @@ export class PersistenceService {
       while (true) {
         try {
           return await this.knexClient.transaction(async (trx) => {
-            await trx.raw('set transaction isolation level serializable');
             return cb(trx, ...args);
           });
         } catch (e) {

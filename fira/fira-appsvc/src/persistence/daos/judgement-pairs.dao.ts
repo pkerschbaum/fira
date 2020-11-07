@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import * as Knex from 'knex';
 
 import { TransientLogger } from '../../commons/logger/transient-logger';
 import { BaseDAO } from '../base.dao';
+import { KnexClient } from '../persistence.constants';
 import { transactional } from '../persistence.util';
 import { JudgementStatus } from '../../typings/enums';
 import { arrays } from '../../../../fira-commons';
@@ -69,13 +71,7 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
 
   public countPreloaded = transactional(
     async ({ where }: { where: { user_id: string; priority: string } }, trx) => {
-      return Number(
-        (
-          await this.preloaded({ where }, trx)
-            .count({ count: '*' })
-            .groupBy('document_id', 'query_id')
-        )[0]?.count ?? 0,
-      );
+      return Number((await this.preloaded({ where }, trx).count({ count: '*' }))[0]?.count ?? 0);
     },
   );
 
@@ -115,20 +111,30 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
     },
   );
 
-  private notPreloaded = transactional(
-    ({ where }: { where: { user_id: string; priority?: string } }, trx) => {
-      return trx(`judgement_pair`)
-        .whereNotExists(function () {
-          void this.select(trx.raw('1'))
-            .from(`judgement`)
-            .whereRaw(
-              `"judgement"."document_document" = "judgement_pair"."document_id" AND "judgement"."query_query" = "judgement_pair"."query_id"`,
-            )
-            .andWhere({ user_id: where.user_id });
-        })
-        .andWhere(where.priority === undefined ? {} : { priority: where.priority });
-    },
-  );
+  public countNotPreloaded = async (
+    { where }: { where: { user_id: string } },
+    knexClient: KnexClient | Knex.Transaction,
+  ) => {
+    return Number(
+      (await this.notPreloaded({ where }, knexClient).count({ count: '*' }))[0]?.count ?? 0,
+    );
+  };
+
+  private notPreloaded = (
+    { where }: { where: { user_id: string; priority?: string } },
+    knex: KnexClient | Knex.Transaction,
+  ) => {
+    return knex(`judgement_pair`)
+      .whereNotExists(function () {
+        void this.select(knex.raw('1'))
+          .from(`judgement`)
+          .whereRaw(
+            `"judgement"."document_document" = "judgement_pair"."document_id" AND "judgement"."query_query" = "judgement_pair"."query_id"`,
+          )
+          .andWhere({ user_id: where.user_id });
+      })
+      .andWhere(where.priority === undefined ? {} : { priority: where.priority });
+  };
 
   public getCandidatesByPriority = transactional(
     async (
@@ -143,6 +149,8 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
       },
       trx,
     ) => {
+      await trx.raw(`LOCK TABLE judgement_pair IN SHARE ROW EXCLUSIVE MODE;`);
+
       return await trx(`judgement_pair`)
         .select(
           'document_id',
@@ -161,11 +169,9 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
                   .join(',')} ) `,
         )
         .orderByRaw(
-          `target_reached_n_times ASC, "judgement_pair"."priority" DESC, cnt_of_judgements, "judgement_pair"."document_id", "judgement_pair"."query_id" ASC`,
+          `target_reached_n_times ASC, "judgement_pair"."priority" DESC, cnt_of_judgements ASC, "judgement_pair"."document_id" ASC, "judgement_pair"."query_id" ASC`,
         )
-        .limit(limit)
-        .forUpdate()
-        .skipLocked();
+        .limit(limit);
     },
   );
 }

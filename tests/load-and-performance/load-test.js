@@ -36,15 +36,17 @@ function responseToStr(res) {
 }
 
 export const options = {
-  vus: 3,
-  iterations: 90,
+  vus: USER_CREDENTIALS.length,
+  iterations: USER_CREDENTIALS.length * 30,
 };
 
 export default function () {
   const results = {};
 
   group("login", function () {
-    const payload = JSON.stringify(USER_CREDENTIALS[(__VU - 1) % 3]);
+    const payload = JSON.stringify(
+      USER_CREDENTIALS[(__VU - 1) % USER_CREDENTIALS.length]
+    );
 
     const res = http.post(`${FIRA_BE_BASE}/auth/v1/login`, payload, {
       headers: DEFAULT_HEADERS,
@@ -79,10 +81,12 @@ export default function () {
     const judgements = res.json().judgements;
     if (
       !check(judgements, {
-        "at least one judgement was returned": (j) => j.length > 0,
+        "3 judgements were returned": (j) => j.length === 3,
       })
     ) {
-      fail("no judgements were returned");
+      fail(
+        `invalid count of judgements were returned! count of returned judgements = ${judgements.length}`
+      );
     }
 
     results.preload = { judgements };
