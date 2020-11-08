@@ -113,17 +113,6 @@ const knexProvider = {
 };
 
 export async function initializeDbSchema() {
-  const currentVersion = await knexClient.migrate.currentVersion();
-  const configExists = await knexClient.schema.hasTable(`config`);
-
-  if (currentVersion === 'none' && configExists) {
-    // currentVersion "none" means that no knex migration has been run. If tables exist anyways,
-    // this means the schema was initialized with a version of Fira below 1.7 (with TypeORM
-    // synchronization). In this case, we don't run any knex migrations, the schema is already initialized.
-    return;
-  }
-
-  // run all knex migrations
   await knexClient.migrate.latest();
 }
 

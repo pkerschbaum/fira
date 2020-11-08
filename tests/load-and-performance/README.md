@@ -17,7 +17,7 @@ Taken and adapted from https://github.com/loadimpact/k6
 
 1. Open the Grafana dashboard. It should be available on the Docker host on
    the port specified by the environment variable `K6_GRAFANA_PUBLIC_PORT`.  
-   Import this dashboard: <https://grafana.com/grafana/dashboards/2587>.  
+   Import dashboard with ID 2587 (<https://grafana.com/grafana/dashboards/2587>).  
    As InfluxDB data source, use `myinfluxdb`.
 1. Execute your K6 script using the K6 docker container.  
    In the following example, the path to the script is `./lpt-script.js`.

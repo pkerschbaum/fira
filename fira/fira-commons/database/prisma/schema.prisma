@@ -69,13 +69,14 @@ model query_version {
 }
 
 model judgement_pair {
-  priority    String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  document_id String
-  query_id    String
-  document    document @relation(fields: [document_id], references: [id])
-  query       query    @relation(fields: [query_id], references: [id])
+  priority          String
+  cnt_of_judgements Int      @default(0)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  document_id       String
+  query_id          String
+  document          document @relation(fields: [document_id], references: [id])
+  query             query    @relation(fields: [query_id], references: [id])
 
   @@id([document_id, query_id])
   @@index([document_id, query_id], name: "IDX_0413dd612cce83f587b8974c0f")

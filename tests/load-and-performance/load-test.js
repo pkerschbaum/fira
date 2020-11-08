@@ -1,7 +1,7 @@
 import http from "k6/http";
 import { check, fail, group } from "k6";
 
-const FIRA_BE_BASE = "http://fira-appsvc:80/fira-trec/api";
+const FIRA_BE_BASE = "http://fira_appsvc:80/fira-trec/api";
 const DEFAULT_HEADERS = {
   "Content-Type": "application/json",
 };
@@ -36,15 +36,17 @@ function responseToStr(res) {
 }
 
 export const options = {
-  vus: 3,
-  iterations: 90,
+  vus: USER_CREDENTIALS.length,
+  iterations: USER_CREDENTIALS.length * 30,
 };
 
 export default function () {
   const results = {};
 
   group("login", function () {
-    const payload = JSON.stringify(USER_CREDENTIALS[(__VU - 1) % 3]);
+    const payload = JSON.stringify(
+      USER_CREDENTIALS[(__VU - 1) % USER_CREDENTIALS.length]
+    );
 
     const res = http.post(`${FIRA_BE_BASE}/auth/v1/login`, payload, {
       headers: DEFAULT_HEADERS,
@@ -79,10 +81,12 @@ export default function () {
     const judgements = res.json().judgements;
     if (
       !check(judgements, {
-        "at least one judgement was returned": (j) => j.length > 0,
+        "3 judgements were returned": (j) => j.length === 3,
       })
     ) {
-      fail("no judgements were returned");
+      fail(
+        `invalid count of judgements were returned! count of returned judgements = ${judgements.length}`
+      );
     }
 
     results.preload = { judgements };
@@ -98,19 +102,21 @@ export default function () {
       durationUsedToJudgeMs: 0,
     });
 
-    const res = http.put(
-      http.url`${FIRA_BE_BASE}/judgements/v1/${results.preload.judgements[0].id}`,
-      payload,
-      { headers }
-    );
-    if (
-      !check(res, {
-        "status was 200": (r) => r.status == 200,
-      })
-    ) {
-      fail(
-        `status code of PUT judgements was wrong. res: ${responseToStr(res)}`
+    for (let i = 0; i < 2 && i < results.preload.judgements.length; i++) {
+      const res = http.put(
+        http.url`${FIRA_BE_BASE}/judgements/v1/${results.preload.judgements[i].id}`,
+        payload,
+        { headers }
       );
+      if (
+        !check(res, {
+          "status was 200": (r) => r.status == 200,
+        })
+      ) {
+        fail(
+          `status code of PUT judgements was wrong. res: ${responseToStr(res)}`
+        );
+      }
     }
   });
 }

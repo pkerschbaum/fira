@@ -47,11 +47,15 @@ COPY fira-appsvc/package*.json ./
 RUN npm install
 
 # Copy sources
-COPY fira-appsvc/. ./
+COPY fira-appsvc/*.* ./
+COPY fira-appsvc/src ./src
 COPY tsconfig.json ../
 
 # Create build
 RUN npm run build
+
+# Copy knex migrations
+COPY fira-appsvc/knex-migrations ./knex-migrations
 
 # Copy final build of web to appsvc
 COPY --from=build-env-web /app/fira-web/build ./dist/fira-appsvc/client/build
