@@ -96,11 +96,13 @@ CREATE TABLE IF NOT EXISTS "public"."judgement" (
   CONSTRAINT "FK_c7a3c0c8dd85fc22c05fb59f2b1" FOREIGN KEY ("document_document", "document_version") REFERENCES "public"."document_version" ("document_id", "document_version") ON UPDATE NO ACTION ON DELETE NO ACTION
 );
 
+
 CREATE INDEX IF NOT EXISTS "IDX_026796aa33ab940f8150fb2572" ON "public"."judgement" ("user_id");
 
 CREATE INDEX IF NOT EXISTS "IDX_54fc3bbea108555284e94a552d" ON "public"."judgement" ("document_document", "query_query");
 
-CREATE INDEX IF NOT EXISTS "IDX_be78d8f77da8cb5c09e156e949" ON "public"."judgement" (
+DROP INDEX IF EXISTS "IDX_be78d8f77da8cb5c09e156e949";
+CREATE UNIQUE INDEX "IDX_be78d8f77da8cb5c09e156e949" ON "public"."judgement" (
   "document_document",
   "query_query",
   "user_id"
