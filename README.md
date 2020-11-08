@@ -34,11 +34,10 @@ The parameter `FIRA_APPSVC_DATA_DIRECTORY` must match the absolute path to the d
 ADMIN_USER=admin
 ADMIN_PASSWORD=admin
 ADMIN_EMAIL=admin@domain.com
-FIRA_PERSISTENT_DB_HOST=postgres_fira
-FIRA_PERSISTENT_DB_PORT=5432
 FIRA_PERSISTENT_DB_USER=fira
 FIRA_PERSISTENT_DB_PASSWORD=password
 FIRA_PERSISTENT_DB_DATABASENAME=fira
+FIRA_PERSISTENT_DB_URL=postgresql://fira:password@postgres_fira:5432/fira
 KEYCLOAK_DB_USER=keycloak
 KEYCLOAK_DB_PASSWORD=password
 
