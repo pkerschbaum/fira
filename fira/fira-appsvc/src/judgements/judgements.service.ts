@@ -236,60 +236,72 @@ export class JudgementsService {
     pairs: PairQueryResult[],
     userId: string,
     judgementMode: judgementsSchema.JudgementMode,
-    rotateDocumentText: boolean,
+    rotateDocumentTextRequested: boolean,
   ): Promise<void> => {
-    for (const pair of pairs) {
-      // determine whether to set 'rotate text'-flag or not
-      let rotate: boolean;
-      if (!rotateDocumentText) {
-        // according to the server config, no rotation should be done
-        rotate = false;
-      } else {
-        // determine how often each variant - rotation or no-rotation - was used,
-        // and set the variant which was used less often
-        const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate({}, trx);
-        const countRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
-        const countNoRotate = rotateStats.find((elem) => !elem.rotate)?.count ?? 0;
-        rotate = countRotate < countNoRotate;
-      }
-
-      // gather data and persist judgement
-      const dbDocumentVersion = httpUtils.throwIfNullish(
-        await this.documentVersionsDAO.findFirst({
-          where: { document_id: pair.document_id },
-        }),
-      );
-      const dbQueryVersion = httpUtils.throwIfNullish(
-        await this.queryVersionsDAO.findFirst({
-          where: { query_id: pair.query_id },
-        }),
-      );
-
-      this.requestLogger.log(
-        `persisting judgement, documentId=${pair.document_id}, queryId=${pair.query_id}, rotate=${rotate}, mode=${judgementMode}, userId=${userId}`,
-      );
-
-      await this.judgementsDAO.createTrx(
-        {
-          data: {
-            status: JudgementStatus.TO_JUDGE,
-            rotate,
-            mode: judgementMode,
-            document_document: dbDocumentVersion.document_id,
-            document_version: dbDocumentVersion.document_version,
-            query_query: dbQueryVersion.query_id,
-            query_version: dbQueryVersion.query_version,
-            user_id: userId,
-
-            relevance_level: null,
-            relevance_positions: [],
-            duration_used_to_judge_ms: null,
-            judged_at: null,
-          },
-        },
-        trx,
-      );
+    let rotateFlagForUnevenPair: boolean;
+    if (rotateDocumentTextRequested) {
+      /*
+       * determine how often each variant - rotation or no-rotation - was used,
+       * and set the variant which was used less often.
+       *
+       * rotateFlagForUnevenPair will be set for the 1st, 3rd, 5th (and so on) pair. The inverse will
+       * be set for the 2nd, 4th, 6th (and so on) pair.
+       */
+      const rotateStats = await this.judgementsDAO.countJudgementsGroupByRotate({}, trx);
+      const countRotate = rotateStats.find((elem) => elem.rotate)?.count ?? 0;
+      const countNoRotate = rotateStats.find((elem) => !elem.rotate)?.count ?? 0;
+      rotateFlagForUnevenPair = countRotate < countNoRotate;
     }
+
+    await Promise.all(
+      pairs.map(async (pair, idx) => {
+        // determine whether to set 'rotate text'-flag or not for this pair
+        let rotate: boolean;
+        if (!rotateDocumentTextRequested) {
+          // according to the server config, no rotation should be done
+          rotate = false;
+        } else {
+          rotate = idx % 2 === 0 ? rotateFlagForUnevenPair : !rotateFlagForUnevenPair;
+        }
+
+        // gather data and persist judgement
+        const dbDocumentVersion = httpUtils.throwIfNullish(
+          await this.documentVersionsDAO.findFirst({
+            where: { document_id: pair.document_id },
+          }),
+        );
+        const dbQueryVersion = httpUtils.throwIfNullish(
+          await this.queryVersionsDAO.findFirst({
+            where: { query_id: pair.query_id },
+          }),
+        );
+
+        this.requestLogger.log(
+          `persisting judgement, documentId=${pair.document_id}, queryId=${pair.query_id}, rotate=${rotate}, mode=${judgementMode}, userId=${userId}`,
+        );
+
+        await this.judgementsDAO.createTrx(
+          {
+            data: {
+              status: JudgementStatus.TO_JUDGE,
+              rotate,
+              mode: judgementMode,
+              document_document: dbDocumentVersion.document_id,
+              document_version: dbDocumentVersion.document_version,
+              query_query: dbQueryVersion.query_id,
+              query_version: dbQueryVersion.query_version,
+              user_id: userId,
+
+              relevance_level: null,
+              relevance_positions: [],
+              duration_used_to_judge_ms: null,
+              judged_at: null,
+            },
+          },
+          trx,
+        );
+      }),
+    );
   };
 
   public submitJudgement = async (
