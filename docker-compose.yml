@@ -1,13 +1,13 @@
-version: '3.4'
+version: "3.8"
 
 services:
-  fira-be:
+  fira_appsvc:
     build:
       context: fira/.
       args:
         - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
     ports:
-      - '${FIRA_BE_PUBLIC_PORT}:80'
+      - "${FIRA_APPSVC_PUBLIC_PORT}:80"
     networks:
       - backend
     depends_on:
@@ -15,26 +15,30 @@ services:
       - postgres_fira
     restart: unless-stopped
     environment:
-      - DB_ADDR=postgres_fira
-      - DB_USER=${FIRA_DB_USER}
-      - DB_PASSWORD=${FIRA_DB_PASSWORD}
+      - NODE_ENV=production
+      - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
+      - FIRA_PERSISTENT_DB_HOST=${FIRA_PERSISTENT_DB_HOST}
+      - FIRA_PERSISTENT_DB_PORT=${FIRA_PERSISTENT_DB_PORT}
+      - FIRA_PERSISTENT_DB_USER=${FIRA_PERSISTENT_DB_USER}
+      - FIRA_PERSISTENT_DB_PASSWORD=${FIRA_PERSISTENT_DB_PASSWORD}
+      - FIRA_PERSISTENT_DB_DATABASENAME=${FIRA_PERSISTENT_DB_DATABASENAME}
+      - FIRA_PERSISTENT_DB_URL=${FIRA_PERSISTENT_DB_URL}
       - KEYCLOAK_HOST_BASE=keycloak:8080
       - KEYCLOAK_ADMIN_USER=${ADMIN_USER}
       - KEYCLOAK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - FIRA_HOMEPAGE=${FIRA_HOMEPAGE}
     volumes:
-      - ${FIRA_BE_DATA_DIRECTORY}:/app/fira-be/data
+      - ${FIRA_APPSVC_DATA_DIRECTORY}:/app/fira-appsvc/data
 
   postgres_fira:
     image: postgres:12
     networks:
       - backend
     volumes:
-      - ${FIRA_BE_DATABASE_DIRECTORY}:/var/lib/postgresql/data
+      - ${FIRA_PERSISTENT_DB_DIRECTORY}:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=fira
-      - POSTGRES_USER=${FIRA_DB_USER}
-      - POSTGRES_PASSWORD=${FIRA_DB_PASSWORD}
+      - POSTGRES_DB=${FIRA_PERSISTENT_DB_DATABASENAME}
+      - POSTGRES_USER=${FIRA_PERSISTENT_DB_USER}
+      - POSTGRES_PASSWORD=${FIRA_PERSISTENT_DB_PASSWORD}
 
   keycloak:
     build: keycloak/.

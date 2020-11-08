@@ -1,13 +1,19 @@
+import { createLogger } from '../commons/logger';
 import { createClientId } from './create-client-id';
 import { loadStoredData } from './load-stored-data';
-import { createLogger } from '../logger/logger';
+import { logUserAgentInfo } from './log-user-agent-info';
 
-const bootScripts = [createClientId, loadStoredData];
+const bootScripts: Array<(() => void | Promise<void>)[]> = [
+  [createClientId],
+  [logUserAgentInfo, loadStoredData],
+];
 
 const logger = createLogger('boot');
 
-export const executeBootScripts = () => {
+export const executeBootScripts = async () => {
   logger.info('executing boot scripts...');
 
-  bootScripts.forEach((bootScript) => bootScript());
+  for (const concurrentScripts of bootScripts) {
+    await Promise.all(concurrentScripts.map((script) => script()));
+  }
 };

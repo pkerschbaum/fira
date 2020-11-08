@@ -5,9 +5,16 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "web: launch Chrome",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/fira/fira-web"
+    },
+    {
       "type": "node",
       "request": "attach",
-      "name": "fira-be: attach to process",
+      "name": "appsvc: attach to process",
       "sourceMaps": true,
       "port": 9229
     }

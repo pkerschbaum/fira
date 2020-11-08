@@ -2,7 +2,7 @@ import React from 'react';
 import { RouteProps, Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { RootState } from '../store/store';
+import { RootState } from '../state/store';
 import { UserRole } from '../typings/enums';
 
 type PrivateRouteProps = RouteProps & {

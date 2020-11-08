@@ -2,14 +2,8 @@
   "autorun": true,
   "terminals": [
     {
-      "name": "docker",
-      "focus": true,
-      "execute": false,
-      "command": "./scripts/fira-dev-up.sh"
-    },
-    {
-      "name": "fira-be",
-      "cwd": "[cwd]/fira/fira-be",
+      "name": "fira-appsvc",
+      "cwd": "[cwd]/fira/fira-appsvc",
       "execute": false,
       "command": "npm run start:debug"
     },
@@ -21,9 +15,15 @@
     },
     {
       "name": "fira-commons",
-      "cwd": "[cwd]/fira/commons",
+      "cwd": "[cwd]/fira/fira-commons",
       "execute": false,
       "command": "npm i"
+    },
+    {
+      "name": "docker",
+      "focus": true,
+      "execute": false,
+      "command": "./scripts/dev-up.sh"
     }
   ]
 }

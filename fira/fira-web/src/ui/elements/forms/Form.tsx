@@ -4,7 +4,7 @@ import { Formik, FieldHookConfig, useField, FormikValues, Form as FormikForm } f
 import styles from './Form.module.css';
 import Button from '../Button';
 import FloatingInput from './FloatingInput';
-import { assertUnreachable } from '../../../util/types.util';
+import { assertUnreachable } from '../../../../../fira-commons';
 
 const TextInput: React.FC<
   { label: string } & FieldHookConfig<HTMLInputElement> &

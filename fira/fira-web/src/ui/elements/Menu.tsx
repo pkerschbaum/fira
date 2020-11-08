@@ -4,7 +4,7 @@ import { Manager, Reference, Popper } from 'react-popper';
 import styles from './Menu.module.css';
 import Button from './Button';
 import { useOnViewportClick } from '../util/events.hooks';
-import { useUserActions } from '../../store/user/user.hooks';
+import { useUserActions } from '../../state/user/user.hooks';
 import { useRouting } from '../annotation-route/AnnotationRouter';
 
 const MenuButton = React.forwardRef<HTMLButtonElement, { onClick: () => void }>(

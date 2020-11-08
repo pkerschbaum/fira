@@ -1,0 +1,20 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": false,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": ["src", "../fira-commons/**/*.js"],
+  "exclude": ["node_modules", "dist"]
+}

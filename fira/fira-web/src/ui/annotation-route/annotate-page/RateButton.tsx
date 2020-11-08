@@ -3,23 +3,23 @@ import React from 'react';
 import styles from './RateButton.module.css';
 import Button from '../../elements/Button';
 import { RateLevelType } from '../../../typings/enums';
-import { RelevanceLevel } from '../../../../../commons';
+import { judgementsSchema } from '../../../../../fira-commons';
 
 const RATE_LEVEL_DATA = {
-  [RelevanceLevel.NOT_RELEVANT]: {
+  [judgementsSchema.RelevanceLevel.NOT_RELEVANT]: {
     style: styles.notRelevant,
     text: 'Wrong',
   },
-  [RelevanceLevel.MISLEADING_ANSWER]: {
+  [judgementsSchema.RelevanceLevel.MISLEADING_ANSWER]: {
     style: styles.misleadingAnswer,
     text: 'Misleading',
   },
-  [RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: {
+  [judgementsSchema.RelevanceLevel.TOPIC_RELEVANT_DOES_NOT_ANSWER]: {
     style: styles.topicRelevantDoesNotAnswer,
     text: 'Topic',
   },
-  [RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Partial' },
-  [RelevanceLevel.PERFECT_ANSWER]: {
+  [judgementsSchema.RelevanceLevel.GOOD_ANSWER]: { style: styles.goodAnswer, text: 'Partial' },
+  [judgementsSchema.RelevanceLevel.PERFECT_ANSWER]: {
     style: styles.perfectAnswer,
     text: 'Perfect',
   },

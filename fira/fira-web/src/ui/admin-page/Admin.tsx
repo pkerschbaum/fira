@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Formik, Form, Field } from 'formik';
 
 import styles from './Admin.module.css';
-import { JudgementMode, Statistic } from '../../../../commons';
 import { adminStories } from '../../stories/admin.stories';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { RootState } from '../../state/store';
 import Button from '../elements/Button';
 import Menu from '../elements/Menu';
 import Line from '../elements/Line';
+import { adminSchema, judgementsSchema } from '../../../../fira-commons';
 
 const Admin: React.FC = () => {
-  const [statistics, updateStatistics] = useState<Statistic[] | undefined>(undefined);
+  const [statistics, updateStatistics] = useState<adminSchema.Statistic[] | undefined>(undefined);
 
   // TODO improve: if the application starts, and a user is logged in but the access token is expired,
   // user.subscriptions.ts will asynchronously refresh the token. But the effect fires immediately,
@@ -43,7 +43,7 @@ const Admin: React.FC = () => {
         <Line orientation="horizontal" />
         <Formik
           initialValues={{
-            judgementMode: JudgementMode.SCORING_AND_SELECT_SPANS,
+            judgementMode: judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS,
             rotateDocumentText: 'true',
           }}
           onSubmit={async (values, { setSubmitting }) => {
@@ -64,7 +64,7 @@ const Admin: React.FC = () => {
                 <div>
                   <label htmlFor="judgementMode">Judgement Mode:</label>
                   <Field name="judgementMode" as="select">
-                    {Object.values(JudgementMode).map((judgementMode) => (
+                    {Object.values(judgementsSchema.JudgementMode).map((judgementMode) => (
                       <option key={judgementMode} value={judgementMode}>
                         {judgementMode}
                       </option>

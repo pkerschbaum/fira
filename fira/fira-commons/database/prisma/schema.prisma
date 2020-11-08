@@ -1,0 +1,124 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./lib/prisma-client"
+  previewFeatures = ["transactionApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("FIRA_PERSISTENT_DB_URL")
+}
+
+model config {
+  id                                    Int      @id @default(1)
+  annotation_target_per_user            Int
+  annotation_target_per_judg_pair       Int
+  judgement_mode                        String
+  rotate_document_text                  Boolean
+  annotation_target_to_require_feedback Int
+  created_at                            DateTime @default(now())
+  updated_at                            DateTime @updatedAt
+}
+
+model user {
+  id         String      @id
+  created_at DateTime    @default(now())
+  feedback   feedback[]
+  judgement  judgement[]
+}
+
+model document {
+  id               String             @id
+  created_at       DateTime           @default(now())
+  document_version document_version[]
+  judgement_pair   judgement_pair[]
+}
+
+model document_version {
+  document_version Int         @default(1)
+  text             String
+  annotate_parts   String[]
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+  document_id      String
+  document         document    @relation(fields: [document_id], references: [id])
+  judgement        judgement[]
+
+  @@id([document_version, document_id])
+  @@unique([document_id, document_version], name: "IDX_a50fac903ff5f90d82f21d769e")
+}
+
+model query {
+  id             String           @id
+  created_at     DateTime         @default(now())
+  judgement_pair judgement_pair[]
+  query_version  query_version[]
+}
+
+model query_version {
+  query_version Int         @default(1)
+  text          String
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now())
+  query_id      String
+  query         query       @relation(fields: [query_id], references: [id])
+  judgement     judgement[]
+
+  @@id([query_version, query_id])
+  @@unique([query_id, query_version], name: "IDX_ce90264a17e7f26b5e60828c5e")
+}
+
+model judgement_pair {
+  priority    String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  document_id String
+  query_id    String
+  document    document @relation(fields: [document_id], references: [id])
+  query       query    @relation(fields: [query_id], references: [id])
+
+  @@id([document_id, query_id])
+  @@index([document_id, query_id], name: "IDX_0413dd612cce83f587b8974c0f")
+  @@index([priority], name: "IDX_1b1d70926e58a51849289436e5")
+  @@index([query_id], name: "IDX_c5db286d4cf85dc1f1cce545ae")
+  @@index([document_id], name: "IDX_fc9335e72b0b3d352840b4bc45")
+}
+
+model judgement {
+  id                                           Int              @id @default(autoincrement())
+  status                                       String
+  relevance_level                              String?
+  relevance_positions                          Float[]
+  rotate                                       Boolean
+  mode                                         String
+  duration_used_to_judge_ms                    Int?
+  judged_at                                    DateTime?
+  created_at                                   DateTime         @default(now())
+  updated_at                                   DateTime         @updatedAt
+  document_version                             Int
+  document_document                            String
+  query_version                                Int
+  query_query                                  String
+  user_id                                      String
+  document_version_document_versionTojudgement document_version @relation(fields: [document_version, document_document], references: [document_version, document_id])
+  query_version_judgementToquery_version       query_version    @relation(fields: [query_version, query_query], references: [query_version, query_id])
+  user                                         user             @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "IDX_026796aa33ab940f8150fb2572")
+  @@index([document_document, query_query], name: "IDX_54fc3bbea108555284e94a552d")
+  @@index([document_document, query_query, user_id], name: "IDX_be78d8f77da8cb5c09e156e949")
+  @@index([query_query, query_version], name: "IDX_c54b24c6f4ae078b0f289b2d6b")
+  @@index([document_document, document_version], name: "IDX_c7a3c0c8dd85fc22c05fb59f2b")
+}
+
+model feedback {
+  id         Int      @id @default(autoincrement())
+  score      String
+  text       String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user_id    String
+  user       user     @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "IDX_121c67d42dd543cca0809f5990")
+}

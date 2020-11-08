@@ -1,0 +1,32 @@
+{
+  "name": "root",
+  "private": true,
+  "devDependencies": {
+    "husky": "^4.3.0",
+    "lint-staged": "^10.5.0"
+  },
+  "scripts": {
+    "lint:one:js": "npm run lint --prefix fira/fira-appsvc",
+    "lint:two:js": "npm run lint --prefix fira/fira-web",
+    "lint:three:js": "npm run lint --prefix fira/fira-commons"
+  },
+  "lint-staged": {
+    "fira/fira-appsvc/**/*.ts": [
+      "npm run --silent lint:one:js",
+      "git add"
+    ],
+    "fira/fira-web/**/*.{ts,tsx}": [
+      "npm run --silent lint:two:js",
+      "git add"
+    ],
+    "fira/fira-commons/**/*.ts": [
+      "npm run --silent lint:three:js",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
+}

@@ -10,7 +10,9 @@
     "esbenp.prettier-vscode",
     "mechatroner.rainbow-csv",
     "stylelint.vscode-stylelint",
-    "ms-vscode.vscode-typescript-tslint-plugin"
+    "ms-vscode.vscode-typescript-tslint-plugin",
+    "exiasr.hadolint",
+    "jpoissonnier.vscode-styled-components"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []

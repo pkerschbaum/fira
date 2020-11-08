@@ -3,31 +3,34 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import './index.css';
+
 import App from './App';
-import { store } from './store/store';
-import * as serviceWorker from './serviceWorker';
+import { store } from './state/store';
 import { executeBootScripts } from './boot/boot';
+import * as serviceWorker from './serviceWorker';
 
-executeBootScripts();
+(async function bootstrap() {
+  await executeBootScripts();
 
-const renderApp = () =>
-  ReactDOM.render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </React.StrictMode>,
-    document.getElementById('root'),
-  );
+  const renderApp = () => {
+    ReactDOM.render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </React.StrictMode>,
+      document.getElementById('root'),
+    );
+  };
 
-// register hot module replacement for development environment
-if (process.env.NODE_ENV !== 'production' && (module as any).hot) {
-  (module as any).hot.accept('./App', renderApp);
-}
+  if (process.env.NODE_ENV === 'development' && (module as any).hot) {
+    (module as any).hot.accept('./theme', renderApp);
+  }
 
-renderApp();
+  renderApp();
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+  // If you want your app to work offline and load faster, you can change
+  // unregister() to register() below. Note this comes with some pitfalls.
+  // Learn more about service workers: https://bit.ly/CRA-PWA
+  serviceWorker.unregister();
+})();

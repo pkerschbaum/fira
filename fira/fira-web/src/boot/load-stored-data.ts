@@ -1,7 +1,7 @@
-import { createLogger } from '../logger/logger';
+import { createLogger } from '../commons/logger';
 import { browserStorage } from '../browser-storage/browser-storage';
-import { store } from '../store/store';
-import { actions as userActions } from '../store/user/user.slice';
+import { store } from '../state/store';
+import { actions as userActions } from '../state/user/user.slice';
 
 const logger = createLogger('load-stored-data');
 

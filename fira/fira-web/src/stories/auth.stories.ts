@@ -1,7 +1,7 @@
-import { httpClient } from '../http/http.client';
-import { store } from '../store/store';
-import { createLogger } from '../logger/logger';
-import { actions as userActions } from '../store/user/user.slice';
+import { createLogger } from '../commons/logger';
+import { authClient } from '../http/auth.client';
+import { store } from '../state/store';
+import { actions as userActions } from '../state/user/user.slice';
 
 const logger = createLogger('auth.stories');
 
@@ -9,7 +9,7 @@ export const authStories = {
   login: async (username: string, password: string) => {
     logger.info(`executing login...`, { username });
 
-    const loginResponse = await httpClient.login({ username, password });
+    const loginResponse = await authClient.login({ username, password });
 
     logger.info(`login succeeded! dispatching authenticate...`, { loginResponse });
     store.dispatch(userActions.authenticate(loginResponse));
@@ -20,7 +20,7 @@ export const authStories = {
 
     let refreshResponse;
     try {
-      refreshResponse = await httpClient.refresh({ refreshToken });
+      refreshResponse = await authClient.refresh({ refreshToken });
     } catch (err) {
       logger.error(`refresh failed! dispatching logout...`, err);
       store.dispatch(userActions.logout());

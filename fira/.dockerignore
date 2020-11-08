@@ -1,10 +1,17 @@
-fira-be/node_modules
-fira-be/npm-debug.log
-fira-be/dist
-fira-be/data
-fira-web/node_modules
-fira-web/npm-debug.log
-fira-web/build
-commons/node_modules
-commons/npm-debug.log
-commons/build
+# defaults from https://dev.to/nodepractices/docker-best-practices-with-node-js-4ln4
+**/node_modules/
+**/.git
+**/README.md
+**/LICENSE
+**/.vscode
+**/npm-debug.log
+**/coverage
+**/.env
+**/.editorconfig
+**/.aws
+**/dist
+**/build
+
+# additional directories
+fira-appsvc/data
+fira-commons/database/prisma/lib

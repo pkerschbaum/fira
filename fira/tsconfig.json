@@ -1,8 +1,13 @@
 {
+  "compilerOptions": {
+    "allowUnreachableCode": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react"
+  },
   "references": [
     {
-      "path": "./commons"
+      "path": "./fira-commons"
     }
-  ],
-  "files": []
+  ]
 }

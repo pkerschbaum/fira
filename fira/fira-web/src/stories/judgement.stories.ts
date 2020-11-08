@@ -1,12 +1,12 @@
-import { httpClient } from '../http/http.client';
-import { createLogger } from '../logger/logger';
-import { store } from '../store/store';
+import { createLogger } from '../commons/logger';
+import { judgementsClient } from '../http/judgements.client';
+import { store } from '../state/store';
 import {
   actions as annotationActions,
   JudgementPairStatus,
-} from '../store/annotation/annotation.slice';
+} from '../state/annotation/annotation.slice';
 import { RateLevels } from '../typings/enums';
-import { RelevanceLevel } from '../../../commons';
+import { judgementsSchema } from '../../../fira-commons';
 
 const logger = createLogger('judgements.service');
 
@@ -14,13 +14,13 @@ export const judgementStories = {
   preloadJudgements: async () => {
     logger.info(`executing preload judgements...`);
 
-    const response = await httpClient.preloadJudgements();
+    const response = await judgementsClient.preloadJudgements();
 
     logger.info(`preload judgements succeeded! dispatching preload judgements...`, { response });
     store.dispatch(annotationActions.preloadJudgements(response));
   },
 
-  rateJudgementPair: async (relevanceLevel: RelevanceLevel) => {
+  rateJudgementPair: async (relevanceLevel: judgementsSchema.RelevanceLevel) => {
     logger.info(`executing rate judgement pair...`);
 
     store.dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));
@@ -66,7 +66,7 @@ export const judgementStories = {
     );
 
     try {
-      await httpClient.submitJudgement(currentJudgementPair.id, {
+      await judgementsClient.submitJudgement(currentJudgementPair.id, {
         relevanceLevel: currentJudgementPair.relevanceLevel!,
         relevancePositions,
         durationUsedToJudgeMs,

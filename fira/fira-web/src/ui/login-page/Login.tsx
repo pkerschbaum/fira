@@ -5,7 +5,9 @@ import { useSelector } from 'react-redux';
 import styles from './Login.module.css';
 import Form from '../elements/forms/Form';
 import { authStories } from '../../stories/auth.stories';
-import { RootState } from '../../store/store';
+import { RootState } from '../../state/store';
+import { HttpStatus } from '../../http/http-status.enum';
+import { HttpException } from '../../http/http.exception';
 
 const Login: React.FC = () => {
   const user = useSelector((state: RootState) => state.user);
@@ -41,7 +43,7 @@ const Login: React.FC = () => {
               await authStories.login(values.username, values.password);
               // omit setSubmitting here because if login was successful, it will redirect and thus unmount the component
             } catch (e) {
-              if (typeof e.getStatus === 'function' && e.getStatus() === 401) {
+              if (e instanceof HttpException && e.status === HttpStatus.UNAUTHORIZED) {
                 setErrors({ formError: `Credentials invalid.` } as any);
               } else {
                 throw e;
