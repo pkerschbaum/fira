@@ -203,16 +203,11 @@ export class JudgementsService {
         return;
       }
 
-      const preloadedPairs = await this.judgementPairsDAO.findPreloaded(
-        { where: { user_id: userId } },
-        trx,
-      );
-
       // get next judgement pairs which should get judged, and have not been judged by this user
       const pairCandidates = await this.judgementPairsDAO.getCandidatesByPriority(
         {
+          where: { user_id: userId },
           limit: countJudgementsToPreload,
-          excluding: { judgementPairs: preloadedPairs },
           dbConfig,
         },
         trx,

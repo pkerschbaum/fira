@@ -139,11 +139,11 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
   public getCandidatesByPriority = transactional(
     async (
       {
-        excluding,
+        where,
         limit,
         dbConfig,
       }: {
-        excluding: { judgementPairs: Array<Pick<judgement_pair, 'document_id' | 'query_id'>> };
+        where: { user_id: string };
         limit: number;
         dbConfig: config;
       },
@@ -159,15 +159,15 @@ export class JudgementPairsDAO extends BaseDAO<ENTITY> {
             `cnt_of_judgements / ${dbConfig.annotation_target_per_judg_pair} target_reached_n_times`,
           ),
         )
-        .whereNot({ priority: 'all' })
-        .andWhereRaw(
-          excluding.judgementPairs.length === 0
-            ? 'TRUE = TRUE'
-            : `("judgement_pair"."document_id", "judgement_pair"."query_id") NOT IN ( VALUES ` +
-                `${excluding.judgementPairs
-                  .map((p) => `('${p.document_id}','${p.query_id}')`)
-                  .join(',')} ) `,
-        )
+        .whereNotExists(function () {
+          void this.select(trx.raw('1'))
+            .from(`judgement`)
+            .whereRaw(
+              `"judgement"."document_document" = "judgement_pair"."document_id" AND "judgement"."query_query" = "judgement_pair"."query_id"`,
+            )
+            .andWhere({ user_id: where.user_id });
+        })
+        .andWhereNot({ priority: 'all' })
         .orderByRaw(
           `target_reached_n_times ASC, "judgement_pair"."priority" DESC, cnt_of_judgements ASC, "judgement_pair"."document_id" ASC, "judgement_pair"."query_id" ASC`,
         )
