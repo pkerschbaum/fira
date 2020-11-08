@@ -54,7 +54,15 @@ export class JudgementsService {
         `no judgements should get preloaded for this user, userId=${user.id}, countJudgementsToPreload=${countJudgementsToPreload}`,
       );
     } else {
-      await this.preloadJudgements({ userId });
+      const countOfNotPreloadedPairs = await this.judgementPairsDAO.countNotPreloaded(
+        { where: { user_id: userId } },
+        this.knexClient,
+      );
+      if (countOfNotPreloadedPairs === 0) {
+        this.requestLogger.log(`user has annotated every possible judgement pair --> no preload`);
+      } else {
+        await this.preloadJudgements({ userId });
+      }
     }
 
     // after the user has preloaded as many judgements as possible,
@@ -212,14 +220,6 @@ export class JudgementsService {
         },
         trx,
       );
-
-      if (pairCandidates.length < countJudgementsToPreload) {
-        this.requestLogger.log(
-          `could not satisfy countJudgementsToPreload. Either the user judged every possible judgement pair, ` +
-            `or all judgement pairs are currently locked because of concurrent preload executions`,
-        );
-        return;
-      }
 
       await this.persistPairs(
         trx,
