@@ -44,11 +44,14 @@ const MainSwitch: React.FC = () => {
 
   return (
     <>
-      {dialogOpen && (
-        <Dialog onClose={() => setDialogOpen(false)}>
-          Your client id is: <strong>{browserStorage.getClientId()}</strong>
-        </Dialog>
-      )}
+      <Dialog
+        id="support-dialog"
+        title="Information for support"
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      >
+        Your client id is: <strong>{browserStorage.getClientId()}</strong>
+      </Dialog>
       <Switch>
         <Route exact path="/">
           <RedirectDependingOnUserRole />

@@ -1,23 +1,33 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { StylesProvider } from '@material-ui/core/styles';
+import { enUS } from '@material-ui/core/locale';
 
 import './index.css';
 
 import App from './App';
 import { store } from './state/store';
 import { executeBootScripts } from './boot/boot';
+import { createTheme } from './theme';
+import { ThemeProvider } from './ThemeProvider';
 import * as serviceWorker from './serviceWorker';
 
 (async function bootstrap() {
   await executeBootScripts();
 
   const renderApp = () => {
+    const theme = createTheme(enUS);
+
     ReactDOM.render(
       <React.StrictMode>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <StylesProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <Provider store={store}>
+              <App />
+            </Provider>
+          </ThemeProvider>
+        </StylesProvider>
       </React.StrictMode>,
       document.getElementById('root'),
     );
