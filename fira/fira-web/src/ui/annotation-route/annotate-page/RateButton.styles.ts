@@ -40,7 +40,6 @@ export const styles = {
 
     border: var(--border-medium) solid var(--darkened-color);
     border-radius: var(--border-radius-normal);
-    color: var(--color-dense);
     background: var(--bg-color);
 
     position: relative;

@@ -19,14 +19,8 @@
   * {
     font-size: 1.05rem;
   }
-
-  body {
-    --font-small: 0.925rem;
-    --font-xxxlarge: 2.05rem;
-  }
 }
 
-/* apply some default styles */
 body {
   margin: 0;
 
@@ -34,12 +28,7 @@ body {
 
   /* ### COLORS ### */
   --color-primary: #202932;
-  --color-primary-font: white;
   --color-error: #c13515;
-  --color-disabled: #9b9b9b;
-  --color-dense: #1d1d1d;
-  --color-soft: #9b9b9b;
-  --color-ui-element-highlight: #cccccc;
   --color-destructive: #c13515;
 
   --color-ratelevel-not-relevant: #ff7e61;
@@ -58,40 +47,22 @@ body {
   --color-annotation-is-in-range: lightgreen;
   --color-annotation-progress-bar: lightgreen;
 
-  /* ### FONT SIZES AND WEIGHTS ### */
-  --font-small: 0.875rem;
-  --font-xxxlarge: 2rem;
-
-  --weight-heavy: 700;
-  --weight-normal: 400;
-
   /* ### BORDERS ### */
-  --border-small: 0.0625rem;
   --border-medium: 0.125rem;
-  --border-xlarge: 0.15rem;
   --border-radius-xsmall: 0.25rem;
   --border-radius-normal: 0.5rem;
 
   /* ### SIZING ### */
-  --margin-xxsmall: 0.5rem;
-  --margin-xsmall: 0.75rem;
-  --margin-medium: 1rem;
-  --margin-xlarge: 2rem;
-  --margin-xxlarge: 3rem;
   --padding-xxxsmall: 0.25rem;
   --padding-xxsmall: 0.5rem;
-  --padding-medium: 1rem;
-  --padding-xlarge: 2rem;
-  --padding-xxlarge: 3rem;
 
   /* ### SPECIAL VARIABLES ### */
-  --transform-button: scale(0.96);
   --narrow-content-area-width: 32.5rem;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', SegoeUI, 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
 
 body * {
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', SegoeUI, 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -106,7 +106,7 @@ export const styles = {
     }
   `,
 
-  footer: css`
+  footer: (theme: Theme) => css`
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -117,7 +117,7 @@ export const styles = {
     margin: 0;
 
     & > * {
-      margin: calc(var(--margin-xxsmall) / 2);
+      margin: ${theme.spacing(0.5)};
     }
   `,
 
