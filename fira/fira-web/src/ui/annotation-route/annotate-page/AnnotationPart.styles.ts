@@ -22,11 +22,8 @@ export const styles = {
 
   isInRange,
 
-  annotationAllowedOnPart: css`
-    // for nesting classes with Emotion see https://github.com/emotion-js/emotion/issues/1217#issuecomment-575832010
-    &:hover {
-      background-color: var(--color-annotation-allowed-highlight);
-    }
+  annotationAllowedHighlight: css`
+    background-color: var(--color-annotation-allowed-highlight);
   `,
 
   annotationAllowedInGeneral: css`

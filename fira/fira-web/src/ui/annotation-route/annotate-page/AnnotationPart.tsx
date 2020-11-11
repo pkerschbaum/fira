@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { Box, Popover } from '@material-ui/core';
+import { useHover } from '@react-aria/interactions';
 
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
@@ -30,14 +31,10 @@ const AnnotationPart: React.FC<{
   onPopoverClick,
 }) => {
   const popoverAnchorRef = useRef<HTMLSpanElement>(null);
+  const { hoverProps, isHovered } = useHover({});
 
   // set css class if part is start of the current selected range
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : false;
-
-  // highlight the span as selectable (e.g., on hover) if annotation on the part is allowed
-  const annotationAllowedOnPartStyle = annotationIsAllowedOnPart
-    ? styles.annotationAllowedOnPart
-    : false;
 
   // apply additional styles if annotation is allowed (e.g., spacing for mobile devices)
   const annotationAllowedInGeneralStyle = annotationIsAllowedInGeneral
@@ -56,10 +53,15 @@ const AnnotationPart: React.FC<{
           styles.annotatePart,
           currentRangeStartStyle,
           !!isInSelectedRange ? styles.isInRange : false,
-          !currentRangeStartStyle && !isInSelectedRange && annotationAllowedOnPartStyle,
+          // highlight the span as selectable on hover, if annotation on the part is allowed
+          isHovered &&
+            !currentRangeStartStyle &&
+            !isInSelectedRange &&
+            styles.annotationAllowedHighlight,
           annotationAllowedInGeneralStyle,
           whitespaceStyle,
         ]}
+        {...hoverProps}
       >
         {text}
       </span>

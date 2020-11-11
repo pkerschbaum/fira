@@ -10,6 +10,7 @@
     "@material-ui/icons": "^5.0.0-alpha.15",
     "@material-ui/lab": "^5.0.0-alpha.15",
     "@popperjs/core": "^2.5.3",
+    "@react-aria/interactions": "^3.3.0",
     "@reduxjs/toolkit": "^1.4.0",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
