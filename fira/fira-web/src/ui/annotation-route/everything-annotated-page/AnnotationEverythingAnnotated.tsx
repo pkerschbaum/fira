@@ -1,6 +1,10 @@
 import React from 'react';
+import { Box } from '@material-ui/core';
 
-import styles from './AnnotationEverythingAnnotated.module.css';
+import TextBox from '../../elements/TextBox';
+import Stack from '../../layouts/Stack';
+
+import { styles } from './AnnotationEverythingAnnotated.styles';
 
 const SportsMedalEmoji: React.FC = () => (
   <svg width="128" height="128">
@@ -134,16 +138,16 @@ const SportsMedalEmoji: React.FC = () => (
 
 const AnnotationEverythingAnnotated: React.FC = () => {
   return (
-    <div className={styles.container}>
-      <span className={styles.headline}>Wow!</span>
-      <div className={styles.finishedLogo}>
-        <SportsMedalEmoji />
-      </div>
-      <div>
-        <div>You annotated every query document pair we have for you!</div>
-        <div>Thank you for your participation!</div>
-      </div>
-    </div>
+    <Stack justifyContent="center" css={styles.container}>
+      <TextBox fontSize="xxl" bold>
+        Wow!
+      </TextBox>
+      <SportsMedalEmoji />
+      <Box>
+        <TextBox>You annotated every query document pair we have for you!</TextBox>
+        <TextBox>Thank you for your participation!</TextBox>
+      </Box>
+    </Stack>
   );
 };
 

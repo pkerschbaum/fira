@@ -2,9 +2,12 @@ import React from 'react';
 
 import styles from './LoadingIndicator.module.css';
 
-const LoadingIndicator: React.FC<{ type?: 'primary' | 'secondary' }> = ({ type = 'secondary' }) => (
+const LoadingIndicator: React.FC<{ type?: 'primary' | 'secondary'; className?: string }> = ({
+  type = 'secondary',
+  className,
+}) => (
   <div
-    className={`${styles.ldsEllipsis} ${
+    className={`${className} ${styles.ldsEllipsis} ${
       type === 'primary' ? styles.typePrimary : styles.typeSecondary
     }`}
   >

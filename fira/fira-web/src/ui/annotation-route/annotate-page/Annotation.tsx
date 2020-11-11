@@ -1,20 +1,24 @@
 import React, { useState, useRef } from 'react';
+import { Box, Divider } from '@material-ui/core';
 
-import styles from './Annotation.module.css';
-import { RateLevels } from '../../../typings/enums';
-import { judgementStories } from '../../../stories/judgement.stories';
 import Button from '../../elements/Button';
-import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
+import TextBox from '../../elements/TextBox';
+import Menu from '../../elements/Menu';
+import Stack from '../../layouts/Stack';
+import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
+import AnnotationPart from './AnnotationPart';
+import { judgementStories } from '../../../stories/judgement.stories';
+import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
 import {
   useAnnotationState,
   useAnnotationActions,
 } from '../../../state/annotation/annotation.hooks';
-import AnnotationPart from './AnnotationPart';
-import JustifiedText from '../../layouts/JustifiedText';
-import Menu from '../../elements/Menu';
-import Line from '../../elements/Line';
+import { RateLevels } from '../../../typings/enums';
 import { functions, judgementsSchema } from '../../../../../fira-commons';
+
+import { styles } from './Annotation.styles';
+import { commonStyles } from '../../Common.styles';
 
 const WHITESPACE = ' ';
 
@@ -39,24 +43,37 @@ const AnnotationShell: React.FC<{
 }) => {
   return (
     <>
-      <div
+      <Box
         style={{ '--finished-fraction': `${finishedFraction}%` } as any}
-        className={styles.progressBar}
+        css={styles.progressBar}
       />
-      <div className={styles.container} onClickCapture={hideTooltip}>
-        <div className={styles.actionBar}>{queryComponent}</div>
-        <Line orientation="horizontal" />
-        <div
+      <Stack
+        alignItems="stretch"
+        css={(styles.container, commonStyles.fullHeight)}
+        boxProps={{ onClickCapture: hideTooltip }}
+      >
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          disableContainerStretch
+          css={styles.actionBar}
+        >
+          {queryComponent}
+        </Stack>
+        <Divider css={styles.divider} />
+        <Stack
+          alignItems="flex-start"
           ref={documentComponentRef}
-          className={`${styles.annotationArea} ${
-            !userSelectionAllowed && styles.noUserSelectionAllowed
-          }`}
-          onMouseUp={annotateOnUserSelect}
+          css={[
+            styles.annotationArea,
+            !userSelectionAllowed && commonStyles.noUserSelectionAllowed,
+          ]}
+          boxProps={{ onMouseUp: annotateOnUserSelect }}
         >
           {documentComponent}
-        </div>
-        <div className={styles.footer}>{guideComponent}</div>
-      </div>
+        </Stack>
+        <Box css={styles.footer}>{guideComponent}</Box>
+      </Stack>
     </>
   );
 };
@@ -192,132 +209,130 @@ const Annotation: React.FC = () => {
   }
 
   return (
-    <>
-      <AnnotationShell
-        finishedFraction={finishedFraction}
-        hideTooltip={hideTooltip}
-        userSelectionAllowed={userSelectionAllowed}
-        annotateOnUserSelect={annotateOnUserSelect}
-        queryComponent={
-          <>
-            <div className={styles.queryText}>{currentJudgementPair.queryText}</div>
-            <Menu
-              additionalInfo={
-                <span>
-                  Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
-                  <strong>{alreadyFinished! + remainingToFinish}</strong>
-                </span>
-              }
-            />
-          </>
-        }
-        documentComponentRef={documentComponentRef}
-        documentComponent={
-          <JustifiedText
-            text={currentJudgementPair.docAnnotationParts}
-            parentContainerRef={documentComponentRef}
-            createTextNode={({ textPart, partIdx }) => {
-              // determine if part is in one of the selected ranges
-              const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
-                (range) => range.start <= partIdx && range.end >= partIdx,
-              );
-              const isInAnnotatedRange = !!correspondingAnnotatedRange;
-              /*
-               * annotation of a part is allowed if
-               * - the corresponding judgement mode is set,
-               * - it is no whitespace
-               * - and the part is not already part of a selected region
-               */
-              const canAnnotatePart =
-                currentJudgementPair.mode ===
-                  judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS &&
-                textPart !== WHITESPACE &&
-                !isInAnnotatedRange;
-
-              /*
-               * now render two things:
-               * - the main annotation part which shows the actual text.
-               * - a second annotation part which is only a placeholder. This placeholder will
-               *   use the horizontal space remaining in the line of text. Essentially, this
-               *   placeholder creates a justified layout for the text (i.e. a "Blocksatz" layout,
-               *   as it is called in german)
-               *
-               * Why use a placeholder, instead of just spreading out the parts via the parent container (e.g.,
-               * justify-content: space-between)? Well, imagine the user annotated a range containing of multiple words.
-               * Then, we want to highlight the entire range, e.g. with a background color.
-               * If we would let the parent container take care of spreading out the text parts, there would be empty space
-               * in between which is not highlighted like the text. So we need something which we can apply styles onto.
-               * The placeholders enable to apply styles on them, e.g. give them the same green background color like the
-               * annotated text parts.
-               */
-              return (
-                <AnnotationPart
-                  key={partIdx}
-                  idx={`${partIdx}`}
-                  text={textPart}
-                  isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
-                  isInSelectedRange={isInAnnotatedRange}
-                  showTooltip={tooltipAnnotatePartIndex === partIdx}
-                  annotationIsAllowedOnPart={canAnnotatePart}
-                  annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
-                  onPartClick={
-                    canAnnotatePart
-                      ? () =>
-                          selectRange({
-                            selection: { type: 'START_OR_END', annotationPartIndex: partIdx },
-                          })
-                      : isInAnnotatedRange
-                      ? () => setTooltipAnnotatePartIndex(partIdx)
-                      : functions.noop
-                  }
-                  onTooltipClick={() => {
-                    deleteRange({ annotationPartIndex: partIdx });
-                    hideTooltip();
-                  }}
-                />
-              );
-            }}
+    <AnnotationShell
+      finishedFraction={finishedFraction}
+      hideTooltip={hideTooltip}
+      userSelectionAllowed={userSelectionAllowed}
+      annotateOnUserSelect={annotateOnUserSelect}
+      queryComponent={
+        <>
+          <TextBox bold>{currentJudgementPair.queryText}</TextBox>
+          <Menu
+            additionalInfo={
+              <TextBox>
+                Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
+                <strong>{alreadyFinished! + remainingToFinish}</strong>
+              </TextBox>
+            }
           />
-        }
-        guideComponent={
-          ratingRequired ? (
-            Object.values(RateLevels)
-              .filter((rateLevel) => rateLevel.enabled)
-              .map((rateLevel) => (
-                <RateButton
-                  key={rateLevel.relevanceLevel}
-                  rateLevel={rateLevel}
-                  onClick={createJudgementFn(rateLevel.relevanceLevel)}
-                />
-              ))
-          ) : (
-            <>
-              <span className={styles.guideText}>
-                {currentSelectionNotFinished ? (
-                  <>Finish your selection</>
-                ) : annotationStatus === 'RELEVANT_REGION_REQUIRED' ? (
-                  <>Please select the relevant regions of the document.</>
-                ) : annotationStatus === 'MISLEADING_REGION_REQUIRED' ? (
-                  <>Please select the misleading regions of the document.</>
-                ) : annotationStatus === 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED' ? (
-                  <>Feel free to add more relevant regions or go to the next judgement pair.</>
-                ) : (
-                  <>Feel free to add more misleading regions or go to the next judgement pair.</>
-                )}
-              </span>
-              <Button
-                buttonType="primary"
-                className={styles.nextButton}
-                disabled={currentSelectionNotFinished || annotationIsRequired}
-                onClick={() => judgementStories.submitCurrentJudgement()}
-              >
-                Next
-              </Button>
-            </>
-          )
-        }
-      />
-    </>
+        </>
+      }
+      documentComponentRef={documentComponentRef}
+      documentComponent={
+        <JustifiedText
+          text={currentJudgementPair.docAnnotationParts}
+          parentContainerRef={documentComponentRef}
+          createTextNode={({ textPart, partIdx }) => {
+            // determine if part is in one of the selected ranges
+            const correspondingAnnotatedRange = currentJudgementPair.annotatedRanges.find(
+              (range) => range.start <= partIdx && range.end >= partIdx,
+            );
+            const isInAnnotatedRange = !!correspondingAnnotatedRange;
+            /*
+             * annotation of a part is allowed if
+             * - the corresponding judgement mode is set,
+             * - it is no whitespace
+             * - and the part is not already part of a selected region
+             */
+            const canAnnotatePart =
+              currentJudgementPair.mode ===
+                judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS &&
+              textPart !== WHITESPACE &&
+              !isInAnnotatedRange;
+
+            /*
+             * now render two things:
+             * - the main annotation part which shows the actual text.
+             * - a second annotation part which is only a placeholder. This placeholder will
+             *   use the horizontal space remaining in the line of text. Essentially, this
+             *   placeholder creates a justified layout for the text (i.e. a "Blocksatz" layout,
+             *   as it is called in german)
+             *
+             * Why use a placeholder, instead of just spreading out the parts via the parent container (e.g.,
+             * justify-content: space-between)? Well, imagine the user annotated a range containing of multiple words.
+             * Then, we want to highlight the entire range, e.g. with a background color.
+             * If we would let the parent container take care of spreading out the text parts, there would be empty space
+             * in between which is not highlighted like the text. So we need something which we can apply styles onto.
+             * The placeholders enable to apply styles on them, e.g. give them the same green background color like the
+             * annotated text parts.
+             */
+            return (
+              <AnnotationPart
+                key={partIdx}
+                idx={`${partIdx}`}
+                text={textPart}
+                isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
+                isInSelectedRange={isInAnnotatedRange}
+                showTooltip={tooltipAnnotatePartIndex === partIdx}
+                annotationIsAllowedOnPart={canAnnotatePart}
+                annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
+                onPartClick={
+                  canAnnotatePart
+                    ? () =>
+                        selectRange({
+                          selection: { type: 'START_OR_END', annotationPartIndex: partIdx },
+                        })
+                    : isInAnnotatedRange
+                    ? () => setTooltipAnnotatePartIndex(partIdx)
+                    : functions.noop
+                }
+                onTooltipClick={() => {
+                  deleteRange({ annotationPartIndex: partIdx });
+                  hideTooltip();
+                }}
+              />
+            );
+          }}
+        />
+      }
+      guideComponent={
+        ratingRequired ? (
+          Object.values(RateLevels)
+            .filter((rateLevel) => rateLevel.enabled)
+            .map((rateLevel) => (
+              <RateButton
+                key={rateLevel.relevanceLevel}
+                rateLevel={rateLevel}
+                onClick={createJudgementFn(rateLevel.relevanceLevel)}
+              />
+            ))
+        ) : (
+          <>
+            <TextBox css={commonStyles.flex.shrinkAndFit}>
+              {currentSelectionNotFinished ? (
+                <>Finish your selection</>
+              ) : annotationStatus === 'RELEVANT_REGION_REQUIRED' ? (
+                <>Please select the relevant regions of the document.</>
+              ) : annotationStatus === 'MISLEADING_REGION_REQUIRED' ? (
+                <>Please select the misleading regions of the document.</>
+              ) : annotationStatus === 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED' ? (
+                <>Feel free to add more relevant regions or go to the next judgement pair.</>
+              ) : (
+                <>Feel free to add more misleading regions or go to the next judgement pair.</>
+              )}
+            </TextBox>
+            <Button
+              variant="contained"
+              css={styles.nextButton}
+              disabled={currentSelectionNotFinished || annotationIsRequired}
+              onClick={() => judgementStories.submitCurrentJudgement()}
+            >
+              Next
+            </Button>
+          </>
+        )
+      }
+    />
   );
 };
 

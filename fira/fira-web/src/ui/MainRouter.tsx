@@ -47,6 +47,8 @@ const MainSwitch: React.FC = () => {
       <Dialog
         id="support-dialog"
         title="Information for support"
+        confirmationButtonLabel="Close"
+        hideAbortButton
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
       >

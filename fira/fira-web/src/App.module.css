@@ -71,10 +71,6 @@
   --narrow-content-area-width: 32.5rem;
 }
 
-* {
-  font-size: 1rem;
-}
-
 /* touch devices (primary input is coarse) */
 @media (pointer: coarse) {
   * {

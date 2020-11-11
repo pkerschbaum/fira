@@ -1,7 +1,8 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
+import { Box } from '@material-ui/core';
 import { ResizeSensor } from 'css-element-queries';
 
-import styles from './JustifiedText.module.css';
+import { styles } from './JustifiedText.styles';
 
 const WHITESPACE = ' ';
 
@@ -19,7 +20,7 @@ const JustifiedText: React.FC<{
   const parentContainer = parentContainerRef.current;
 
   useLayoutEffect(
-    function registerResizseObserver() {
+    function registerResizeObserver() {
       if (parentContainer) {
         setParentWidth(parentContainer.offsetWidth);
         const resizeSensor = new ResizeSensor(parentContainer, () => {
@@ -80,14 +81,14 @@ const JustifiedText: React.FC<{
         const isLastLine = lineIdx === textLines.length - 1;
 
         return (
-          <div key={lineIdx} className={`${!isLastLine ? styles.line : styles.lastLine}`}>
+          <Box key={lineIdx} css={!isLastLine ? styles.line : styles.lastLine}>
             {line.map((part) =>
               createTextNode({ textPart: part.textPart, partIdx: part.originalPartIdx }),
             )}
-          </div>
+          </Box>
         );
       })}
-      <span className={styles.hiddenPlaceholder} ref={placeholderRef}></span>
+      <Box component="span" css={styles.hiddenPlaceholder} ref={placeholderRef} />
     </>
   );
 };

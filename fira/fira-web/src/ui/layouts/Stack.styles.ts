@@ -8,6 +8,7 @@ type StyleParams = {
   alignItems: Property.AlignItems;
   wrap?: true | 'nowrap' | 'wrap-reverse';
   growItems?: boolean;
+  shrinkItems?: boolean;
   itemsBasis?: Property.FlexBasis<string | 0>;
   spacing: number;
 };
@@ -15,6 +16,7 @@ type StyleParams = {
 export const styles = {
   stack: (params: StyleParams) => (theme: Theme) => {
     const flexGrow = !!params.growItems ? 1 : undefined;
+    const flexShrink = !!params.shrinkItems ? 1 : undefined;
     const flexBasis = params.itemsBasis !== undefined ? params.itemsBasis : undefined;
 
     return css({
@@ -26,9 +28,10 @@ export const styles = {
 
       '& > *': {
         flexGrow,
+        flexShrink,
         flexBasis,
-        marginBottom: params.direction !== 'column' ? 0 : theme.spacing(params.spacing),
-        marginRight: params.direction !== 'row' ? 0 : theme.spacing(params.spacing),
+        marginBottom: params.direction !== 'column' ? undefined : theme.spacing(params.spacing),
+        marginRight: params.direction !== 'row' ? undefined : theme.spacing(params.spacing),
       },
 
       '& > *:last-child': {
