@@ -1,6 +1,5 @@
-import React from 'react';
-import { Box } from '@material-ui/core';
-import { Manager, Reference, Popper } from 'react-popper';
+import React, { useRef } from 'react';
+import { Box, Popover } from '@material-ui/core';
 
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
@@ -14,22 +13,24 @@ const AnnotationPart: React.FC<{
   text: string;
   isRangeStart?: boolean;
   isInSelectedRange: boolean;
-  showTooltip?: boolean;
+  showPopover?: boolean;
   annotationIsAllowedOnPart?: boolean;
   annotationIsAllowedInGeneral: boolean;
   onPartClick: () => void;
-  onTooltipClick: () => void;
+  onPopoverClick: () => void;
 }> = ({
   idx,
   text,
   isRangeStart = false,
   isInSelectedRange,
-  showTooltip = false,
+  showPopover = false,
   annotationIsAllowedOnPart = false,
   annotationIsAllowedInGeneral,
   onPartClick,
-  onTooltipClick,
+  onPopoverClick,
 }) => {
+  const popoverAnchorRef = useRef<HTMLSpanElement>(null);
+
   // set css class if part is start of the current selected range
   const currentRangeStartStyle = isRangeStart ? styles.rangeStart : false;
 
@@ -45,35 +46,41 @@ const AnnotationPart: React.FC<{
 
   const whitespaceStyle = text === WHITESPACE ? styles.whitespace : false;
 
-  const annotatePartBox = (ref?: any) => (
-    <span
-      ref={ref}
-      data-idx={idx}
-      onClick={onPartClick}
-      css={[
-        styles.annotatePart,
-        currentRangeStartStyle,
-        !!isInSelectedRange ? styles.isInRange : false,
-        !currentRangeStartStyle && !isInSelectedRange && annotationAllowedOnPartStyle,
-        annotationAllowedInGeneralStyle,
-        whitespaceStyle,
-      ]}
-    >
-      {text}
-    </span>
-  );
+  return (
+    <>
+      <span
+        ref={popoverAnchorRef}
+        data-idx={idx}
+        onClick={onPartClick}
+        css={[
+          styles.annotatePart,
+          currentRangeStartStyle,
+          !!isInSelectedRange ? styles.isInRange : false,
+          !currentRangeStartStyle && !isInSelectedRange && annotationAllowedOnPartStyle,
+          annotationAllowedInGeneralStyle,
+          whitespaceStyle,
+        ]}
+      >
+        {text}
+      </span>
 
-  return !showTooltip ? (
-    annotatePartBox()
-  ) : (
-    <Manager>
-      <Reference>{({ ref }) => annotatePartBox(ref)}</Reference>
-      <Popper placement="right">
-        {({ ref, style, placement }) => (
-          <Box ref={ref} style={style} css={styles.annotatePartTooltip} data-placement={placement}>
-            <Button variant="outlined" onClick={onTooltipClick}>
+      {popoverAnchorRef.current !== null && (
+        <Popover
+          open={showPopover}
+          anchorEl={popoverAnchorRef.current}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <Box css={styles.annotatePartPopover}>
+            <Button variant="outlined" onClick={onPopoverClick}>
               <svg
-                css={styles.annotatePartTooltipIcon}
+                css={styles.annotatePartPopoverIcon}
                 xmlns="http://www.w3.org/2000/svg"
                 width="12"
                 height="15"
@@ -87,9 +94,9 @@ const AnnotationPart: React.FC<{
               </TextBox>
             </Button>
           </Box>
-        )}
-      </Popper>
-    </Manager>
+        </Popover>
+      )}
+    </>
   );
 };
 

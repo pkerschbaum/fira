@@ -38,11 +38,15 @@ export const styles = {
     }
   `,
 
-  annotatePartTooltip: css`
+  annotatePartPopover: css`
+    & * {
+      color: var(--color-destructive);
+      fill: var(--color-destructive);
+    }
     background-color: white;
   `,
 
-  annotatePartTooltipIcon: css`
+  annotatePartPopoverIcon: css`
     padding-right: var(--padding-xxxsmall);
   `,
 

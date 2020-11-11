@@ -24,7 +24,7 @@ const WHITESPACE = ' ';
 
 const AnnotationShell: React.FC<{
   finishedFraction: number;
-  hideTooltip?: () => void;
+  hidePopover?: () => void;
   userSelectionAllowed?: boolean;
   annotateOnUserSelect?: () => void;
   queryComponent?: React.ReactNode;
@@ -33,7 +33,7 @@ const AnnotationShell: React.FC<{
   documentComponentRef?: React.RefObject<HTMLDivElement>;
 }> = ({
   finishedFraction,
-  hideTooltip,
+  hidePopover,
   userSelectionAllowed,
   annotateOnUserSelect,
   queryComponent,
@@ -50,7 +50,7 @@ const AnnotationShell: React.FC<{
       <Stack
         alignItems="stretch"
         css={(styles.container, commonStyles.fullHeight)}
-        boxProps={{ onClickCapture: hideTooltip }}
+        boxProps={{ onClickCapture: hidePopover }}
       >
         <Stack
           direction="row"
@@ -81,7 +81,7 @@ const AnnotationShell: React.FC<{
 const Annotation: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
   const { selectRange, deleteRange } = useAnnotationActions();
-  const [tooltipAnnotatePartIndex, setTooltipAnnotatePartIndex] = useState<number | undefined>(
+  const [popoverAnnotatePartIndex, setPopoverAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
@@ -143,8 +143,8 @@ const Annotation: React.FC = () => {
       : 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED';
   const userSelectionAllowed = currentJudgementPair.currentAnnotationStart === undefined;
 
-  function hideTooltip() {
-    setTooltipAnnotatePartIndex(undefined);
+  function hidePopover() {
+    setPopoverAnnotatePartIndex(undefined);
   }
 
   function annotateOnUserSelect() {
@@ -211,7 +211,7 @@ const Annotation: React.FC = () => {
   return (
     <AnnotationShell
       finishedFraction={finishedFraction}
-      hideTooltip={hideTooltip}
+      hidePopover={hidePopover}
       userSelectionAllowed={userSelectionAllowed}
       annotateOnUserSelect={annotateOnUserSelect}
       queryComponent={
@@ -273,7 +273,7 @@ const Annotation: React.FC = () => {
                 text={textPart}
                 isRangeStart={currentJudgementPair.currentAnnotationStart === partIdx}
                 isInSelectedRange={isInAnnotatedRange}
-                showTooltip={tooltipAnnotatePartIndex === partIdx}
+                showPopover={popoverAnnotatePartIndex === partIdx}
                 annotationIsAllowedOnPart={canAnnotatePart}
                 annotationIsAllowedInGeneral={annotationIsAllowedInGeneral}
                 onPartClick={
@@ -283,12 +283,12 @@ const Annotation: React.FC = () => {
                           selection: { type: 'START_OR_END', annotationPartIndex: partIdx },
                         })
                     : isInAnnotatedRange
-                    ? () => setTooltipAnnotatePartIndex(partIdx)
+                    ? () => setPopoverAnnotatePartIndex(partIdx)
                     : functions.noop
                 }
-                onTooltipClick={() => {
+                onPopoverClick={() => {
                   deleteRange({ annotationPartIndex: partIdx });
-                  hideTooltip();
+                  hidePopover();
                 }}
               />
             );

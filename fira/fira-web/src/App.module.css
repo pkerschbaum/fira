@@ -1,5 +1,4 @@
 .app {
-  --app-container-padding: var(--padding-xxsmall);
   max-width: calc(600px + var(--app-container-padding) * 2);
   height: 100%;
   margin: 0 auto; /* horizontal align */
@@ -13,6 +12,25 @@
   align-items: stretch;
 
   background-color: white;
+}
+
+/* touch devices (primary input is coarse) */
+@media (pointer: coarse) {
+  * {
+    font-size: 1.05rem;
+  }
+
+  body {
+    --font-small: 0.925rem;
+    --font-xxxlarge: 2.05rem;
+  }
+}
+
+/* apply some default styles */
+body {
+  margin: 0;
+
+  --app-container-padding: var(--padding-xxsmall);
 
   /* ### COLORS ### */
   --color-primary: #202932;
@@ -69,23 +87,6 @@
   /* ### SPECIAL VARIABLES ### */
   --transform-button: scale(0.96);
   --narrow-content-area-width: 32.5rem;
-}
-
-/* touch devices (primary input is coarse) */
-@media (pointer: coarse) {
-  * {
-    font-size: 1.05rem;
-  }
-
-  .app {
-    --font-small: 0.925rem;
-    --font-xxxlarge: 2.05rem;
-  }
-}
-
-/* apply some default styles */
-body {
-  margin: 0;
 }
 
 body * {
