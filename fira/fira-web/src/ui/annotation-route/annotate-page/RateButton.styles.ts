@@ -1,26 +1,5 @@
 import { css } from '@emotion/core';
 
-const hotkey = css`
-  background: var(--darkened-color);
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  min-width: 1.25rem;
-  height: 1.25rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 0.5rem;
-  border-radius: 0.75rem;
-
-  /* touch devices (primary input is coarse) */
-  @media (pointer: coarse) {
-    & {
-      display: none;
-    }
-  }
-`;
-
 export const styles = {
   container: css`
     width: 5.5rem;
@@ -47,10 +26,6 @@ export const styles = {
     justify-content: center;
     align-items: center;
 
-    & > div {
-      color: white;
-    }
-
     &:hover {
       background: var(--bg-color);
       filter: brightness(85%);
@@ -64,7 +39,27 @@ export const styles = {
     }
   `,
 
-  hotkey,
+  hotkey: css`
+    color: white;
+    background: var(--darkened-color);
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 0.5rem;
+    border-radius: 0.75rem;
+
+    /* touch devices (primary input is coarse) */
+    @media (pointer: coarse) {
+      & {
+        display: none;
+      }
+    }
+  `,
 
   divider: css`
     border-bottom-width: medium;

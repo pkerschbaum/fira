@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Box, Divider } from '@material-ui/core';
+import { Box, Divider, Skeleton } from '@material-ui/core';
 
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
@@ -40,43 +40,50 @@ const AnnotationShell: React.FC<{
   documentComponent,
   guideComponent,
   documentComponentRef,
-}) => {
-  return (
-    <>
-      <Box
-        style={{ '--finished-fraction': `${finishedFraction}%` } as any}
-        css={styles.progressBar}
-      />
+}) => (
+  <>
+    <Box
+      style={{ '--finished-fraction': `${finishedFraction}%` } as any}
+      css={styles.progressBar}
+    />
+    <Stack
+      alignItems="stretch"
+      css={(styles.container, commonStyles.fullHeight)}
+      boxProps={{ onClickCapture: hidePopover }}
+    >
       <Stack
-        alignItems="stretch"
-        css={(styles.container, commonStyles.fullHeight)}
-        boxProps={{ onClickCapture: hidePopover }}
+        direction="row"
+        justifyContent="space-between"
+        disableContainerStretch
+        css={styles.actionBar}
       >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          disableContainerStretch
-          css={styles.actionBar}
-        >
-          {queryComponent}
-        </Stack>
-        <Divider css={styles.divider} />
-        <Stack
-          alignItems="flex-start"
-          ref={documentComponentRef}
-          css={[
-            styles.annotationArea,
-            !userSelectionAllowed && commonStyles.noUserSelectionAllowed,
-          ]}
-          boxProps={{ onMouseUp: annotateOnUserSelect }}
-        >
-          {documentComponent}
-        </Stack>
-        <Box css={styles.footer}>{guideComponent}</Box>
+        {queryComponent ?? (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            css={[styles.actionBarSkeleton, commonStyles.fullWidth]}
+          />
+        )}
       </Stack>
-    </>
-  );
-};
+      <Divider css={styles.divider} />
+      <Stack
+        alignItems="flex-start"
+        ref={documentComponentRef}
+        css={[styles.annotationArea, !userSelectionAllowed && commonStyles.noUserSelectionAllowed]}
+        boxProps={{ onMouseUp: annotateOnUserSelect }}
+      >
+        {documentComponent ?? (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            css={[styles.annotationAreaSkeleton, commonStyles.fullWidth, commonStyles.fullHeight]}
+          />
+        )}
+      </Stack>
+      <Box css={styles.footer}>{guideComponent}</Box>
+    </Stack>
+  </>
+);
 
 const Annotation: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();

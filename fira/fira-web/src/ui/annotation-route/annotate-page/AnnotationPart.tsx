@@ -54,7 +54,8 @@ const AnnotationPart: React.FC<{
           currentRangeStartStyle,
           !!isInSelectedRange ? styles.isInRange : false,
           // highlight the span as selectable on hover, if annotation on the part is allowed
-          isHovered &&
+          annotationIsAllowedOnPart &&
+            isHovered &&
             !currentRangeStartStyle &&
             !isInSelectedRange &&
             styles.annotationAllowedHighlight,

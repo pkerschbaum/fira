@@ -1,37 +1,6 @@
 import { css } from '@emotion/core';
 import { Theme } from '@material-ui/core';
 
-/* contains :empty selectors for loading state skeleton animation (see https://css-tricks.com/building-skeleton-screens-css-custom-properties/) */
-const emptyStyle = css`
-  position: relative;
-  overflow: hidden;
-  animation: loading 1.5s infinite;
-  background-color: rgb(217, 217, 217);
-  border-radius: var(--border-radius-xsmall);
-`;
-const skeletonAnimation = css`
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 1) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  animation: shimmer 2s infinite;
-  content: '';
-
-  @keyframes shimmer {
-    100% {
-      transform: translateX(100%);
-    }
-  }
-`;
-
 export const styles = {
   progressBar: css`
     background-color: var(--color-annotation-progress-bar);
@@ -63,15 +32,10 @@ export const styles = {
 
   actionBar: (theme: Theme) => css`
     padding-top: ${theme.spacing()};
+  `,
 
-    &:empty {
-      ${emptyStyle};
-      min-height: 1.5rem;
-    }
-
-    &:empty::after {
-      ${skeletonAnimation};
-    }
+  actionBarSkeleton: css`
+    min-height: 1.5rem;
   `,
 
   annotationArea: css`
@@ -81,15 +45,6 @@ export const styles = {
     /* add a little bit of vertical padding because otherwise chrome shows the scrollbar, 
      even if it is not necessary... */
     padding: 0.5px 0;
-
-    &:empty {
-      ${emptyStyle};
-      min-height: 4rem;
-    }
-
-    &:empty::after {
-      ${skeletonAnimation};
-    }
 
     /* 800px ~ OnePlus 6T, 6.2 inch screen with 19.5:9 ratio */
     @media (max-height: 800px) {
@@ -104,6 +59,10 @@ export const styles = {
         user-select: none;
       }
     }
+  `,
+
+  annotationAreaSkeleton: css`
+    min-height: 4rem;
   `,
 
   footer: (theme: Theme) => css`

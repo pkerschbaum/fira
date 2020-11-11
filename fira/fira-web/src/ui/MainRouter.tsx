@@ -73,12 +73,10 @@ const MainSwitch: React.FC = () => {
   );
 };
 
-const MainRouter: React.FC = () => {
-  return (
-    <BrowserRouter basename={PATH_NAME}>
-      <MainSwitch />
-    </BrowserRouter>
-  );
-};
+const MainRouter: React.FC = () => (
+  <BrowserRouter basename={PATH_NAME}>
+    <MainSwitch />
+  </BrowserRouter>
+);
 
 export default MainRouter;

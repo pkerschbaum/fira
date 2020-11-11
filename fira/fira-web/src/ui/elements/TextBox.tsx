@@ -39,7 +39,6 @@ const TextBox = React.forwardRef<
   } = props;
 
   return (
-    // eslint-disable-next-line react/no-danger-with-children
     <Box
       className={className}
       css={(theme) => [
