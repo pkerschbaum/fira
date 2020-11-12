@@ -32,11 +32,8 @@ left join judgement_pair jp on jp.document_id = j.document_document and jp.query
 where jp.priority = 'all';
 
 -- query#03: candidates
-select jp.document_id, jp.query_id, count(j.*)
+select jp.document_id, jp.query_id, jp.priority, jp.cnt_of_judgements / 2 target_reached_n_times
 from judgement_pair jp
-left join judgement j on j.document_document = jp.document_id and j.query_query = jp.query_id
-where jp.priority = '2' and (jp.document_id, jp.query_id) not in (values ('0','1'))
-group by jp.document_id, jp.query_id
-having count(j.*) < 2
-order by count(j.*), jp.document_id, jp.query_id ASC
+where jp.priority <> 'all' and (jp.document_id, jp.query_id) not in (values ('0','1'))
+order by target_reached_n_times ASC, jp.priority DESC, jp.cnt_of_judgements ASC, jp.document_id ASC, jp.query_id ASC
 limit 3
