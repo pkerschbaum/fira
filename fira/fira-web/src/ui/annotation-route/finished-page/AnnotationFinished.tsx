@@ -1,9 +1,13 @@
 import React from 'react';
+import { Box } from '@material-ui/core';
 
-import styles from './AnnotationFinished.module.css';
+import Button from '../../elements/Button';
+import TextBox from '../../elements/TextBox';
+import Stack from '../../layouts/Stack';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { useRouting } from '../AnnotationRouter';
-import Button from '../../elements/Button';
+
+import { styles } from './AnnotationFinished.styles';
 
 const PartyPopperEmoji: React.FC = () => (
   <svg width="128" height="128">
@@ -77,19 +81,19 @@ const AnnotationFinished: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <span className={styles.headline}>Congratulations!</span>
-      <div className={styles.finishedLogo}>
-        <PartyPopperEmoji />
-      </div>
-      <div>
-        <div>You finished your annotation target!</div>
-        <div>Feel free to continue annotating!</div>
-      </div>
-      <Button className={styles.button} buttonType="primary" onClick={onAcknowledge}>
+    <Stack justifyContent="center" css={styles.container}>
+      <TextBox fontSize="xxl" bold>
+        Congratulations!
+      </TextBox>
+      <PartyPopperEmoji />
+      <Box>
+        <TextBox>You finished your annotation target!</TextBox>
+        <TextBox>Feel free to continue annotating!</TextBox>
+      </Box>
+      <Button variant="contained" onClick={onAcknowledge}>
         Continue
       </Button>
-    </div>
+    </Stack>
   );
 };
 

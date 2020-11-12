@@ -1,10 +1,14 @@
 import React from 'react';
+import { TextField } from '@material-ui/core';
 import { Formik, FieldHookConfig, useField, FormikValues, Form as FormikForm } from 'formik';
 
-import styles from './Form.module.css';
 import Button from '../Button';
-import FloatingInput from './FloatingInput';
+import TextBox from '../TextBox';
+import SelectInput from './SelectInput';
+import Stack from '../../layouts/Stack';
 import { assertUnreachable } from '../../../../../fira-commons';
+
+import { styles } from './Form.styles';
 
 const TextInput: React.FC<
   { label: string } & FieldHookConfig<HTMLInputElement> &
@@ -15,48 +19,37 @@ const TextInput: React.FC<
   const showError = !!(meta.touched && meta.error);
 
   return (
-    <div>
-      <FloatingInput
-        childType="input"
-        isError={showError}
-        htmlFor={props.id || props.name}
-        label={label}
-        {...field}
-        {...props}
-      />
-    </div>
+    <TextField
+      error={showError}
+      helperText={!showError ? undefined : meta.error}
+      {...field}
+      size="small"
+      variant="outlined"
+      label={label}
+      css={styles.input}
+      inputProps={props}
+    />
   );
 };
 
-const Textarea: React.FC<
-  FieldHookConfig<HTMLTextAreaElement> &
+const TextareaInput: React.FC<
+  FieldHookConfig<any> &
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>
 > = ({ ...props }) => {
-  const [field] = useField(props);
+  const [field, meta] = useField(props);
+
+  const showError = !!(meta.touched && meta.error);
 
   return (
-    <div>
-      <FloatingInput childType="textarea" htmlFor={props.id || props.name} {...field} {...props} />
-    </div>
-  );
-};
-
-const Select: React.FC<
-  { label: string } & FieldHookConfig<HTMLSelectElement> &
-    React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>
-> = ({ label, ...props }) => {
-  const [field] = useField(props);
-
-  return (
-    <div>
-      <FloatingInput
-        childType="select"
-        htmlFor={props.id || props.name}
-        label={label}
-        {...field}
-        {...props}
-      />
-    </div>
+    <TextField
+      error={showError}
+      helperText={!showError ? undefined : meta.error}
+      {...field}
+      variant="outlined"
+      multiline
+      css={styles.input}
+      inputProps={props}
+    />
   );
 };
 
@@ -77,12 +70,15 @@ type TextareaElement = {
     React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
 };
 
-type SelectElement = {
+type SelectElement<ItemValue> = {
   readonly elementType: 'select';
   readonly label: string;
-  readonly htmlProps: FieldHookConfig<HTMLSelectElement> &
-    React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
-  readonly childElements: React.ReactNode;
+  readonly name: string;
+  readonly availableValues: Array<{
+    value: ItemValue;
+    label: string;
+  }>;
+  readonly onValueChange?: (val: ItemValue) => void;
 };
 
 type FormProps<V extends FormikValues> = {
@@ -95,7 +91,7 @@ type FormProps<V extends FormikValues> = {
       setErrors: (arg: V & { formError: string }) => void;
     },
   ) => Promise<void>;
-  readonly elements: Array<InputElement | TextareaElement | SelectElement>;
+  readonly elements: Array<InputElement | TextareaElement | SelectElement<any>>;
 };
 
 const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<FormProps<T>> = ({
@@ -103,77 +99,69 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
   validate,
   onSubmit,
   elements,
-}) => {
-  return (
-    <Formik
-      initialValues={{ ...initialValues, formError: '' }}
-      validate={validate}
-      onSubmit={async (values, { setSubmitting, setErrors }) => {
-        try {
-          await onSubmit(values, { setSubmitting, setErrors });
-        } catch (e) {
-          if (
-            (typeof e.message === 'string' && /Network Error/i.test(e.message)) ||
-            e.code === 'ECONNABORTED'
-          ) {
-            setErrors({ formError: `Network error. Please make sure to be online.` } as any);
-          } else {
-            setErrors({ formError: `Unexpected error occured.` } as any);
-            throw e;
-          }
-        } finally {
-          setSubmitting(false);
+}) => (
+  <Formik
+    initialValues={{ ...initialValues, formError: '' }}
+    validate={validate}
+    onSubmit={async (values, { setSubmitting, setErrors }) => {
+      try {
+        await onSubmit(values, { setSubmitting, setErrors });
+      } catch (e) {
+        if (
+          (typeof e.message === 'string' && /Network Error/i.test(e.message)) ||
+          e.code === 'ECONNABORTED'
+        ) {
+          setErrors({ formError: `Network error. Please make sure to be online.` } as any);
+        } else {
+          setErrors({ formError: `Unexpected error occured.` } as any);
+          throw e;
         }
-      }}
-    >
-      {({ isSubmitting, errors }) => (
-        <FormikForm className={styles.form}>
-          <div className={styles.inputContainer}>
+      } finally {
+        setSubmitting(false);
+      }
+    }}
+  >
+    {({ isSubmitting, errors }) => (
+      <FormikForm css={styles.form}>
+        <Stack spacing={2} alignItems="stretch">
+          <Stack spacing={1.5}>
             {elements.map((el, idx) => {
-              const childElem =
-                el.elementType === 'input' ? (
-                  <TextInput label={el.label} {...el.htmlProps} />
-                ) : el.elementType === 'select' ? (
-                  <Select label={el.label} {...el.htmlProps}>
-                    {el.childElements}
-                  </Select>
-                ) : el.elementType === 'textarea' ? (
-                  <Textarea {...el.htmlProps} />
-                ) : (
-                  assertUnreachable(el)
-                );
-
-              const isLastElem = idx === elements.length - 1;
-
-              return (
-                <React.Fragment key={idx}>
-                  {childElem}
-                  {/* omit divider for last element */}
-                  {isLastElem ? null : <div className={styles.inputDivider} />}
-                </React.Fragment>
+              return el.elementType === 'input' ? (
+                <TextInput key={idx} label={el.label} {...el.htmlProps} />
+              ) : el.elementType === 'select' ? (
+                <SelectInput
+                  key={idx}
+                  label={el.label}
+                  name={el.name}
+                  availableValues={el.availableValues}
+                  onValueChange={el.onValueChange}
+                />
+              ) : el.elementType === 'textarea' ? (
+                <TextareaInput key={idx} {...el.htmlProps} />
+              ) : (
+                assertUnreachable(el)
               );
             })}
-          </div>
+          </Stack>
           {errors.formError && errors.formError.length && errors.formError.length > 0 && (
-            <ul className={styles.errorList}>
+            <ul css={styles.errorList}>
               <li>
-                <span>{errors.formError}</span>
+                <TextBox component="span">{errors.formError}</TextBox>
               </li>
             </ul>
           )}
           <Button
-            className={styles.button}
-            buttonType="primary"
+            variant="contained"
             type="submit"
             disabled={isSubmitting}
             isLoading={isSubmitting}
           >
             Continue
           </Button>
-        </FormikForm>
-      )}
-    </Formik>
-  );
-};
+        </Stack>
+      </FormikForm>
+    )}
+  </Formik>
+);
 
 export default Form;

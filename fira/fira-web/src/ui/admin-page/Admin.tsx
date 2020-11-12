@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Formik, Form, Field } from 'formik';
-
-import styles from './Admin.module.css';
-import { adminStories } from '../../stories/admin.stories';
+import { Box, Divider } from '@material-ui/core';
+import { Formik, Form } from 'formik';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../state/store';
+
 import Button from '../elements/Button';
+import TextBox from '../elements/TextBox';
 import Menu from '../elements/Menu';
-import Line from '../elements/Line';
+import SelectInput from '../elements/forms/SelectInput';
+import SwitchInput from '../elements/forms/SwitchInput';
+import Stack from '../layouts/Stack';
+import { adminStories } from '../../stories/admin.stories';
+import { RootState } from '../../state/store';
 import { adminSchema, judgementsSchema } from '../../../../fira-commons';
+
+import { styles } from './Admin.styles';
+import { commonStyles } from '../Common.styles';
 
 const Admin: React.FC = () => {
   const [statistics, updateStatistics] = useState<adminSchema.Statistic[] | undefined>(undefined);
@@ -27,81 +33,82 @@ const Admin: React.FC = () => {
   }, [user]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.adminArea}>
-        <div className={styles.actionBar}>
-          <div className={styles.actionButtons}>
-            <Button className={styles.button} onClick={adminStories.exportJudgements}>
-              <span>Export Judgements</span>
-            </Button>
-            <Button className={styles.button} onClick={adminStories.exportFeedback}>
-              <span>Export Feedback</span>
-            </Button>
-          </div>
-          <Menu />
-        </div>
-        <Line orientation="horizontal" />
-        <Formik
-          initialValues={{
-            judgementMode: judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS,
-            rotateDocumentText: 'true',
-          }}
-          onSubmit={async (values, { setSubmitting }) => {
-            try {
-              await adminStories.updateConfig({
-                ...values,
-                rotateDocumentText: values.rotateDocumentText === 'true',
-              });
-              setSubmitting(true);
-            } catch (e) {
-              setSubmitting(false);
-            }
-          }}
-        >
-          {({ isSubmitting }) => (
-            <Form className={styles.actionBar}>
-              <div className={styles.options}>
-                <div>
-                  <label htmlFor="judgementMode">Judgement Mode:</label>
-                  <Field name="judgementMode" as="select">
-                    {Object.values(judgementsSchema.JudgementMode).map((judgementMode) => (
-                      <option key={judgementMode} value={judgementMode}>
-                        {judgementMode}
-                      </option>
-                    ))}
-                  </Field>
-                </div>
-                <div>
-                  <label htmlFor="rotateDocumentText">Rotate Document Text:</label>
-                  <Field name="rotateDocumentText" as="select">
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                  </Field>
-                </div>
-              </div>
+    <Stack
+      justifyContent="center"
+      alignItems="stretch"
+      spacing={2}
+      css={[commonStyles.fullHeight, styles.adminArea]}
+    >
+      <Stack direction="row" disableContainerStretch justifyContent="space-between">
+        <Stack direction="row">
+          <Button variant="outlined" onClick={adminStories.exportJudgements}>
+            Export Judgements
+          </Button>
+          <Button variant="outlined" onClick={adminStories.exportFeedback}>
+            Export Feedback
+          </Button>
+        </Stack>
+        <Menu />
+      </Stack>
+
+      <Divider />
+
+      <Formik
+        initialValues={{
+          judgementMode: judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS,
+          rotateDocumentText: 'true',
+        }}
+        onSubmit={async (values, { setSubmitting }) => {
+          try {
+            await adminStories.updateConfig({
+              ...values,
+              rotateDocumentText: values.rotateDocumentText === 'true',
+            });
+            setSubmitting(true);
+          } catch (e) {
+            setSubmitting(false);
+          }
+        }}
+      >
+        {({ isSubmitting }) => (
+          <Form>
+            <Stack direction="row" justifyContent="space-between">
+              <Stack alignItems="stretch" css={commonStyles.flex.shrinkAndFit}>
+                <SelectInput
+                  name="judgementMode"
+                  label="Judgement Mode"
+                  availableValues={Object.values(
+                    judgementsSchema.JudgementMode,
+                  ).map((judgementMode) => ({ label: judgementMode, value: judgementMode }))}
+                />
+                <SwitchInput name="rotateDocumentText" label="Rotate Document Text" />
+              </Stack>
               <Button
-                className={styles.button}
+                variant="outlined"
                 type="submit"
                 disabled={isSubmitting}
                 isLoading={isSubmitting}
               >
                 Update Config
               </Button>
-            </Form>
-          )}
-        </Formik>
-        <Line orientation="horizontal" />
-        <div className={styles.statisticsContainer}>
-          {statistics &&
-            statistics.map((statistic) => (
-              <div key={statistic.id} className={styles.statistic}>
-                <div className={styles.statisticValue}>{statistic.value}</div>
-                <div className={styles.statisticLabel}>{statistic.label}</div>
-              </div>
-            ))}
-        </div>
-      </div>
-    </div>
+            </Stack>
+          </Form>
+        )}
+      </Formik>
+
+      <Divider />
+
+      {statistics && (
+        <Box css={styles.statisticsArea}>
+          {statistics.map((statistic) => (
+            <Stack key={statistic.id} justifyContent="center">
+              <TextBox fontSize="xl">{statistic.value}</TextBox>
+              <TextBox textAlign="center">{statistic.label}</TextBox>
+            </Stack>
+          ))}
+        </Box>
+      )}
+    </Stack>
   );
 };
 

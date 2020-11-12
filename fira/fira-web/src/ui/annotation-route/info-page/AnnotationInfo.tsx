@@ -1,9 +1,5 @@
 import React from 'react';
-
-import styles from './AnnotationInfo.module.css';
-import Button from '../../elements/Button';
-import { annotatorStories } from '../../../stories/annotator.stories';
-import { useRouting } from '../AnnotationRouter';
+import { Box } from '@material-ui/core';
 
 import infoPageLabels from './info-page-labels.png';
 import infoPageSpan from './info-page-span-example.png';
@@ -11,6 +7,14 @@ import infoEx1 from './info-example-wrong.png';
 import infoEx2 from './info-example-topic.png';
 import infoEx3 from './info-example-partial.png';
 import infoEx4 from './info-example-perfect.png';
+
+import Button from '../../elements/Button';
+import TextBox from '../../elements/TextBox';
+import Stack from '../../layouts/Stack';
+import { annotatorStories } from '../../../stories/annotator.stories';
+import { useRouting } from '../AnnotationRouter';
+
+import { styles } from './AnnotationInfo.styles';
 
 const AnnotationInfo: React.FC = () => {
   const annotationRouting = useRouting();
@@ -94,17 +98,23 @@ const AnnotationInfo: React.FC = () => {
   }
 
   return (
-    <div className={styles.container}>
-      <span className={styles.headline}>How to annotate</span>
+    <Stack alignItems="stretch" spacing={2} css={styles.container}>
+      <TextBox fontSize="lg" bold textAlign="center">
+        How to annotate
+      </TextBox>
       {content.map((entry, idx) =>
         entry.type === 'text' ? (
-          <p key={idx} dangerouslySetInnerHTML={{ __html: entry.content }}></p>
+          <TextBox key={idx}>
+            <Box dangerouslySetInnerHTML={{ __html: entry.content }} />
+          </TextBox>
         ) : (
-          <img key={idx} className={styles.infoImage} src={entry.content} alt={entry.alt} />
+          <img key={idx} css={styles.infoImage} src={entry.content} alt={entry.alt} />
         ),
       )}
-      <Button onClick={onAcknowledge}>Let's get started!</Button>
-    </div>
+      <Button variant="contained" onClick={onAcknowledge}>
+        Let's get started!
+      </Button>
+    </Stack>
   );
 };
 

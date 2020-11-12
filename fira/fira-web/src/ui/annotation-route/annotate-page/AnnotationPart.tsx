@@ -1,8 +1,11 @@
-import React from 'react';
-import { Manager, Reference, Popper } from 'react-popper';
+import React, { useRef } from 'react';
+import { Box, Popover } from '@material-ui/core';
+import { useHover } from '@react-aria/interactions';
 
-import styles from './AnnotationPart.module.css';
 import Button from '../../elements/Button';
+import TextBox from '../../elements/TextBox';
+
+import { styles } from './AnnotationPart.styles';
 
 const WHITESPACE = ' ';
 
@@ -11,60 +14,76 @@ const AnnotationPart: React.FC<{
   text: string;
   isRangeStart?: boolean;
   isInSelectedRange: boolean;
-  showTooltip?: boolean;
+  showPopover?: boolean;
   annotationIsAllowedOnPart?: boolean;
   annotationIsAllowedInGeneral: boolean;
   onPartClick: () => void;
-  onTooltipClick: () => void;
+  onPopoverClick: () => void;
 }> = ({
   idx,
   text,
   isRangeStart = false,
   isInSelectedRange,
-  showTooltip = false,
+  showPopover = false,
   annotationIsAllowedOnPart = false,
   annotationIsAllowedInGeneral,
   onPartClick,
-  onTooltipClick,
+  onPopoverClick,
 }) => {
-  // set css class if part is start of the current selected range
-  const currentRangeStartStyle = isRangeStart ? styles.rangeStart : '';
+  const popoverAnchorRef = useRef<HTMLSpanElement>(null);
+  const { hoverProps, isHovered } = useHover({});
 
-  // highlight the span as selectable (e.g., on hover) if annotation on the part is allowed
-  const annotationAllowedOnPartStyle = annotationIsAllowedOnPart
-    ? styles.annotationAllowedOnPart
-    : '';
+  // set css class if part is start of the current selected range
+  const currentRangeStartStyle = isRangeStart ? styles.rangeStart : false;
 
   // apply additional styles if annotation is allowed (e.g., spacing for mobile devices)
   const annotationAllowedInGeneralStyle = annotationIsAllowedInGeneral
     ? styles.annotationAllowedInGeneral
-    : '';
+    : false;
 
-  const whitespaceStyle = text === WHITESPACE ? styles.whitespace : '';
+  const whitespaceStyle = text === WHITESPACE ? styles.whitespace : false;
 
-  const annotatePartSpan = (ref?: any) => (
-    <span
-      ref={ref}
-      data-idx={idx}
-      onClick={onPartClick}
-      className={`${styles.annotatePart} ${currentRangeStartStyle} ${
-        !!isInSelectedRange ? styles.isInRange : ''
-      } ${annotationAllowedOnPartStyle} ${annotationAllowedInGeneralStyle} ${whitespaceStyle}`}
-    >
-      {text}
-    </span>
-  );
+  return (
+    <>
+      <span
+        ref={popoverAnchorRef}
+        data-idx={idx}
+        onClick={onPartClick}
+        css={[
+          styles.annotatePart,
+          currentRangeStartStyle,
+          !!isInSelectedRange ? styles.isInRange : false,
+          // highlight the span as selectable on hover, if annotation on the part is allowed
+          annotationIsAllowedOnPart &&
+            isHovered &&
+            !currentRangeStartStyle &&
+            !isInSelectedRange &&
+            styles.annotationAllowedHighlight,
+          annotationAllowedInGeneralStyle,
+          whitespaceStyle,
+        ]}
+        {...hoverProps}
+      >
+        {text}
+      </span>
 
-  return !showTooltip ? (
-    annotatePartSpan()
-  ) : (
-    <Manager>
-      <Reference>{({ ref }) => annotatePartSpan(ref)}</Reference>
-      <Popper placement="right">
-        {({ ref, style, placement }) => (
-          <div ref={ref} style={style} data-placement={placement}>
-            <Button className={styles.annotatePartTooltipButton} onClick={onTooltipClick}>
+      {popoverAnchorRef.current !== null && (
+        <Popover
+          open={showPopover}
+          anchorEl={popoverAnchorRef.current}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <Box css={styles.annotatePartPopover}>
+            <Button variant="outlined" onClick={onPopoverClick}>
               <svg
+                css={styles.annotatePartPopoverIcon}
                 xmlns="http://www.w3.org/2000/svg"
                 width="12"
                 height="15"
@@ -73,12 +92,14 @@ const AnnotationPart: React.FC<{
               >
                 <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
               </svg>
-              <span>Remove</span>
+              <TextBox component="span" fontSize="sm">
+                Remove
+              </TextBox>
             </Button>
-          </div>
-        )}
-      </Popper>
-    </Manager>
+          </Box>
+        </Popover>
+      )}
+    </>
   );
 };
 

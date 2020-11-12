@@ -47,6 +47,8 @@ const MainSwitch: React.FC = () => {
       <Dialog
         id="support-dialog"
         title="Information for support"
+        confirmationButtonLabel="Close"
+        hideAbortButton
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
       >
@@ -71,12 +73,10 @@ const MainSwitch: React.FC = () => {
   );
 };
 
-const MainRouter: React.FC = () => {
-  return (
-    <BrowserRouter basename={PATH_NAME}>
-      <MainSwitch />
-    </BrowserRouter>
-  );
-};
+const MainRouter: React.FC = () => (
+  <BrowserRouter basename={PATH_NAME}>
+    <MainSwitch />
+  </BrowserRouter>
+);
 
 export default MainRouter;

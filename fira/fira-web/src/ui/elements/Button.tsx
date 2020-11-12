@@ -1,66 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Box, Button as MuiButton, ButtonProps as MuiButtonProps } from '@material-ui/core';
 
-import styles from './Button.module.css';
 import LoadingIndicator from './LoadingIndicator';
 
-const Button = React.forwardRef<
-  HTMLButtonElement,
-  {
-    buttonType?: 'primary' | 'secondary' | 'tertiary';
-    isLoading?: boolean;
-  } & React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
->(({ children, buttonType = 'secondary', isLoading, ...props }, ref) => {
-  const [animate, setAnimate] = useState(false);
+import { commonStyles } from '../Common.styles';
 
-  function animateStart() {
-    setAnimate(true);
-  }
+type ButtonProps = MuiButtonProps & {
+  isLoading?: boolean;
+};
 
-  function animateEnd() {
-    setAnimate(false);
-  }
-
-  function onClick(e: React.MouseEvent<HTMLButtonElement>) {
-    if (typeof props.onClick === 'function') {
-      props.onClick(e);
-    }
-    animateStart();
-  }
-
-  function onTransitionEnd(e: React.TransitionEvent<HTMLButtonElement>) {
-    if (typeof props.onTransitionEnd === 'function') {
-      props.onTransitionEnd(e);
-    }
-    animateEnd();
-  }
-
-  return (
-    <button
-      {...props}
-      onClick={onClick}
-      onTransitionEnd={onTransitionEnd}
-      ref={ref}
-      className={`${props.className} ${styles.button} ${animate && styles.animate} ${
-        buttonType === 'primary'
-          ? styles.typePrimary
-          : buttonType === 'secondary'
-          ? styles.typeSecondary
-          : styles.typeTertiary
-      }`}
-    >
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, isLoading, ...props }, ref) => (
+    <MuiButton ref={ref} {...props}>
       {!isLoading ? (
-        typeof children === 'string' ? (
-          <span>{children}</span>
-        ) : (
-          children
-        )
+        children
       ) : (
-        <div>
-          <LoadingIndicator type={buttonType === 'tertiary' ? 'secondary' : buttonType} />
-        </div>
+        <Box css={commonStyles.overlayContainer}>
+          <Box css={[commonStyles.overlayChild, commonStyles.transparent]}>{children}</Box>
+          <LoadingIndicator css={commonStyles.overlayChild} type={'secondary'} />
+        </Box>
       )}
-    </button>
-  );
-});
+    </MuiButton>
+  ),
+);
 
 export default Button;

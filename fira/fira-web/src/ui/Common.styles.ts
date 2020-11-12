@@ -54,6 +54,10 @@ export const commonStyles = {
       css({
         color: theme.palette.text.primary,
       }),
+
+    noTransform: css`
+      text-transform: none;
+    `,
   },
 
   fullHeight: css({
@@ -72,7 +76,7 @@ export const commonStyles = {
     maxWidth: '100%',
   }),
 
-  center: css({
+  horizontalCenter: css({
     justifySelf: 'center',
     textAlign: 'center',
   }),
@@ -91,7 +95,6 @@ export const commonStyles = {
 
   transparent: css({
     opacity: 0,
-    height: 0,
   }),
 
   hidden: css({
@@ -115,4 +118,8 @@ export const commonStyles = {
   cursorPointer: css({
     cursor: 'pointer',
   }),
+
+  noUserSelectionAllowed: css`
+    user-select: none;
+  `,
 };

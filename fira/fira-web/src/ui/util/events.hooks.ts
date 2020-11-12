@@ -30,11 +30,3 @@ export function useKeyupEvent(keyFunctionMap: {
     return () => document.removeEventListener('keyup', keyUpHandler);
   });
 }
-
-export function useOnViewportClick(onViewportClick: () => void) {
-  useEffect(() => {
-    const viewportClickHandler = () => onViewportClick();
-    document.addEventListener('click', viewportClickHandler, { passive: true });
-    return () => document.removeEventListener('click', viewportClickHandler);
-  });
-}

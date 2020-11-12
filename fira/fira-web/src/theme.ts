@@ -50,6 +50,8 @@ export const createTheme = (locale: Localization) => {
     dimensions: {
       borderWidth: (factor?: number) => (factor === undefined ? 2 : factor * 2),
     },
+
+    palette: { primary: { main: '#202932' } },
   };
 
   return createMuiTheme(theme, locale);
