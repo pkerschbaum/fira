@@ -226,7 +226,7 @@ const Annotation: React.FC = () => {
           <TextBox bold>{currentJudgementPair.queryText}</TextBox>
           <Menu
             additionalInfo={
-              <TextBox>
+              <TextBox disablePreserveNewlines>
                 Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
                 <strong>{alreadyFinished! + remainingToFinish}</strong>
               </TextBox>
