@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { IconButton, Menu as MuiMenu, MenuItem } from '@material-ui/core';
 
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import HistoryIcon from '@material-ui/icons/History';
 import InfoIcon from '@material-ui/icons/Info';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
@@ -18,6 +19,10 @@ const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }
 
   function handleLogout() {
     userActions.logout();
+  }
+
+  function handleShowHistoryPage() {
+    annotationRouting.routeToHistoryPage();
   }
 
   function handleShowInfoPage() {
@@ -43,6 +48,12 @@ const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }
             {additionalInfo}
           </Stack>
         )}
+        <MenuItem onClick={handleShowHistoryPage}>
+          <Stack direction="row" spacing={1.5}>
+            <HistoryIcon />
+            <TextBox>History</TextBox>
+          </Stack>
+        </MenuItem>
         <MenuItem onClick={handleShowInfoPage}>
           <Stack direction="row" spacing={1.5}>
             <InfoIcon />

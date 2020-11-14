@@ -58,6 +58,12 @@ export const commonStyles = {
     noTransform: css`
       text-transform: none;
     `,
+
+    overflowEllipsis: css`
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `,
   },
 
   fullHeight: css({

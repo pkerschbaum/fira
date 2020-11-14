@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch, Route, Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 
 import Annotation from './annotate-page/Annotation';
+import AnnotationHistory from './history-page/AnnotationHistory';
 import AnnotationInfo from './info-page/AnnotationInfo';
 import AnnotationFeedback from './feedback-page/AnnotationFeedback';
 import AnnotationFinished from './finished-page/AnnotationFinished';
@@ -11,6 +12,7 @@ import { useAnnotationState } from '../../state/annotation/annotation.hooks';
 import { assertUnreachable } from '../../../../fira-commons';
 
 const ANNOTATE_RELATIVE_URL = 'annotate';
+const HISTORY_RELATIVE_URL = 'history';
 const INFO_RELATIVE_URL = 'info';
 const FEEDBACK_RELATIVE_URL = 'feedback';
 const FINISHED_RELATIVE_URL = 'finished';
@@ -22,6 +24,9 @@ export function useRouting() {
   return {
     routeToAnnotatePage: () => {
       history.push(ANNOTATE_RELATIVE_URL);
+    },
+    routeToHistoryPage: () => {
+      history.push(HISTORY_RELATIVE_URL);
     },
     routeToInfoPage: () => {
       history.push(INFO_RELATIVE_URL);
@@ -77,6 +82,9 @@ const AnnotationRouter: React.FC = () => {
         ) : (
           assertUnreachable(pageToShow)
         )}
+      </Route>
+      <Route path={`${match.path}/${HISTORY_RELATIVE_URL}`}>
+        <AnnotationHistory />
       </Route>
       <Route path={`${match.path}/${INFO_RELATIVE_URL}`}>
         <AnnotationInfo />
