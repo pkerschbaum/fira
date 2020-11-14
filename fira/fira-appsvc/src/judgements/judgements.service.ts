@@ -18,7 +18,6 @@ import { JudgementStatus } from '../typings/enums';
 import { httpUtils } from '../utils/http.utils';
 import { adminSchema, judgementsSchema } from '../../../fira-commons';
 import { judgementGetPayload } from '../../../fira-commons/database/prisma';
-import { PaginationResponse, Query } from '../../../fira-commons/src/rest-api';
 
 const EXPORT_PAGE_SIZE = 200;
 
@@ -307,28 +306,18 @@ export class JudgementsService {
 
   public loadJudgementsOfUser = async (
     userId: string,
-    query: Query,
-  ): Promise<PaginationResponse<judgementsSchema.LoadJugementOfUserResponse>> => {
-    const filter = { user_id: userId, status: JudgementStatus.JUDGED } as const;
-
+  ): Promise<judgementsSchema.LoadJugementsOfUserResponse> => {
     const judgementsOfUser = await this.judgementsDAO.findMany({
-      where: filter,
+      where: { user_id: userId, status: JudgementStatus.JUDGED },
       select: { id: true },
       orderBy: { id: 'asc' },
     });
 
-    const judgementsWithNr = judgementsOfUser.map((dbJudgement, idx) => ({
-      id: dbJudgement.id,
-      nr: idx + 1,
-    }));
-
-    const judgementsToReturn = judgementsWithNr
-      .reverse()
-      .slice(query.skip, query.skip + query.take);
-
     return {
-      data: judgementsToReturn,
-      totalCount: judgementsOfUser.length,
+      judgements: judgementsOfUser.map((dbJudgement, idx) => ({
+        id: dbJudgement.id,
+        nr: idx + 1,
+      })),
     };
   };
 

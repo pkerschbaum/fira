@@ -8,7 +8,6 @@ import {
   Body,
   ParseIntPipe,
   Get,
-  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiHeader } from '@nestjs/swagger';
 
@@ -51,14 +50,9 @@ export class JudgementsController {
   @Get(loadJudgementsOfUserSchema.shape.request.shape.url._def.value)
   public async loadJudgementIDs(
     @Headers('authorization') authHeader: string,
-    @Query(new ZodValidationPipe(loadJudgementsOfUserSchema.shape.request.shape.params))
-    queryParams: LoadJudgementsOfUser['request']['params'],
   ): Promise<LoadJudgementsOfUser['response']> {
     const jwtPayload = extractJwtPayload(authHeader);
-    return await this.judgementsService.loadJudgementsOfUser(jwtPayload.preferred_username, {
-      skip: Number(queryParams.skip),
-      take: Number(queryParams.take),
-    });
+    return await this.judgementsService.loadJudgementsOfUser(jwtPayload.preferred_username);
   }
 
   @Get(loadJudgementByIdSchema.shape.request.shape.url._def.value)

@@ -4,7 +4,7 @@ import { Statistic, updateConfigSchema } from './admin.schema';
 import { AuthResponse, loginRequestSchema, refreshRequestSchema } from './auth.schema';
 import { submitFeedbackSchema } from './feedback.schema';
 import {
-  LoadJugementOfUserResponse,
+  LoadJugementsOfUserResponse,
   LoadJudgementResponse,
   PreloadJudgementResponse,
   saveJudgementSchema,
@@ -159,11 +159,10 @@ export const loadJudgementsOfUserSchema = z.object({
   request: z.object({
     url: z.literal('v1'),
     method: z.literal('GET'),
-    params: queryParams,
   }),
 });
 export type LoadJudgementsOfUser = z.infer<typeof loadJudgementsOfUserSchema> & {
-  response: PaginationResponse<LoadJugementOfUserResponse>;
+  response: LoadJugementsOfUserResponse;
 };
 
 export const loadJudgementByIdSchema = z.object({

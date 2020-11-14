@@ -20,26 +20,26 @@ export const judgementStories = {
     store.dispatch(annotationActions.preloadJudgements(response));
   },
 
-  loadJudgementsOfUser: async (skip: number, take: number) => {
+  loadJudgementsOfUser: async () => {
     logger.info(`executing load judgements of user...`);
 
-    const response = await judgementsClient.loadJugementsOfUser({ skip, take });
+    const response = await judgementsClient.loadJugementsOfUser();
 
     logger.info(`load judgements of user succeeded!`, { response });
     return response;
   },
 
   loadJudgementById: async (judgementId: number) => {
-    logger.info(`executing load judgement by id...`);
+    logger.info(`executing load judgement by id...`, { judgementId });
 
     const response = await judgementsClient.loadJugementById(judgementId);
 
-    logger.info(`preload load judgement by id succeeded!`, { response });
+    logger.info(`load judgement by id succeeded!`, { response });
     return response;
   },
 
   rateJudgementPair: async (relevanceLevel: judgementsSchema.RelevanceLevel) => {
-    logger.info(`executing rate judgement pair...`);
+    logger.info(`executing rate judgement pair...`, { relevanceLevel });
 
     store.dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));
 

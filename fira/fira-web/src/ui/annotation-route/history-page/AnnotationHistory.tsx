@@ -36,11 +36,17 @@ const AnnotationHistory: React.FC = () => {
   const { routeToAnnotatePage } = useRouting();
   const [currentPage, setCurrentPage] = useState(0);
 
-  const skip = currentPage * pageSize;
   const query = useQuery(
-    ['judgements-of-user', skip],
-    () => judgementStories.loadJudgementsOfUser(skip, pageSize),
-    { retry: false },
+    'judgements-of-user',
+    async () => {
+      const response = await judgementStories.loadJudgementsOfUser();
+      response.judgements.sort((a, b) => b.nr - a.nr); // descending by number
+      return response;
+    },
+    {
+      retry: false,
+      refetchInterval: false,
+    },
   );
 
   function handleCloseHistory() {
@@ -54,6 +60,8 @@ const AnnotationHistory: React.FC = () => {
   function handlePagingForward() {
     setCurrentPage((oldVal) => oldVal - 1);
   }
+
+  const skip = currentPage * pageSize;
 
   return (
     <Stack alignItems="stretch" css={commonStyles.fullHeight}>
@@ -76,15 +84,19 @@ const AnnotationHistory: React.FC = () => {
             css={[styles.listSkeleton, commonStyles.fullWidth, commonStyles.fullHeight]}
           />
         ) : (
-          query.data.data.map((entry) => (
-            <HistoryEntry key={entry.nr} judgementId={entry.id} judgementNr={entry.nr} />
-          ))
+          query.data.judgements
+            .slice(skip, skip + pageSize)
+            .map((entry) => (
+              <HistoryEntry key={entry.nr} judgementId={entry.id} judgementNr={entry.nr} />
+            ))
         )}
       </Stack>
       <Stack direction="row" disableContainerStretch justifyContent="space-between">
         <IconButton
           style={{ padding: 4 }}
-          disabled={!!query.data?.data.find((elem) => elem.nr === 1)}
+          disabled={
+            !!query.data?.judgements.slice(skip, skip + pageSize).find((elem) => elem.nr === 1)
+          }
           onClick={handlePagingBack}
         >
           <NavigateBeforeIcon style={{ height: 32, width: 32 }} />
@@ -105,7 +117,7 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
   const query = useQuery(
     ['judgement', judgementId],
     () => judgementStories.loadJudgementById(judgementId),
-    { retry: false },
+    { retry: false, refetchInterval: false },
   );
 
   function handleEntryClick() {
