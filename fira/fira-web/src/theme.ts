@@ -20,6 +20,8 @@ declare module '@material-ui/core/styles/createMuiTheme' {
 }
 
 export const createTheme = (locale: Localization) => {
+  const primaryColor = '#202932';
+
   const theme: ThemeOptions = {
     components: {
       MuiDivider: {
@@ -45,13 +47,21 @@ export const createTheme = (locale: Localization) => {
           },
         },
       },
+
+      MuiIconButton: {
+        styleOverrides: {
+          label: {
+            color: primaryColor,
+          },
+        },
+      },
     },
 
     dimensions: {
       borderWidth: (factor?: number) => (factor === undefined ? 2 : factor * 2),
     },
 
-    palette: { primary: { main: '#202932' } },
+    palette: { primary: { main: primaryColor } },
   };
 
   return createMuiTheme(theme, locale);

@@ -1,20 +1,11 @@
 import { css } from '@emotion/core';
 
 export const styles = {
-  container: css`
-    width: 5.5rem;
-
-    /* touch devices (primary input is coarse) */
-    @media (pointer: coarse) {
-      & {
-        width: 4.25rem;
-      }
-    }
+  button: css`
+    border-radius: var(--border-radius-normal);
   `,
 
-  button: css`
-    min-height: 3.25rem;
-    width: 100%;
+  badge: css`
     padding: 0;
 
     border: var(--border-medium) solid var(--darkened-color);
@@ -25,18 +16,6 @@ export const styles = {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    &:hover {
-      background: var(--bg-color);
-      filter: brightness(85%);
-    }
-
-    /* touch devices (primary input is coarse) */
-    @media (pointer: coarse) {
-      & {
-        min-height: 3rem;
-      }
-    }
   `,
 
   hotkey: css`

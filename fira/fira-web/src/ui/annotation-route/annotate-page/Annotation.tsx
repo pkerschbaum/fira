@@ -309,7 +309,9 @@ const Annotation: React.FC = () => {
             .map((rateLevel) => (
               <RateButton
                 key={rateLevel.relevanceLevel}
-                rateLevel={rateLevel}
+                css={styles.rateButton}
+                relevanceLevel={rateLevel.relevanceLevel}
+                keyboardKeyToShow={rateLevel.keyboardKey.toShow}
                 onClick={createJudgementFn(rateLevel.relevanceLevel)}
               />
             ))

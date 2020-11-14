@@ -69,7 +69,7 @@ export const styles = {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
 
     /* the button container does not need any margin because the flex items will 
        get margins, and thus make the container bigger anyways */
@@ -77,6 +77,24 @@ export const styles = {
 
     & > * {
       margin: ${theme.spacing(0.5)};
+    }
+  `,
+
+  rateButton: css`
+    min-height: 3.25rem;
+    width: 5.5rem;
+
+    &:hover {
+      background: var(--bg-color);
+      filter: brightness(85%);
+    }
+
+    /* touch devices (primary input is coarse) */
+    @media (pointer: coarse) {
+      & {
+        min-height: 3rem;
+        width: 4.25rem;
+      }
     }
   `,
 
