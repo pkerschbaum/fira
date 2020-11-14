@@ -41,6 +41,8 @@ body {
   --color-ratelevel-good-answer-darkened: #4eb120;
   --color-ratelevel-perfect-answer: #4dc828;
   --color-ratelevel-perfect-answer-darkened: #2c7317;
+  --color-ratelevel-loading: #c5c5c5;
+  --color-ratelevel-loading-darkened: #888888;
 
   --color-annotation-allowed-highlight: #caffca;
   --color-annotation-range-start: #f07f7f80;

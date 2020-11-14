@@ -5,6 +5,7 @@ import {
   JudgementsReqRes,
   ExceptionHandler,
   SubmitJudgement,
+  Query,
 } from '../../../fira-commons/src/rest-api';
 
 const request: JudgementsRequestor = async (
@@ -33,6 +34,22 @@ export const judgementsClient = {
     return await request({
       url: 'v1/preload',
       method: 'POST',
+    });
+  },
+
+  loadJugementsOfUser: async (queryParams: Query) => {
+    return await request({
+      url: 'v1',
+      method: 'GET',
+      params: queryParams,
+    });
+  },
+
+  loadJugementById: async (judgementId: number) => {
+    return await request({
+      url: 'v1/:judgementId',
+      pathParams: { judgementId },
+      method: 'GET',
     });
   },
 

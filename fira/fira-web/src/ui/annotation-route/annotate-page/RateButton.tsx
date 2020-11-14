@@ -28,6 +28,10 @@ const RATE_LEVEL_DATA = {
     style: styles.rateLevelStyles.perfectAnswer,
     text: 'Perfect',
   },
+  LOADING: {
+    style: styles.rateLevelStyles.loading,
+    text: <>&nbsp;</>,
+  },
 } as const;
 
 const RateButton: React.FC<{
@@ -45,7 +49,7 @@ const RateButton: React.FC<{
 };
 
 export const RateBadge: React.FC<{
-  relevanceLevel: judgementsSchema.RelevanceLevel;
+  relevanceLevel: judgementsSchema.RelevanceLevel | 'LOADING';
   keyboardKeyToShow?: string;
   className?: string;
 }> = ({ relevanceLevel, keyboardKeyToShow, className }) => (

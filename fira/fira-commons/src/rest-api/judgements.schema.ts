@@ -33,6 +33,17 @@ const preloadJudgementResponseSchema = z.object({
 });
 export type PreloadJudgementResponse = z.infer<typeof preloadJudgementResponseSchema>;
 
+const loadJudgementOfUserResponseSchema = z.object({ id: z.number(), nr: z.number() });
+export type LoadJugementOfUserResponse = z.infer<typeof loadJudgementOfUserResponseSchema>;
+
+const loadJudgementResponseSchema = z.object({
+  id: z.number(),
+  queryText: z.string(),
+  documentText: z.string(),
+  relevanceLevel: relevanceLevelSchema,
+});
+export type LoadJudgementResponse = z.infer<typeof loadJudgementResponseSchema>;
+
 export const saveJudgementSchema = z.object({
   relevanceLevel: relevanceLevelSchema,
   relevancePositions: z.array(z.number()),

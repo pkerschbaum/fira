@@ -13,6 +13,10 @@ export const styles = {
     }
   `,
 
+  listSkeleton: css`
+    border-radius: var(--border-radius-normal);
+  `,
+
   rateBadge: (theme: Theme) => css`
     box-sizing: border-box;
     padding: ${theme.spacing(1, 1.5)};

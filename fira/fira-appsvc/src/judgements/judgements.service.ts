@@ -18,6 +18,7 @@ import { JudgementStatus } from '../typings/enums';
 import { httpUtils } from '../utils/http.utils';
 import { adminSchema, judgementsSchema } from '../../../fira-commons';
 import { judgementGetPayload } from '../../../fira-commons/database/prisma';
+import { PaginationResponse, Query } from '../../../fira-commons/src/rest-api';
 
 const EXPORT_PAGE_SIZE = 200;
 
@@ -304,6 +305,69 @@ export class JudgementsService {
     );
   };
 
+  public loadJudgementsOfUser = async (
+    userId: string,
+    query: Query,
+  ): Promise<PaginationResponse<judgementsSchema.LoadJugementOfUserResponse>> => {
+    const filter = { user_id: userId, status: JudgementStatus.JUDGED } as const;
+
+    const judgementsOfUser = await this.judgementsDAO.findMany({
+      where: filter,
+      select: { id: true },
+      orderBy: { id: 'asc' },
+    });
+
+    const judgementsWithNr = judgementsOfUser.map((dbJudgement, idx) => ({
+      id: dbJudgement.id,
+      nr: idx + 1,
+    }));
+
+    const judgementsToReturn = judgementsWithNr
+      .reverse()
+      .slice(query.skip, query.skip + query.take);
+
+    return {
+      data: judgementsToReturn,
+      totalCount: judgementsOfUser.length,
+    };
+  };
+
+  public loadJudgement = async (
+    userId: string,
+    judgementId: number,
+  ): Promise<judgementsSchema.LoadJudgementResponse> => {
+    const dbJudgement = await this.judgementsDAO.findOne({
+      where: { id: judgementId },
+      include: {
+        query_version_judgementToquery_version: true,
+        document_version_document_versionTojudgement: true,
+      },
+    });
+
+    if (!dbJudgement) {
+      throw new NotFoundException(
+        `judgement could not be found! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+    if (dbJudgement.user_id !== userId) {
+      throw new NotFoundException(
+        `the judgement does not belong to the given user id! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+    if (dbJudgement.status !== JudgementStatus.JUDGED) {
+      throw new NotFoundException(
+        `only judged judgements are allowed to get loaded! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+
+    return {
+      id: dbJudgement.id,
+      queryText: dbJudgement.query_version_judgementToquery_version.text,
+      documentText: dbJudgement.document_version_document_versionTojudgement.text,
+      relevanceLevel: dbJudgement.relevance_level as judgementsSchema.RelevanceLevel,
+    };
+  };
+
   public submitJudgement = async (
     userId: string,
     judgementId: number,
@@ -316,7 +380,7 @@ export class JudgementsService {
 
     if (!dbJudgement) {
       throw new NotFoundException(
-        `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
+        `judgement could not be found! judgemendId=${judgementId}, userId=${userId}`,
       );
     }
     if (dbJudgement.user_id !== userId) {

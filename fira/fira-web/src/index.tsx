@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { StylesProvider } from '@material-ui/core/styles';
 import { enUS } from '@material-ui/core/locale';
+import { QueryCache, ReactQueryCacheProvider } from 'react-query';
 
 import './index.css';
 
@@ -12,6 +13,8 @@ import { executeBootScripts } from './boot/boot';
 import { createTheme } from './theme';
 import { ThemeProvider } from './ThemeProvider';
 import * as serviceWorker from './serviceWorker';
+
+const queryCache = new QueryCache();
 
 (async function bootstrap() {
   await executeBootScripts();
@@ -24,7 +27,9 @@ import * as serviceWorker from './serviceWorker';
         <StylesProvider injectFirst>
           <ThemeProvider theme={theme}>
             <Provider store={store}>
-              <App />
+              <ReactQueryCacheProvider queryCache={queryCache}>
+                <App />
+              </ReactQueryCacheProvider>
             </Provider>
           </ThemeProvider>
         </StylesProvider>

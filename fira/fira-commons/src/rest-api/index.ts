@@ -1,18 +1,14 @@
 import * as z from 'zod';
 
-import {
-  importAssetSchema,
-  ImportJudgementPairResult,
-  importJudgementPairSchema,
-  ImportResult,
-  importUserRequestSchema,
-  ImportUserResponse,
-  Statistic,
-  updateConfigSchema,
-} from './admin.schema';
+import { Statistic, updateConfigSchema } from './admin.schema';
 import { AuthResponse, loginRequestSchema, refreshRequestSchema } from './auth.schema';
 import { submitFeedbackSchema } from './feedback.schema';
-import { PreloadJudgementResponse, saveJudgementSchema } from './judgements.schema';
+import {
+  LoadJugementOfUserResponse,
+  LoadJudgementResponse,
+  PreloadJudgementResponse,
+  saveJudgementSchema,
+} from './judgements.schema';
 import { HealthResponse } from './mgmt.schema';
 import { NarrowUnion, UnionToIntersection } from '../util/types.util';
 
@@ -25,22 +21,19 @@ export const basePaths = {
 } as const;
 
 export type OrderOptions = 'asc' | 'desc';
-export type Query<Shape extends {}> = {
-  skip?: number;
-  take?: number;
-  filter?: {
-    [prop in keyof Shape]?: Shape[prop] extends string
-      ? { contains: Shape[prop]; mode?: 'insensitive' } | { equals: Shape[prop] }
-      : { equals: Shape[prop] };
-  };
-  orderBy?: { [prop in keyof Shape]?: OrderOptions };
+export type Query = {
+  skip: number;
+  take: number;
+};
+
+export type PaginationResponse<ResponseDto> = {
+  data: ResponseDto[];
+  totalCount: number;
 };
 
 export const queryParams = z.object({
-  skip: z.union([z.string().nonempty(), z.number()]).optional(),
-  take: z.union([z.string().nonempty(), z.number()]).optional(),
-  filter: z.union([z.string().nonempty(), z.array(z.string().nonempty())]).optional(),
-  orderBy: z.union([z.string().nonempty(), z.array(z.string().nonempty())]).optional(),
+  skip: z.union([z.string().nonempty(), z.number()]),
+  take: z.union([z.string().nonempty(), z.number()]),
 });
 export type QueryParams = z.infer<typeof queryParams>;
 
@@ -161,6 +154,30 @@ export type PreloadJudgements = z.infer<typeof preloadJudgementsSchema> & {
   response: PreloadJudgementResponse;
 };
 
+export const loadJudgementsOfUserSchema = z.object({
+  type: z.literal('load judgements of user'),
+  request: z.object({
+    url: z.literal('v1'),
+    method: z.literal('GET'),
+    params: queryParams,
+  }),
+});
+export type LoadJudgementsOfUser = z.infer<typeof loadJudgementsOfUserSchema> & {
+  response: PaginationResponse<LoadJugementOfUserResponse>;
+};
+
+export const loadJudgementByIdSchema = z.object({
+  type: z.literal('load judgement by ID'),
+  request: z.object({
+    url: z.literal('v1/:judgementId'),
+    pathParams: z.object({ judgementId: z.number() }),
+    method: z.literal('GET'),
+  }),
+});
+export type LoadJudgementByID = z.infer<typeof loadJudgementByIdSchema> & {
+  response: LoadJudgementResponse;
+};
+
 export const submitJudgementSchema = z.object({
   type: z.literal('submit judgement'),
   request: z.object({
@@ -174,7 +191,11 @@ export type SubmitJudgement = z.infer<typeof submitJudgementSchema> & {
   response: void;
 };
 
-export type JudgementsReqRes = PreloadJudgements | SubmitJudgement;
+export type JudgementsReqRes =
+  | PreloadJudgements
+  | LoadJudgementsOfUser
+  | LoadJudgementByID
+  | SubmitJudgement;
 export type JudgementsRequestor = Requestor<JudgementsReqRes>;
 
 /* mgmt (general) request/response types */
