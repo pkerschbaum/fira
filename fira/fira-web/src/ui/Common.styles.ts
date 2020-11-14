@@ -29,8 +29,15 @@ export const commonStyles = {
   },
 
   flex: {
-    shrinkAndFit: css({
+    shrinkAndFitHorizontal: css({
       minWidth: 0,
+      flexBasis: 0,
+      flexShrink: 1,
+      flexGrow: 1,
+    }),
+
+    shrinkAndFitVertical: css({
+      minHeight: 0,
       flexBasis: 0,
       flexShrink: 1,
       flexGrow: 1,
@@ -65,6 +72,10 @@ export const commonStyles = {
       text-overflow: ellipsis;
     `,
   },
+
+  borderBoxSizing: css`
+    box-sizing: border-box;
+  `,
 
   fullHeight: css({
     height: '100%',

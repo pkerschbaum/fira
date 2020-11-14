@@ -52,6 +52,7 @@ export const createTheme = (locale: Localization) => {
         styleOverrides: {
           root: {
             color: primaryColor,
+            padding: 4,
           },
         },
       },

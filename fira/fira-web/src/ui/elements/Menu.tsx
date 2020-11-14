@@ -39,7 +39,7 @@ const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }
 
   return (
     <>
-      <IconButton style={{ padding: 4, marginBottom: -8 }} onClick={handleClick}>
+      <IconButton style={{ marginBottom: -8 }} onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
       <MuiMenu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>

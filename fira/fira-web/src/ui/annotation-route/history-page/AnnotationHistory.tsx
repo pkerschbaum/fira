@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   AlertTitle,
@@ -10,6 +10,7 @@ import {
   Theme,
 } from '@material-ui/core';
 import { useQuery } from 'react-query';
+import ResizeObserver from 'resize-observer-polyfill';
 
 import CancelIcon from '@material-ui/icons/Cancel';
 import EditIcon from '@material-ui/icons/Edit';
@@ -30,11 +31,29 @@ type HistoryDataEntry = {
   judgementId: number;
 };
 
-const pageSize = 5;
+const heightOfHistoryElement = 100; // px
 
 const AnnotationHistory: React.FC = () => {
   const { routeToAnnotatePage } = useRouting();
-  const [currentPage, setCurrentPage] = useState(0);
+
+  const [skip, setSkip] = useState(0);
+  const [pageSize, setPageSize] = useState<undefined | number>(undefined);
+  const listContainerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(
+    function computePageSizeBasedOnAvailableSpace() {
+      if (listContainerRef.current !== null) {
+        const ro = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            setPageSize(Math.floor(entry.contentRect.height / heightOfHistoryElement));
+          }
+        });
+        ro.observe(listContainerRef.current);
+        return () => ro.disconnect();
+      }
+    },
+    [listContainerRef],
+  );
 
   const query = useQuery(
     'judgements-of-user',
@@ -54,30 +73,48 @@ const AnnotationHistory: React.FC = () => {
   }
 
   function handlePagingBack() {
-    setCurrentPage((oldVal) => oldVal + 1);
+    setSkip((oldVal) => {
+      if (pageSize === undefined) {
+        return oldVal;
+      }
+
+      const newSkip = oldVal + pageSize;
+      if (query.data === undefined) {
+        return newSkip;
+      } else {
+        return Math.min(oldVal + pageSize, query.data.judgements.length - 1);
+      }
+    });
   }
 
   function handlePagingForward() {
-    setCurrentPage((oldVal) => oldVal - 1);
-  }
+    setSkip((oldVal) => {
+      if (pageSize === undefined) {
+        return oldVal;
+      }
 
-  const skip = currentPage * pageSize;
+      return Math.max(oldVal - pageSize, 0);
+    });
+  }
 
   return (
     <Stack alignItems="stretch" css={commonStyles.fullHeight}>
-      <Stack direction="row" disableContainerStretch justifyContent="space-between">
-        <Box />
-        <IconButton style={{ padding: 4 }} onClick={handleCloseHistory}>
+      <Stack direction="row-reverse" disableContainerStretch justifyContent="space-between">
+        <IconButton onClick={handleCloseHistory}>
           <CancelIcon />
         </IconButton>
       </Stack>
-      <Stack alignItems="stretch" css={commonStyles.flex.shrinkAndFit}>
+      <Stack
+        ref={listContainerRef}
+        alignItems="stretch"
+        css={commonStyles.flex.shrinkAndFitVertical}
+      >
         {query.isError ? (
           <Alert severity="error">
             <AlertTitle>Error occured</AlertTitle>
             {query.error}
           </Alert>
-        ) : query.isLoading || query.data === undefined ? (
+        ) : pageSize === undefined || query.isLoading || query.data === undefined ? (
           <Skeleton
             variant="rectangular"
             animation="wave"
@@ -87,25 +124,22 @@ const AnnotationHistory: React.FC = () => {
           query.data.judgements
             .slice(skip, skip + pageSize)
             .map((entry) => (
-              <HistoryEntry key={entry.nr} judgementId={entry.id} judgementNr={entry.nr} />
+              <HistoryEntry key={entry.id} judgementId={entry.id} judgementNr={entry.nr} />
             ))
         )}
       </Stack>
       <Stack direction="row" disableContainerStretch justifyContent="space-between">
         <IconButton
-          style={{ padding: 4 }}
           disabled={
-            !!query.data?.judgements.slice(skip, skip + pageSize).find((elem) => elem.nr === 1)
+            pageSize === undefined ||
+            query.data === undefined ||
+            skip + pageSize >= query.data.judgements.length
           }
           onClick={handlePagingBack}
         >
           <NavigateBeforeIcon style={{ height: 32, width: 32 }} />
         </IconButton>
-        <IconButton
-          style={{ padding: 4 }}
-          disabled={currentPage === 0}
-          onClick={handlePagingForward}
-        >
+        <IconButton disabled={pageSize === undefined || skip === 0} onClick={handlePagingForward}>
           <NavigateNextIcon style={{ height: 32, width: 32 }} />
         </IconButton>
       </Stack>
@@ -126,22 +160,32 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
   }
 
   return (
-    <Card onClick={handleEntryClick}>
-      <CardActionArea>
-        <Box sx={{ padding: (theme: Theme) => theme.spacing() }}>
+    <Card onClick={handleEntryClick} style={{ height: heightOfHistoryElement }}>
+      <CardActionArea css={commonStyles.fullHeight}>
+        <Box
+          sx={{ padding: (theme: Theme) => theme.spacing(1.5, 1) }}
+          css={[commonStyles.fullHeight, commonStyles.borderBoxSizing]}
+        >
           {query.isError ? (
             <Alert severity="error">
               <AlertTitle>Error occured</AlertTitle>
               {query.error}
             </Alert>
           ) : (
-            <Stack alignItems="stretch" spacing={1.5}>
-              <Stack direction="row" justifyContent="space-between">
-                <Stack direction="row" alignItems="stretch" css={commonStyles.flex.shrinkAndFit}>
+            <Stack alignItems="stretch" spacing={1.5} css={commonStyles.fullHeight}>
+              <Stack direction="row" disableContainerStretch justifyContent="space-between">
+                <Stack
+                  direction="row"
+                  alignItems="stretch"
+                  css={commonStyles.flex.shrinkAndFitHorizontal}
+                >
                   <TextBox bold>#{judgementNr}</TextBox>
                   <TextBox
                     bold
-                    css={[commonStyles.flex.shrinkAndFit, commonStyles.text.overflowEllipsis]}
+                    css={[
+                      commonStyles.flex.shrinkAndFitHorizontal,
+                      commonStyles.text.overflowEllipsis,
+                    ]}
                   >
                     {query.isLoading || query.data === undefined ? (
                       <Skeleton
@@ -156,10 +200,14 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
                 </Stack>
                 <EditIcon />
               </Stack>
-              <Stack direction="row" justifyContent="space-between">
+              <Stack direction="row" alignItems="stretch" justifyContent="space-between">
                 <TextBox
                   textAlign="start"
-                  css={[commonStyles.text.overflowEllipsis, commonStyles.flex.shrinkAndFit]}
+                  css={[
+                    commonStyles.flex.shrinkAndFitHorizontal,
+                    commonStyles.text.overflowEllipsis,
+                    commonStyles.grid.verticalCenter,
+                  ]}
                 >
                   {query.isLoading || query.data === undefined ? (
                     <Stack direction="row" alignItems="stretch">
@@ -173,16 +221,14 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
                     query.data.documentText
                   )}
                 </TextBox>
-                <Box>
-                  <RateBadge
-                    relevanceLevel={
-                      query.isLoading || query.data === undefined
-                        ? 'LOADING'
-                        : query.data.relevanceLevel
-                    }
-                    css={styles.rateBadge}
-                  />
-                </Box>
+                <RateBadge
+                  relevanceLevel={
+                    query.isLoading || query.data === undefined
+                      ? 'LOADING'
+                      : query.data.relevanceLevel
+                  }
+                  css={styles.rateBadge}
+                />
               </Stack>
             </Stack>
           )}

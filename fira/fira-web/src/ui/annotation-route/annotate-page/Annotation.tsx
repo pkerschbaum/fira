@@ -317,7 +317,7 @@ const Annotation: React.FC = () => {
             ))
         ) : (
           <>
-            <TextBox css={commonStyles.flex.shrinkAndFit}>
+            <TextBox css={commonStyles.flex.shrinkAndFitHorizontal}>
               {currentSelectionNotFinished ? (
                 <>Finish your selection</>
               ) : annotationStatus === 'RELEVANT_REGION_REQUIRED' ? (

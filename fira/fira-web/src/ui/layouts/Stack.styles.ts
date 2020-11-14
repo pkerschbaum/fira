@@ -3,7 +3,7 @@ import { Theme } from '@material-ui/core/styles';
 import { Property } from 'csstype';
 
 type StyleParams = {
-  direction: 'row' | 'column';
+  direction: 'row' | 'column' | 'row-reverse' | 'column-reverse';
   justifyContent: Property.JustifyContent;
   alignItems: Property.AlignItems;
   wrap?: true | 'nowrap' | 'wrap-reverse';

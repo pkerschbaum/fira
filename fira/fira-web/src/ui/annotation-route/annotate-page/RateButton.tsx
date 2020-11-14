@@ -53,10 +53,7 @@ export const RateBadge: React.FC<{
   keyboardKeyToShow?: string;
   className?: string;
 }> = ({ relevanceLevel, keyboardKeyToShow, className }) => (
-  <Box
-    css={[styles.badge, commonStyles.fullWidth, RATE_LEVEL_DATA[relevanceLevel].style]}
-    className={className}
-  >
+  <Box css={[styles.badge, RATE_LEVEL_DATA[relevanceLevel].style]} className={className}>
     {keyboardKeyToShow && (
       <TextBox fontSize="sm" css={styles.hotkey}>
         {keyboardKeyToShow}
