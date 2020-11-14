@@ -9,7 +9,7 @@ import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
 import AnnotationPart from './AnnotationPart';
 import { judgementStories } from '../../../stories/judgement.stories';
-import { useKeyupEvent as useKeyupHandler } from '../../util/events.hooks';
+import { useKeyupHandler } from '../../util/events.hooks';
 import {
   useAnnotationState,
   useAnnotationActions,

@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 
-export function useKeyupEvent(keyFunctionMap: {
+export function useKeyupHandler(keyFunctionMap: {
   [keyCode: string]:
     | (() => void)
     | {
-        additionalKeys: Array<'ALT' | 'STRG'> | ReadonlyArray<'ALT' | 'STRG'>;
+        additionalKeys?: Array<'ALT' | 'STRG'> | ReadonlyArray<'ALT' | 'STRG'>;
         handler: () => void;
       };
 }) {
@@ -16,9 +16,11 @@ export function useKeyupEvent(keyFunctionMap: {
         if (typeof keyHandler === 'function') {
           keyHandler();
         } else {
-          const allAdditionalKeysPressed = keyHandler.additionalKeys.every((key) => {
-            return (key !== 'ALT' || e.altKey) && (key !== 'STRG' || e.ctrlKey);
-          });
+          const allAdditionalKeysPressed =
+            keyHandler.additionalKeys === undefined ||
+            keyHandler.additionalKeys.every((key) => {
+              return (key !== 'ALT' || e.altKey) && (key !== 'STRG' || e.ctrlKey);
+            });
           if (allAdditionalKeysPressed) {
             keyHandler.handler();
           }

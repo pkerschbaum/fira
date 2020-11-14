@@ -8,7 +8,7 @@ import Admin from './admin-page/Admin';
 import AnnotationRouter from './annotation-route/AnnotationRouter';
 import RoleRoute from './RoleRoute';
 import { useUserState } from '../state/user/user.hooks';
-import { useKeyupEvent } from './util/events.hooks';
+import { useKeyupHandler } from './util/events.hooks';
 import { browserStorage } from '../browser-storage/browser-storage';
 import { UserRole } from '../typings/enums';
 import { assertUnreachable } from '../../../fira-commons';
@@ -35,7 +35,7 @@ const MainSwitch: React.FC = () => {
   const showClientId = new URLSearchParams(useLocation().search).get('showClientId') === 'true';
   const [dialogOpen, setDialogOpen] = useState(showClientId);
 
-  useKeyupEvent({
+  useKeyupHandler({
     [config.application.helpDialog.shortcut.key]: {
       additionalKeys: config.application.helpDialog.shortcut.additionalKeys,
       handler: () => setDialogOpen((oldVal) => !oldVal),

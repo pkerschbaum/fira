@@ -22,6 +22,7 @@ import Stack from '../../layouts/Stack';
 import { RateBadge } from '../annotate-page/RateButton';
 import { useRouting } from '../AnnotationRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
+import { useKeyupHandler } from '../../util/events.hooks';
 
 import { styles } from './AnnotationHistory.styles';
 import { commonStyles } from '../../Common.styles';
@@ -31,7 +32,9 @@ type HistoryDataEntry = {
   judgementId: number;
 };
 
-const heightOfHistoryElement = 100; // px
+const KEYCODE_LEFT_ARROW = 'ArrowLeft';
+const KEYCODE_RIGHT_ARROW = 'ArrowRight';
+const HEIGHT_OF_HISTORY_ELEMENT = 100; // px
 
 const AnnotationHistory: React.FC = () => {
   const { routeToAnnotatePage } = useRouting();
@@ -45,7 +48,7 @@ const AnnotationHistory: React.FC = () => {
       if (listContainerRef.current !== null) {
         const ro = new ResizeObserver((entries) => {
           for (const entry of entries) {
-            setPageSize(Math.floor(entry.contentRect.height / heightOfHistoryElement));
+            setPageSize(Math.floor(entry.contentRect.height / HEIGHT_OF_HISTORY_ELEMENT));
           }
         });
         ro.observe(listContainerRef.current);
@@ -67,6 +70,11 @@ const AnnotationHistory: React.FC = () => {
       refetchInterval: false,
     },
   );
+
+  useKeyupHandler({
+    [KEYCODE_LEFT_ARROW]: { handler: handlePagingBack },
+    [KEYCODE_RIGHT_ARROW]: { handler: handlePagingForward },
+  });
 
   function handleCloseHistory() {
     routeToAnnotatePage();
@@ -160,7 +168,7 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
   }
 
   return (
-    <Card onClick={handleEntryClick} style={{ height: heightOfHistoryElement }}>
+    <Card onClick={handleEntryClick} style={{ height: HEIGHT_OF_HISTORY_ELEMENT }}>
       <CardActionArea css={commonStyles.fullHeight}>
         <Box
           sx={{ padding: (theme: Theme) => theme.spacing(1.5, 1) }}
