@@ -63,16 +63,17 @@ type SetJudgementStatusPayload = {
 
 const INITIAL_STATE = { judgementPairs: [] } as AnnotationState;
 
-const preloadJudgements = createAction<PreloadJudgementsPayload>('JUDGEMENTS_PRELOADED');
-const rateJudgementPair = createAction<RateJudgementPairPayload>('JUDGEMENT_PAIR_RATED');
-const selectRange = createAction<SelectRangePayload>('RANGE_SELECTED');
-const deleteRange = createAction<DeleteRangePayload>('RANGE_DELETED');
-const setJudgementStatus = createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET');
-const selectJudgementPair = createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED');
-
-const reducer = createReducer(INITIAL_STATE, (builder) =>
+export const actions = {
+  preloadJudgements: createAction<PreloadJudgementsPayload>('JUDGEMENTS_PRELOADED'),
+  rateJudgementPair: createAction<RateJudgementPairPayload>('JUDGEMENT_PAIR_RATED'),
+  selectRange: createAction<SelectRangePayload>('RANGE_SELECTED'),
+  deleteRange: createAction<DeleteRangePayload>('RANGE_DELETED'),
+  setJudgementStatus: createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET'),
+  selectJudgementPair: createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED'),
+};
+export const reducer = createReducer(INITIAL_STATE, (builder) =>
   builder
-    .addCase(preloadJudgements, (state, action) => {
+    .addCase(actions.preloadJudgements, (state, action) => {
       state.alreadyFinished = action.payload.alreadyFinished;
       state.remainingToFinish = action.payload.remainingToFinish;
       state.remainingUntilFirstFeedbackRequired =
@@ -102,7 +103,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         }
       });
     })
-    .addCase(rateJudgementPair, (state, action) => {
+    .addCase(actions.rateJudgementPair, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
         (pair) => pair.id === state.currentJudgementPairId,
       );
@@ -116,7 +117,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         currentJudgementPair!.currentAnnotationStart = undefined;
       }
     })
-    .addCase(selectRange, (state, action) => {
+    .addCase(actions.selectRange, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
         (pair) => pair.id === state.currentJudgementPairId,
       );
@@ -179,7 +180,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
       });
       currentJudgementPair!.currentAnnotationStart = undefined;
     })
-    .addCase(deleteRange, (state, action) => {
+    .addCase(actions.deleteRange, (state, action) => {
       const currentJudgementPair = state.judgementPairs.find(
         (pair) => pair.id === state.currentJudgementPairId,
       );
@@ -192,11 +193,11 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         },
       );
     })
-    .addCase(setJudgementStatus, (state, action) => {
+    .addCase(actions.setJudgementStatus, (state, action) => {
       const judgementPair = state.judgementPairs.find((pair) => pair.id === action.payload.id);
       judgementPair!.status = action.payload.status;
     })
-    .addCase(selectJudgementPair, (state, action) => {
+    .addCase(actions.selectJudgementPair, (state, action) => {
       if (state.currentJudgementPairId !== action.payload?.id) {
         state.currentJudgementPairId = action.payload?.id;
         state.currentJudgementPairSelectedOnMs = new Date().getTime();
@@ -218,13 +219,3 @@ function areJudgementPairsEqual(
     !jp1.docAnnotationParts.some((part, index) => jp2.docAnnotationParts[index] !== part)
   );
 }
-
-export const actions = {
-  preloadJudgements,
-  rateJudgementPair,
-  selectRange,
-  deleteRange,
-  setJudgementStatus,
-  selectJudgementPair,
-};
-export default reducer;

@@ -1,5 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Box, Divider, Skeleton } from '@material-ui/core';
+import { Box, Divider, MenuItem, Skeleton } from '@material-ui/core';
+
+import HistoryIcon from '@material-ui/icons/History';
+import InfoIcon from '@material-ui/icons/Info';
 
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
@@ -8,6 +11,7 @@ import Stack from '../../layouts/Stack';
 import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
 import AnnotationPart from './AnnotationPart';
+import { useRouting } from '../AnnotationRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
 import {
@@ -21,69 +25,6 @@ import { styles } from './Annotation.styles';
 import { commonStyles } from '../../Common.styles';
 
 const WHITESPACE = ' ';
-
-const AnnotationShell: React.FC<{
-  finishedFraction: number;
-  hidePopover?: () => void;
-  userSelectionAllowed?: boolean;
-  annotateOnUserSelect?: () => void;
-  queryComponent?: React.ReactNode;
-  documentComponent?: React.ReactNode;
-  guideComponent?: React.ReactNode;
-  documentComponentRef?: React.RefObject<HTMLDivElement>;
-}> = ({
-  finishedFraction,
-  hidePopover,
-  userSelectionAllowed,
-  annotateOnUserSelect,
-  queryComponent,
-  documentComponent,
-  guideComponent,
-  documentComponentRef,
-}) => (
-  <>
-    <Box
-      style={{ '--finished-fraction': `${finishedFraction}%` } as any}
-      css={styles.progressBar}
-    />
-    <Stack
-      alignItems="stretch"
-      css={(styles.container, commonStyles.fullHeight)}
-      boxProps={{ onClickCapture: hidePopover }}
-    >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        disableContainerStretch
-        css={styles.actionBar}
-      >
-        {queryComponent ?? (
-          <Skeleton
-            variant="rectangular"
-            animation="wave"
-            css={[styles.actionBarSkeleton, commonStyles.fullWidth]}
-          />
-        )}
-      </Stack>
-      <Divider css={styles.divider} />
-      <Stack
-        alignItems="flex-start"
-        ref={documentComponentRef}
-        css={[styles.annotationArea, !userSelectionAllowed && commonStyles.noUserSelectionAllowed]}
-        boxProps={{ onMouseUp: annotateOnUserSelect }}
-      >
-        {documentComponent ?? (
-          <Skeleton
-            variant="rectangular"
-            animation="wave"
-            css={[styles.annotationAreaSkeleton, commonStyles.fullWidth, commonStyles.fullHeight]}
-          />
-        )}
-      </Stack>
-      <Box css={styles.footer}>{guideComponent}</Box>
-    </Stack>
-  </>
-);
 
 const Annotation: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
@@ -104,7 +45,6 @@ const Annotation: React.FC = () => {
       keyupMap[rateLevel.keyboardKey.keyCode] = createJudgementFn(rateLevel.relevanceLevel);
     }
   }
-
   useKeyupHandler(!currentJudgementPair ? {} : keyupMap);
 
   // compute fraction of finished annotation; used for progress bar
@@ -122,7 +62,8 @@ const Annotation: React.FC = () => {
     }
   }
 
-  if (!currentJudgementPair || remainingToFinish === undefined) {
+  if (!currentJudgementPair || remainingToFinish === undefined || alreadyFinished === undefined) {
+    // judgement pair is currently getting loaded from server --> show annotation shell in loading state
     return <AnnotationShell finishedFraction={finishedFraction} />;
   }
 
@@ -224,14 +165,7 @@ const Annotation: React.FC = () => {
       queryComponent={
         <>
           <TextBox bold>{currentJudgementPair.queryText}</TextBox>
-          <Menu
-            additionalInfo={
-              <TextBox disablePreserveNewlines>
-                Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
-                <strong>{alreadyFinished! + remainingToFinish}</strong>
-              </TextBox>
-            }
-          />
+          <AnnotationMenu alreadyFinished={alreadyFinished} remainingToFinish={remainingToFinish} />
         </>
       }
       documentComponentRef={documentComponentRef}
@@ -342,6 +276,111 @@ const Annotation: React.FC = () => {
             </Button>
           </>
         )
+      }
+    />
+  );
+};
+
+const AnnotationShell: React.FC<{
+  finishedFraction: number;
+  hidePopover?: () => void;
+  userSelectionAllowed?: boolean;
+  annotateOnUserSelect?: () => void;
+  queryComponent?: React.ReactNode;
+  documentComponent?: React.ReactNode;
+  guideComponent?: React.ReactNode;
+  documentComponentRef?: React.RefObject<HTMLDivElement>;
+}> = ({
+  finishedFraction,
+  hidePopover,
+  userSelectionAllowed,
+  annotateOnUserSelect,
+  queryComponent,
+  documentComponent,
+  guideComponent,
+  documentComponentRef,
+}) => (
+  <>
+    <Box
+      style={{ '--finished-fraction': `${finishedFraction}%` } as any}
+      css={styles.progressBar}
+    />
+    <Stack
+      alignItems="stretch"
+      css={(styles.container, commonStyles.fullHeight)}
+      boxProps={{ onClickCapture: hidePopover }}
+    >
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        disableContainerStretch
+        css={styles.actionBar}
+      >
+        {queryComponent ?? (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            css={[styles.actionBarSkeleton, commonStyles.fullWidth]}
+          />
+        )}
+      </Stack>
+      <Divider css={styles.divider} />
+      <Stack
+        alignItems="flex-start"
+        ref={documentComponentRef}
+        css={[styles.annotationArea, !userSelectionAllowed && commonStyles.noUserSelectionAllowed]}
+        boxProps={{ onMouseUp: annotateOnUserSelect }}
+      >
+        {documentComponent ?? (
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            css={[styles.annotationAreaSkeleton, commonStyles.fullWidth, commonStyles.fullHeight]}
+          />
+        )}
+      </Stack>
+      <Box css={styles.footer}>{guideComponent}</Box>
+    </Stack>
+  </>
+);
+
+const AnnotationMenu: React.FC<{ alreadyFinished: number; remainingToFinish: number }> = ({
+  alreadyFinished,
+  remainingToFinish,
+}) => {
+  const annotationRouting = useRouting();
+
+  function handleShowHistoryPage() {
+    annotationRouting.routeToHistoryPage();
+  }
+
+  function handleShowInfoPage() {
+    annotationRouting.routeToInfoPage();
+  }
+
+  return (
+    <Menu
+      additionalItems={
+        <>
+          <Stack justifyContent="center" alignItems="center">
+            <TextBox disablePreserveNewlines textAlign="center">
+              Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
+              <strong>{alreadyFinished! + remainingToFinish}</strong>
+            </TextBox>
+          </Stack>
+          <MenuItem onClick={handleShowHistoryPage}>
+            <Stack direction="row" spacing={1.5}>
+              <HistoryIcon />
+              <TextBox>History</TextBox>
+            </Stack>
+          </MenuItem>
+          <MenuItem onClick={handleShowInfoPage}>
+            <Stack direction="row" spacing={1.5}>
+              <InfoIcon />
+              <TextBox>Go to Info Page</TextBox>
+            </Stack>
+          </MenuItem>
+        </>
       }
     />
   );
