@@ -10,14 +10,10 @@ import Stack from '../../layouts/Stack';
 import AnnotationComponent from '../elements/AnnotationComponent';
 import { useRouting } from '../AnnotationRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
-import {
-  useAnnotationState,
-  useAnnotationActions,
-} from '../../../state/annotation/annotation.hooks';
+import { useAnnotationState } from '../../../state/annotation/annotation.hooks';
 
 const Annotation: React.FC = () => {
   const { remainingToFinish, alreadyFinished, currentJudgementPair } = useAnnotationState();
-  const { selectRange, deleteRange } = useAnnotationActions();
 
   // compute fraction of finished annotation; used for progress bar
   let finishedFraction;
@@ -36,9 +32,8 @@ const Annotation: React.FC = () => {
 
   return (
     <AnnotationComponent
+      key={currentJudgementPair?.id}
       judgementPair={currentJudgementPair}
-      selectRange={selectRange}
-      deleteRange={deleteRange}
       finishedFraction={finishedFraction}
       menuComponents={
         alreadyFinished !== undefined &&
@@ -46,7 +41,8 @@ const Annotation: React.FC = () => {
           <AnnotationMenu alreadyFinished={alreadyFinished} remainingToFinish={remainingToFinish} />
         )
       }
-      submitJudgement={judgementStories.submitCurrentJudgement}
+      submitJudgement={judgementStories.submitJudgement}
+      autoSubmit
     />
   );
 };

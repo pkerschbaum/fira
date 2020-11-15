@@ -80,21 +80,6 @@ export const setupSubscriptions = (store: RootStore) => {
     },
   };
   addMemoizedSubscription(store, retrieveJudgPairsSubscription);
-
-  // set new currently selected judgement pair if list of judgement pairs changes
-  const setNextSelectedPairSubscription: MemoizedSubscription = {
-    memoizeOnValue: (subscribedStore) => subscribedStore.getState().annotation.judgementPairs,
-    listener: (subscribedStore) => {
-      const judgePairsOfStore = subscribedStore.getState().annotation.judgementPairs;
-
-      // select first pair which neither gets currently sent to the server nor was already sent to the server
-      const nextPair = judgePairsOfStore.find(
-        (pair) => pair.status === JudgementPairStatus.TO_JUDGE,
-      );
-      subscribedStore.dispatch(annotationActions.selectJudgementPair(nextPair));
-    },
-  };
-  addMemoizedSubscription(store, setNextSelectedPairSubscription);
 };
 
 type MemoizedSubscription = {

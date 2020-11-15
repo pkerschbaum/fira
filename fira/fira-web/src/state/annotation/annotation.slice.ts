@@ -1,8 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 
-import { RateLevels } from '../../typings/enums';
 import { actions as userActions } from '../user/user.slice';
-import { assertUnreachable, judgementsSchema } from '../../../../fira-commons';
+import { judgementsSchema } from '../../../../fira-commons';
 
 export enum JudgementPairStatus {
   TO_JUDGE = 'TO_JUDGE',
@@ -25,8 +24,6 @@ type AnnotationState = {
   readonly remainingUntilFirstFeedbackRequired?: number;
   readonly countOfFeedbacks?: number;
   readonly countOfNotPreloadedPairs?: number;
-  readonly currentJudgementPairId?: judgementsSchema.PreloadJudgement['id'];
-  readonly currentJudgementPairSelectedOnMs?: number; // unix timestamp
 };
 
 type PreloadJudgementsPayload = {
@@ -38,24 +35,6 @@ type PreloadJudgementsPayload = {
   readonly countOfNotPreloadedPairs: number;
 };
 
-type RateJudgementPairPayload = {
-  readonly relevanceLevel: judgementsSchema.RelevanceLevel;
-};
-
-export type SelectRangePayload = {
-  readonly selection:
-    | { readonly type: 'START_OR_END'; readonly annotationPartIndex: number }
-    | {
-        readonly type: 'ENTIRE_RANGE';
-        readonly partStartIndex: number;
-        readonly partEndIndex: number;
-      };
-};
-
-export type DeleteRangePayload = {
-  readonly annotationPartIndex: number;
-};
-
 type SetJudgementStatusPayload = {
   readonly id: judgementsSchema.PreloadJudgement['id'];
   readonly status: JudgementPairStatus;
@@ -65,11 +44,7 @@ const INITIAL_STATE = { judgementPairs: [] } as AnnotationState;
 
 export const actions = {
   preloadJudgements: createAction<PreloadJudgementsPayload>('JUDGEMENTS_PRELOADED'),
-  rateJudgementPair: createAction<RateJudgementPairPayload>('JUDGEMENT_PAIR_RATED'),
-  selectRange: createAction<SelectRangePayload>('RANGE_SELECTED'),
-  deleteRange: createAction<DeleteRangePayload>('RANGE_DELETED'),
   setJudgementStatus: createAction<SetJudgementStatusPayload>('JUDGEMENT_STATUS_SET'),
-  selectJudgementPair: createAction<JudgementPair | undefined>('JUDGEMENT_PAIR_SELECTED'),
 };
 export const reducer = createReducer(INITIAL_STATE, (builder) =>
   builder
@@ -103,105 +78,9 @@ export const reducer = createReducer(INITIAL_STATE, (builder) =>
         }
       });
     })
-    .addCase(actions.rateJudgementPair, (state, action) => {
-      const currentJudgementPair = state.judgementPairs.find(
-        (pair) => pair.id === state.currentJudgementPairId,
-      );
-      currentJudgementPair!.relevanceLevel = action.payload.relevanceLevel;
-      const currentRateLevel = RateLevels[currentJudgementPair!.relevanceLevel];
-
-      // clear annotated ranges and current annotation start if
-      // rating is changed to a level which does not require annotation of ranges
-      if (!currentRateLevel!.annotationRequired) {
-        currentJudgementPair!.annotatedRanges = [];
-        currentJudgementPair!.currentAnnotationStart = undefined;
-      }
-    })
-    .addCase(actions.selectRange, (state, action) => {
-      const currentJudgementPair = state.judgementPairs.find(
-        (pair) => pair.id === state.currentJudgementPairId,
-      );
-
-      let start: number;
-      let end: number;
-
-      if (action.payload.selection.type === 'START_OR_END') {
-        if (currentJudgementPair!.currentAnnotationStart === undefined) {
-          // the start of an annotation range was selected
-          // if the user selected a whitespace, start the selection at the next word
-          let selectedPartIdx = action.payload.selection.annotationPartIndex;
-          if (currentJudgementPair!.docAnnotationParts[selectedPartIdx] === ' ') {
-            selectedPartIdx++;
-          }
-
-          currentJudgementPair!.currentAnnotationStart = selectedPartIdx;
-          return;
-        } else {
-          // the end of an annotation range was selected --> save the annotated range
-          // if the user selected a whitespace, end the selection at the previous word
-          let selectedPartIdx = action.payload.selection.annotationPartIndex;
-          if (currentJudgementPair!.docAnnotationParts[selectedPartIdx] === ' ') {
-            selectedPartIdx--;
-          }
-
-          start = currentJudgementPair!.currentAnnotationStart;
-          end = selectedPartIdx;
-        }
-      } else if (action.payload.selection.type === 'ENTIRE_RANGE') {
-        start = action.payload.selection.partStartIndex;
-        end = action.payload.selection.partEndIndex;
-      } else {
-        assertUnreachable(action.payload.selection);
-      }
-
-      const actualStart = start < end ? start : end;
-      const actualEnd = end > start ? end : start;
-
-      // edge case: avoid overlapping ranges
-      const overlapping = currentJudgementPair!.annotatedRanges.some(
-        (range) =>
-          (actualStart >= range.start && actualStart <= range.end) ||
-          (actualEnd >= range.start && actualEnd <= range.end),
-      );
-      if (overlapping) {
-        return;
-      }
-
-      // edge case: it's possible that the user selected start/end so that it overlaps
-      // another range which got previously selected. Remove such ranges
-      currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
-        (range) => !(range.start >= actualStart && range.end <= actualEnd),
-      );
-
-      // then, add new range to the annotated ranges, and clear current annotation start
-      currentJudgementPair!.annotatedRanges.push({
-        start: actualStart,
-        end: actualEnd,
-      });
-      currentJudgementPair!.currentAnnotationStart = undefined;
-    })
-    .addCase(actions.deleteRange, (state, action) => {
-      const currentJudgementPair = state.judgementPairs.find(
-        (pair) => pair.id === state.currentJudgementPairId,
-      );
-      currentJudgementPair!.annotatedRanges = currentJudgementPair!.annotatedRanges.filter(
-        (range) => {
-          return !(
-            action.payload.annotationPartIndex >= range.start &&
-            action.payload.annotationPartIndex <= range.end
-          );
-        },
-      );
-    })
     .addCase(actions.setJudgementStatus, (state, action) => {
       const judgementPair = state.judgementPairs.find((pair) => pair.id === action.payload.id);
       judgementPair!.status = action.payload.status;
-    })
-    .addCase(actions.selectJudgementPair, (state, action) => {
-      if (state.currentJudgementPairId !== action.payload?.id) {
-        state.currentJudgementPairId = action.payload?.id;
-        state.currentJudgementPairSelectedOnMs = new Date().getTime();
-      }
     })
     .addCase(userActions.logout, () => {
       // on logout, erase annotation state

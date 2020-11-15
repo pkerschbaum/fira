@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Divider, Skeleton } from '@material-ui/core';
 
 import Button from '../../elements/Button';
@@ -7,14 +7,10 @@ import Stack from '../../layouts/Stack';
 import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
 import AnnotationPart from './AnnotationPart';
-import { judgementStories } from '../../../stories/judgement.stories';
-import {
-  DeleteRangePayload,
-  JudgementPair,
-  SelectRangePayload,
-} from '../../../state/annotation/annotation.slice';
+import { useAnnotationState } from './AnnotationComponent.hooks';
 import { useKeyupHandler } from '../../util/events.hooks';
 import { RateLevels } from '../../../typings/enums';
+import { CustomError } from '../../../commons/custom-error';
 import { functions, judgementsSchema } from '../../../../../fira-commons';
 
 import { styles } from './AnnotationComponent.styles';
@@ -22,35 +18,78 @@ import { commonStyles } from '../../Common.styles';
 
 const WHITESPACE = ' ';
 
+export type SubmitPayload = {
+  id: number;
+  relevanceLevel: judgementsSchema.RelevanceLevel;
+  annotatedRanges: Array<{ start: number; end: number }>;
+  judgementStartedMs: number;
+};
+
 const AnnotationComponent: React.FC<{
-  judgementPair?: JudgementPair;
-  selectRange: (args: SelectRangePayload) => void;
-  deleteRange: (args: DeleteRangePayload) => void;
+  judgementPair?: judgementsSchema.PreloadJudgement;
   finishedFraction: number;
   menuComponents: React.ReactNode;
-  submitJudgement: () => void;
-}> = ({
-  judgementPair,
-  selectRange,
-  deleteRange,
-  finishedFraction,
-  menuComponents,
-  submitJudgement,
-}) => {
+  submitJudgement: (data: SubmitPayload) => void;
+  autoSubmit: boolean;
+}> = ({ judgementPair, finishedFraction, menuComponents, submitJudgement, autoSubmit }) => {
+  const {
+    state,
+    rateJudgementPair,
+    selectRange,
+    deleteRange,
+    startJudgement,
+  } = useAnnotationState();
   const [popoverAnnotatePartIndex, setPopoverAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
 
-  function createJudgementFn(relevanceLevel: judgementsSchema.RelevanceLevel) {
-    return () => judgementStories.rateJudgementPair(relevanceLevel);
-  }
+  // once a judgement pair is given to the component, or the judgement pair changes, reset judgementStartedMs
+  useEffect(() => {
+    if (judgementPair !== undefined) {
+      startJudgement();
+    }
+  }, [judgementPair, startJudgement]);
+
+  // if autoSubmit is enabled and submission of judgement pair is possible, do that
+  useEffect(() => {
+    if (
+      autoSubmit &&
+      judgementPair !== undefined &&
+      state.relevanceLevel !== undefined &&
+      state.judgementStartedMs !== undefined
+    ) {
+      const currentRateLevel = RateLevels[state.relevanceLevel];
+
+      // if the chosen rate level does not require annotation, or it does and regions were
+      // annotated already when the pair was rated, immediately submit judgement
+      if (!currentRateLevel.annotationRequired || state.annotatedRangesExistedWhenRated) {
+        submitJudgement({
+          id: judgementPair.id,
+          relevanceLevel: state.relevanceLevel,
+          annotatedRanges: state.annotatedRanges,
+          judgementStartedMs: state.judgementStartedMs,
+        });
+      }
+    }
+  }, [
+    autoSubmit,
+    judgementPair,
+    state.relevanceLevel,
+    state.judgementStartedMs,
+    state.annotatedRanges,
+    state.annotatedRangesExistedWhenRated,
+    submitJudgement,
+  ]);
 
   // create map which is used to rate judgement pairs with keyboard keys
   const keyupMap: { [keyCode: string]: () => void } = {};
   for (const rateLevel of Object.values(RateLevels)) {
     if (rateLevel.enabled) {
-      keyupMap[rateLevel.keyboardKey.keyCode] = createJudgementFn(rateLevel.relevanceLevel);
+      keyupMap[rateLevel.keyboardKey.keyCode] = () =>
+        rateJudgementPair({
+          relevanceLevel: rateLevel.relevanceLevel,
+        });
     }
   }
   useKeyupHandler(!judgementPair ? {} : keyupMap);
@@ -61,19 +100,17 @@ const AnnotationComponent: React.FC<{
   }
 
   const currentRateLevel =
-    judgementPair.relevanceLevel === undefined
-      ? undefined
-      : RateLevels[judgementPair.relevanceLevel];
+    state.relevanceLevel === undefined ? undefined : RateLevels[state.relevanceLevel];
 
   // compute some boolean variables needed to guide the user throw the annotation process
   const ratingRequired = !currentRateLevel;
-  const currentSelectionNotFinished = judgementPair.currentAnnotationStart !== undefined;
+  const currentSelectionNotFinished = state.currentAnnotationStart !== undefined;
   const annotationIsAllowedInGeneral =
     judgementPair.mode === judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS;
   const annotationIsRequired =
     annotationIsAllowedInGeneral &&
     !!currentRateLevel?.annotationRequired &&
-    judgementPair.annotatedRanges.length === 0;
+    state.annotatedRanges.length === 0;
   const annotationStatus =
     currentRateLevel?.relevanceLevel === judgementsSchema.RelevanceLevel.MISLEADING_ANSWER
       ? annotationIsRequired
@@ -82,7 +119,7 @@ const AnnotationComponent: React.FC<{
       : annotationIsRequired
       ? 'RELEVANT_REGION_REQUIRED'
       : 'ADDITIONAL_RELEVANT_REGIONS_ALLOWED';
-  const userSelectionAllowed = judgementPair.currentAnnotationStart === undefined;
+  const userSelectionAllowed = state.currentAnnotationStart === undefined;
 
   function hidePopover() {
     setPopoverAnnotatePartIndex(undefined);
@@ -168,7 +205,7 @@ const AnnotationComponent: React.FC<{
           parentContainerRef={documentComponentRef}
           createTextNode={({ textPart, partIdx }) => {
             // determine if part is in one of the selected ranges
-            const correspondingAnnotatedRange = judgementPair.annotatedRanges.find(
+            const correspondingAnnotatedRange = state.annotatedRanges.find(
               (range) => range.start <= partIdx && range.end >= partIdx,
             );
             const isInAnnotatedRange = !!correspondingAnnotatedRange;
@@ -204,7 +241,7 @@ const AnnotationComponent: React.FC<{
                 key={partIdx}
                 idx={`${partIdx}`}
                 text={textPart}
-                isRangeStart={judgementPair.currentAnnotationStart === partIdx}
+                isRangeStart={state.currentAnnotationStart === partIdx}
                 isInSelectedRange={isInAnnotatedRange}
                 showPopover={popoverAnnotatePartIndex === partIdx}
                 annotationIsAllowedOnPart={canAnnotatePart}
@@ -213,7 +250,11 @@ const AnnotationComponent: React.FC<{
                   canAnnotatePart
                     ? () =>
                         selectRange({
-                          selection: { type: 'START_OR_END', annotationPartIndex: partIdx },
+                          selection: {
+                            type: 'START_OR_END',
+                            docAnnotationParts: judgementPair.docAnnotationParts,
+                            annotationPartIndex: partIdx,
+                          },
                         })
                     : isInAnnotatedRange
                     ? () => setPopoverAnnotatePartIndex(partIdx)
@@ -238,7 +279,11 @@ const AnnotationComponent: React.FC<{
                 css={styles.rateButton}
                 relevanceLevel={rateLevel.relevanceLevel}
                 keyboardKeyToShow={rateLevel.keyboardKey.toShow}
-                onClick={createJudgementFn(rateLevel.relevanceLevel)}
+                onClick={() =>
+                  rateJudgementPair({
+                    relevanceLevel: rateLevel.relevanceLevel,
+                  })
+                }
               />
             ))
         ) : (
@@ -262,7 +307,25 @@ const AnnotationComponent: React.FC<{
               variant="contained"
               css={styles.nextButton}
               disabled={currentSelectionNotFinished || annotationIsRequired}
-              onClick={submitJudgement}
+              onClick={() => {
+                if (
+                  judgementPair === undefined ||
+                  state.relevanceLevel === undefined ||
+                  state.judgementStartedMs === undefined
+                ) {
+                  throw new CustomError(
+                    `judgemenPair cannot be submitted, current annotation state is`,
+                    { judgementPair, state },
+                  );
+                }
+
+                submitJudgement({
+                  id: judgementPair.id,
+                  relevanceLevel: state.relevanceLevel,
+                  annotatedRanges: state.annotatedRanges,
+                  judgementStartedMs: state.judgementStartedMs,
+                });
+              }}
             >
               Next
             </Button>

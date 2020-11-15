@@ -5,8 +5,7 @@ import {
   actions as annotationActions,
   JudgementPairStatus,
 } from '../state/annotation/annotation.slice';
-import { RateLevels } from '../typings/enums';
-import { judgementsSchema } from '../../../fira-commons';
+import { SubmitPayload } from '../ui/annotation-route/elements/AnnotationComponent';
 
 const logger = createLogger('judgements.service');
 
@@ -38,62 +37,37 @@ export const judgementStories = {
     return response;
   },
 
-  rateJudgementPair: async (relevanceLevel: judgementsSchema.RelevanceLevel) => {
-    logger.info(`executing rate judgement pair...`, { relevanceLevel });
+  submitJudgement: async (data: SubmitPayload) => {
+    logger.info(`executing submit judgement...`, { data });
 
-    store.dispatch(annotationActions.rateJudgementPair({ relevanceLevel }));
-
-    const annotationState = store.getState().annotation;
-    const currentJudgementPair = annotationState.judgementPairs.find(
-      (pair) => pair.id === annotationState.currentJudgementPairId,
-    )!;
-    const currentRateLevel = RateLevels[currentJudgementPair.relevanceLevel!];
-
-    if (!currentRateLevel!.annotationRequired || currentJudgementPair!.annotatedRanges.length > 0) {
-      // if the chosen rate level does not require annotation, or it does and regions are
-      // annotated already,
-      // immediately submit current judgement and proceed
-      await judgementStories.submitCurrentJudgement();
-    }
-
-    logger.info(`rate judgement pair succeeded!`);
-  },
-
-  submitCurrentJudgement: async () => {
-    logger.info(`executing submit current judgement...`);
-
-    const annotationState = store.getState().annotation;
-    const currentJudgementPair = annotationState.judgementPairs.find(
-      (pair) => pair.id === annotationState.currentJudgementPairId,
-    )!;
     const relevancePositions: number[] = [];
-    for (const annotatedRange of currentJudgementPair.annotatedRanges) {
+    for (const annotatedRange of data.annotatedRanges) {
       for (let i = annotatedRange.start; i <= annotatedRange.end; i++) {
         relevancePositions.push(i);
       }
     }
 
     const now = new Date().getTime();
-    const durationUsedToJudgeMs = now - annotationState.currentJudgementPairSelectedOnMs!;
+    const durationUsedToJudgeMs = now - data.judgementStartedMs!;
 
     store.dispatch(
       annotationActions.setJudgementStatus({
-        id: currentJudgementPair.id,
+        id: data.id,
         status: JudgementPairStatus.SEND_PENDING,
       }),
     );
 
     try {
-      await judgementsClient.submitJudgement(currentJudgementPair.id, {
-        relevanceLevel: currentJudgementPair.relevanceLevel!,
+      await judgementsClient.submitJudgement(data.id, {
+        relevanceLevel: data.relevanceLevel,
         relevancePositions,
         durationUsedToJudgeMs,
       });
     } catch (error) {
-      logger.error(`submit current judgement failed!`, { id: currentJudgementPair.id, error });
+      logger.error(`submit judgement failed!`, { id: data.id, error });
       store.dispatch(
         annotationActions.setJudgementStatus({
-          id: currentJudgementPair.id,
+          id: data.id,
           status: JudgementPairStatus.SEND_FAILED,
         }),
       );
@@ -102,11 +76,11 @@ export const judgementStories = {
 
     store.dispatch(
       annotationActions.setJudgementStatus({
-        id: currentJudgementPair.id,
+        id: data.id,
         status: JudgementPairStatus.SEND_SUCCESS,
       }),
     );
 
-    logger.info(`submit current judgement succeeded!`);
+    logger.info(`submit judgement succeeded!`);
   },
 };
