@@ -20,7 +20,7 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import TextBox from '../../elements/TextBox';
 import Stack from '../../layouts/Stack';
 import { RateBadge } from '../elements/RateButton';
-import { useRouting } from '../AnnotationRouter';
+import { useRouting } from '../../MainRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
 
@@ -37,7 +37,7 @@ const KEYCODE_RIGHT_ARROW = 'ArrowRight';
 const HEIGHT_OF_HISTORY_ELEMENT = 100; // px
 
 const AnnotationHistory: React.FC = () => {
-  const { routeToAnnotatePage } = useRouting();
+  const { route } = useRouting();
 
   const [skip, setSkip] = useState(0);
   const [pageSize, setPageSize] = useState<undefined | number>(undefined);
@@ -77,7 +77,7 @@ const AnnotationHistory: React.FC = () => {
   });
 
   function handleCloseHistory() {
-    routeToAnnotatePage();
+    route.annotation.toAnnotatePage();
   }
 
   function handlePagingBack() {

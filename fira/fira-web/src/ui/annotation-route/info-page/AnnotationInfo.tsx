@@ -11,13 +11,13 @@ import infoEx4 from './info-example-perfect.png';
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
 import Stack from '../../layouts/Stack';
+import { useRouting } from '../../MainRouter';
 import { annotatorStories } from '../../../stories/annotator.stories';
-import { useRouting } from '../AnnotationRouter';
 
 import { styles } from './AnnotationInfo.styles';
 
 const AnnotationInfo: React.FC = () => {
-  const annotationRouting = useRouting();
+  const { route } = useRouting();
 
   const content = [
     {
@@ -94,7 +94,7 @@ const AnnotationInfo: React.FC = () => {
 
   function onAcknowledge() {
     annotatorStories.acknowledgePage('INFO');
-    annotationRouting.routeToAnnotatePage();
+    route.annotation.toAnnotatePage();
   }
 
   return (

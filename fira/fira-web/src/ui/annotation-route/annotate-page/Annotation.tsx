@@ -8,7 +8,7 @@ import TextBox from '../../elements/TextBox';
 import Menu from '../../elements/Menu';
 import Stack from '../../layouts/Stack';
 import AnnotationComponent from '../elements/AnnotationComponent';
-import { useRouting } from '../AnnotationRouter';
+import { useRouting } from '../../MainRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { useAnnotationState } from '../../../state/annotation/annotation.hooks';
 
@@ -51,14 +51,14 @@ const AnnotationMenu: React.FC<{ alreadyFinished: number; remainingToFinish: num
   alreadyFinished,
   remainingToFinish,
 }) => {
-  const annotationRouting = useRouting();
+  const { route } = useRouting();
 
   function handleShowHistoryPage() {
-    annotationRouting.routeToHistoryPage();
+    route.annotation.toHistoryPage();
   }
 
   function handleShowInfoPage() {
-    annotationRouting.routeToInfoPage();
+    route.annotation.toInfoPage();
   }
 
   return (

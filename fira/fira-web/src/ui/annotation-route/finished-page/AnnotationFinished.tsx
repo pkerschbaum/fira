@@ -4,8 +4,8 @@ import { Box } from '@material-ui/core';
 import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
 import Stack from '../../layouts/Stack';
+import { useRouting } from '../../MainRouter';
 import { annotatorStories } from '../../../stories/annotator.stories';
-import { useRouting } from '../AnnotationRouter';
 
 import { styles } from './AnnotationFinished.styles';
 
@@ -73,11 +73,11 @@ const PartyPopperEmoji: React.FC = () => (
 );
 
 const AnnotationFinished: React.FC = () => {
-  const annotationRouting = useRouting();
+  const { route } = useRouting();
 
   function onAcknowledge() {
     annotatorStories.acknowledgePage('FINISHED');
-    annotationRouting.routeToAnnotatePage();
+    route.annotation.toAnnotatePage();
   }
 
   return (

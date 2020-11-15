@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, Redirect, useRouteMatch, useHistory } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
 import Annotation from './annotate-page/Annotation';
 import AnnotationHistory from './history-page/AnnotationHistory';
@@ -9,33 +9,9 @@ import AnnotationFinished from './finished-page/AnnotationFinished';
 import AnnotationEverythingAnnotated from './everything-annotated-page/AnnotationEverythingAnnotated';
 import { useUserState } from '../../state/user/user.hooks';
 import { useAnnotationState } from '../../state/annotation/annotation.hooks';
-import { assertUnreachable } from '../../../../fira-commons';
-
-const ANNOTATE_RELATIVE_URL = 'annotate';
-const HISTORY_RELATIVE_URL = 'history';
-const INFO_RELATIVE_URL = 'info';
-const FEEDBACK_RELATIVE_URL = 'feedback';
-const FINISHED_RELATIVE_URL = 'finished';
-const EVERYTHING_ANNOTATED_RELATIVE_URL = 'everything-finished';
-
-export function useRouting() {
-  const history = useHistory();
-
-  return {
-    routeToAnnotatePage: () => {
-      history.push(ANNOTATE_RELATIVE_URL);
-    },
-    routeToHistoryPage: () => {
-      history.push(HISTORY_RELATIVE_URL);
-    },
-    routeToInfoPage: () => {
-      history.push(INFO_RELATIVE_URL);
-    },
-  };
-}
+import { assertUnreachable, routes } from '../../../../fira-commons';
 
 const AnnotationRouter: React.FC = () => {
-  const match = useRouteMatch();
   const { userAcknowledgedInfoPage, userAcknowledgedFinishedPage } = useUserState();
   const {
     remainingToFinish,
@@ -46,7 +22,7 @@ const AnnotationRouter: React.FC = () => {
     pairsToJudge,
   } = useAnnotationState();
 
-  const redirectToDefault = <Redirect to={`${match.path}/${ANNOTATE_RELATIVE_URL}`} />;
+  const redirectToDefault = <Redirect to={routes.ANNOTATION.annotate} />;
 
   const pageToShow = !annotationDataReceivedFromServer
     ? 'ANNOTATION_PAGE'
@@ -63,39 +39,39 @@ const AnnotationRouter: React.FC = () => {
 
   return (
     <Switch>
-      <Route path={`${match.path}/${ANNOTATE_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.annotate}>
         {pageToShow === 'INFO_PAGE' ? (
           // on this device, the info page was never shown and
           // acknowledged by the user --> show page
-          <Redirect to={`${match.path}/${INFO_RELATIVE_URL}`} />
+          <Redirect to={routes.ANNOTATION.info} />
         ) : pageToShow === 'FEEDBACK_PAGE' ? (
           // user must submit a feedback
-          <Redirect to={`${match.path}/${FEEDBACK_RELATIVE_URL}`} />
+          <Redirect to={routes.ANNOTATION.feedback} />
         ) : pageToShow === 'FINISHED_PAGE' ? (
           // user finished annotation target and the finished page was never shown and
           // acknowledged by the user --> show page
-          <Redirect to={`${match.path}/${FINISHED_RELATIVE_URL}`} />
+          <Redirect to={routes.ANNOTATION.finished} />
         ) : pageToShow === 'EVERYTHING_ANNOTATED_PAGE' ? (
-          <Redirect to={`${match.path}/${EVERYTHING_ANNOTATED_RELATIVE_URL}`} />
+          <Redirect to={routes.ANNOTATION.everythingAnnotated} />
         ) : pageToShow === 'ANNOTATION_PAGE' ? (
           <Annotation />
         ) : (
           assertUnreachable(pageToShow)
         )}
       </Route>
-      <Route path={`${match.path}/${HISTORY_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.history}>
         <AnnotationHistory />
       </Route>
-      <Route path={`${match.path}/${INFO_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.info}>
         <AnnotationInfo />
       </Route>
-      <Route path={`${match.path}/${FEEDBACK_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.feedback}>
         {pageToShow !== 'FEEDBACK_PAGE' ? redirectToDefault : <AnnotationFeedback />}
       </Route>
-      <Route path={`${match.path}/${FINISHED_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.finished}>
         {pageToShow !== 'FINISHED_PAGE' ? redirectToDefault : <AnnotationFinished />}
       </Route>
-      <Route path={`${match.path}/${EVERYTHING_ANNOTATED_RELATIVE_URL}`}>
+      <Route path={routes.ANNOTATION.everythingAnnotated}>
         {pageToShow !== 'EVERYTHING_ANNOTATED_PAGE' ? (
           redirectToDefault
         ) : (
