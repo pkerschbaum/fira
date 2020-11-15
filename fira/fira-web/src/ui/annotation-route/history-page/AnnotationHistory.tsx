@@ -109,7 +109,7 @@ const AnnotationHistory: React.FC = () => {
     <Stack alignItems="stretch" css={commonStyles.fullHeight}>
       <Stack direction="row-reverse" disableContainerStretch justifyContent="space-between">
         <IconButton onClick={handleCloseHistory}>
-          <CancelIcon />
+          <CancelIcon style={{ width: 32, height: 32 }} />
         </IconButton>
       </Stack>
       <Stack
