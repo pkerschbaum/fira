@@ -42,7 +42,7 @@ type RateJudgementPairPayload = {
   readonly relevanceLevel: judgementsSchema.RelevanceLevel;
 };
 
-type SelectRangePayload = {
+export type SelectRangePayload = {
   readonly selection:
     | { readonly type: 'START_OR_END'; readonly annotationPartIndex: number }
     | {
@@ -52,7 +52,7 @@ type SelectRangePayload = {
       };
 };
 
-type DeleteRangePayload = {
+export type DeleteRangePayload = {
   readonly annotationPartIndex: number;
 };
 

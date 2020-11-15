@@ -19,7 +19,7 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 
 import TextBox from '../../elements/TextBox';
 import Stack from '../../layouts/Stack';
-import { RateBadge } from '../annotate-page/RateButton';
+import { RateBadge } from '../elements/RateButton';
 import { useRouting } from '../AnnotationRouter';
 import { judgementStories } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
