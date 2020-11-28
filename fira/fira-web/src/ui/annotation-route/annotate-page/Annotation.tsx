@@ -1,5 +1,4 @@
 import React from 'react';
-import { MenuItem } from '@material-ui/core';
 
 import HistoryIcon from '@material-ui/icons/History';
 import InfoIcon from '@material-ui/icons/Info';
@@ -61,28 +60,39 @@ const AnnotationMenu: React.FC<{ alreadyFinished: number; remainingToFinish: num
 
   return (
     <Menu
-      additionalItems={
-        <>
-          <Stack justifyContent="center" alignItems="center">
-            <TextBox disablePreserveNewlines textAlign="center">
-              Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
-              <strong>{alreadyFinished! + remainingToFinish}</strong>
-            </TextBox>
-          </Stack>
-          <MenuItem onClick={handleShowHistoryPage}>
+      additionalMenuEntries={[
+        {
+          component: 'li',
+          children: (
+            <Stack justifyContent="center" alignItems="center">
+              <TextBox disablePreserveNewlines textAlign="center">
+                Finished <strong>{alreadyFinished}</strong> <br /> out of{' '}
+                <strong>{alreadyFinished! + remainingToFinish}</strong>
+              </TextBox>
+            </Stack>
+          ),
+        },
+        {
+          component: 'MenuItem',
+          children: (
             <Stack direction="row" spacing={1.5}>
               <HistoryIcon />
               <TextBox>History</TextBox>
             </Stack>
-          </MenuItem>
-          <MenuItem onClick={handleShowInfoPage}>
+          ),
+          onClick: handleShowHistoryPage,
+        },
+        {
+          component: 'MenuItem',
+          children: (
             <Stack direction="row" spacing={1.5}>
               <InfoIcon />
               <TextBox>Go to Info Page</TextBox>
             </Stack>
-          </MenuItem>
-        </>
-      }
+          ),
+          onClick: handleShowInfoPage,
+        },
+      ]}
     />
   );
 };
