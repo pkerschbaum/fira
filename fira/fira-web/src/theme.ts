@@ -50,8 +50,9 @@ export const createTheme = (locale: Localization) => {
 
       MuiIconButton: {
         styleOverrides: {
-          label: {
+          root: {
             color: primaryColor,
+            padding: 4,
           },
         },
       },

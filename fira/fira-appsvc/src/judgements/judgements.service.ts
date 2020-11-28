@@ -304,21 +304,83 @@ export class JudgementsService {
     );
   };
 
+  public loadJudgementsOfUser = async (
+    userId: string,
+  ): Promise<judgementsSchema.LoadJugementsOfUserResponse> => {
+    const judgementsOfUser = await this.judgementsDAO.findMany({
+      where: { user_id: userId, status: JudgementStatus.JUDGED },
+      select: { id: true },
+      orderBy: { id: 'asc' },
+    });
+
+    return {
+      judgements: judgementsOfUser.map((dbJudgement, idx) => ({
+        id: dbJudgement.id,
+        nr: idx + 1,
+      })),
+    };
+  };
+
+  public loadJudgement = async (
+    userId: string,
+    judgementId: number,
+  ): Promise<judgementsSchema.LoadJudgementResponse> => {
+    const dbJudgement = httpUtils.throw404IfNullish(
+      await this.judgementsDAO.findOne({
+        where: { id: judgementId },
+        include: {
+          query_version_judgementToquery_version: true,
+          document_version_document_versionTojudgement: true,
+        },
+      }),
+    );
+
+    if (dbJudgement.user_id !== userId) {
+      throw new NotFoundException(
+        `the judgement does not belong to the given user id! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+    if (dbJudgement.status !== JudgementStatus.JUDGED) {
+      throw new BadRequestException(
+        `only judged judgements are allowed to get loaded! judgemendId=${judgementId}, userId=${userId}`,
+      );
+    }
+
+    const mappedJudgement = mapJudgementsToResponse([dbJudgement])[0];
+
+    // if relevance positions are stored rotated in the db, revert the rotation
+    let relevancePositions = dbJudgement.relevance_positions;
+    if (dbJudgement.rotate) {
+      const annotateParts = dbJudgement.document_version_document_versionTojudgement.annotate_parts;
+      const rotateIndex = Math.ceil(getRotateIndex(annotateParts.length));
+      const rotateIndex2 = Math.floor(getRotateIndex(annotateParts.length));
+      relevancePositions = relevancePositions.map((relevancePosition) =>
+        relevancePosition >= rotateIndex
+          ? relevancePosition - rotateIndex
+          : relevancePosition + rotateIndex2,
+      );
+    }
+
+    return {
+      ...mappedJudgement,
+      documentText: dbJudgement.document_version_document_versionTojudgement.text,
+      relevanceLevel: dbJudgement.relevance_level as judgementsSchema.RelevanceLevel,
+      relevancePositions,
+    };
+  };
+
   public submitJudgement = async (
     userId: string,
     judgementId: number,
     judgementData: judgementsSchema.SaveJudgement,
   ): Promise<void> => {
-    const dbJudgement = await this.judgementsDAO.findOne({
-      where: { id: judgementId },
-      include: { document_version_document_versionTojudgement: true },
-    });
+    const dbJudgement = httpUtils.throw404IfNullish(
+      await this.judgementsDAO.findOne({
+        where: { id: judgementId },
+        include: { document_version_document_versionTojudgement: true },
+      }),
+    );
 
-    if (!dbJudgement) {
-      throw new NotFoundException(
-        `judgement for the user could not be found! judgemendId=${judgementId}, userId=${userId}`,
-      );
-    }
     if (dbJudgement.user_id !== userId) {
       throw new NotFoundException(
         `the judgement does not belong to the given user id! judgemendId=${judgementId}, userId=${userId}`,

@@ -36,6 +36,21 @@ export const judgementsClient = {
     });
   },
 
+  loadJugementsOfUser: async () => {
+    return await request({
+      url: 'v1',
+      method: 'GET',
+    });
+  },
+
+  loadJugementById: async (judgementId: number) => {
+    return await request({
+      url: 'v1/:judgementId',
+      pathParams: { judgementId },
+      method: 'GET',
+    });
+  },
+
   submitJudgement: async (
     judgementId: number,
     submitJudgementData: SubmitJudgement['request']['data'],

@@ -40,9 +40,8 @@ export const styles = {
     }
   `,
 
-  divider: css`
-    border-bottom-width: medium;
-    border-color: rgba(0, 0, 0, 0.54);
+  activeLevel: css`
+    border-width: var(--border-large);
   `,
 
   rateLevelStyles: {
@@ -69,6 +68,12 @@ export const styles = {
     perfectAnswer: css`
       --bg-color: var(--color-ratelevel-perfect-answer);
       --darkened-color: var(--color-ratelevel-perfect-answer-darkened);
+    `,
+
+    loading: css`
+      width: 60px;
+      --bg-color: var(--color-ratelevel-loading);
+      --darkened-color: var(--color-ratelevel-loading-darkened);
     `,
   },
 };

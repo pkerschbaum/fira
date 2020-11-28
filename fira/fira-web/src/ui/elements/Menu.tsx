@@ -2,26 +2,26 @@ import React, { useState } from 'react';
 import { IconButton, Menu as MuiMenu, MenuItem } from '@material-ui/core';
 
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-import InfoIcon from '@material-ui/icons/Info';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 import TextBox from './TextBox';
 import Stack from '../layouts/Stack';
 import { useUserActions } from '../../state/user/user.hooks';
-import { useRouting } from '../annotation-route/AnnotationRouter';
+import { assertUnreachable } from '../../../../fira-commons';
 
-const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }) => {
+type MenuEntry = {
+  component: 'li' | 'MenuItem';
+  children: React.ReactNode;
+  onClick?: () => void;
+};
+
+const Menu: React.FC<{ additionalMenuEntries?: MenuEntry[] }> = ({ additionalMenuEntries }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const userActions = useUserActions();
-  const annotationRouting = useRouting();
 
   function handleLogout() {
     userActions.logout();
-  }
-
-  function handleShowInfoPage() {
-    annotationRouting.routeToInfoPage();
   }
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -32,29 +32,39 @@ const Menu: React.FC<{ additionalInfo?: React.ReactNode }> = ({ additionalInfo }
     setAnchorEl(null);
   };
 
+  const menuItems: MenuEntry[] = [
+    ...additionalMenuEntries,
+    {
+      component: 'MenuItem',
+      children: (
+        <Stack direction="row" spacing={1.5}>
+          <ExitToAppIcon />
+          <TextBox>Logout</TextBox>
+        </Stack>
+      ),
+      onClick: handleLogout,
+    },
+  ];
+
   return (
     <>
-      <IconButton style={{ padding: 4, marginBottom: -8 }} onClick={handleClick}>
+      <IconButton style={{ marginBottom: -8 }} onClick={handleClick}>
         <MoreVertIcon />
       </IconButton>
       <MuiMenu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-        {additionalInfo === undefined ? null : (
-          <Stack justifyContent="center" alignItems="center">
-            {additionalInfo}
-          </Stack>
+        {menuItems.map((item, idx) =>
+          item.component === 'li' ? (
+            <li key={idx} onClick={item.onClick}>
+              {item.children}
+            </li>
+          ) : item.component === 'MenuItem' ? (
+            <MenuItem key={idx} onClick={item.onClick}>
+              {item.children}
+            </MenuItem>
+          ) : (
+            assertUnreachable(item.component)
+          ),
         )}
-        <MenuItem onClick={handleShowInfoPage}>
-          <Stack direction="row" spacing={1.5}>
-            <InfoIcon />
-            <TextBox>Go to Info Page</TextBox>
-          </Stack>
-        </MenuItem>
-        <MenuItem onClick={handleLogout}>
-          <Stack direction="row" spacing={1.5}>
-            <ExitToAppIcon />
-            <TextBox>Logout</TextBox>
-          </Stack>
-        </MenuItem>
       </MuiMenu>
     </>
   );

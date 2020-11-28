@@ -1,7 +1,7 @@
 import { combineReducers } from '@reduxjs/toolkit';
 
-import userReducer from './user/user.slice';
-import annotationReducer from './annotation/annotation.slice';
+import { reducer as userReducer } from './user/user.slice';
+import { reducer as annotationReducer } from './annotation/annotation.slice';
 
 export default combineReducers({
   user: userReducer,

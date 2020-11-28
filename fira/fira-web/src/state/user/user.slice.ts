@@ -30,12 +30,14 @@ const INITIAL_STATE = null as UserState;
 const DEFAULT_ACKNOWLEDGED_INFO_PAGE = false;
 const DEFAULT_ACKNOWLEDGED_FINISHED_PAGE = false;
 
-const authenticate = createAction<AuthenticatePayload>('AUTHENTICATED');
-const acknowledgePage = createAction<AcknowledgePagePayload>('ACKNOWLEDGED_PAGE');
-const logout = createAction<void>('LOGGED_OUT');
-const reducer = createReducer(INITIAL_STATE, (builder) =>
+export const actions = {
+  authenticate: createAction<AuthenticatePayload>('AUTHENTICATED'),
+  acknowledgePage: createAction<AcknowledgePagePayload>('ACKNOWLEDGED_PAGE'),
+  logout: createAction<void>('LOGGED_OUT'),
+};
+export const reducer = createReducer(INITIAL_STATE, (builder) =>
   builder
-    .addCase(authenticate, (state, action) => {
+    .addCase(actions.authenticate, (state, action) => {
       const accessTokenJwtPayload = jwt.decode(action.payload.accessToken) as JwtPayload;
       const refreshTokenJwtPayload = jwt.decode(action.payload.refreshToken) as JwtPayload;
       const isAdmin = !!accessTokenJwtPayload.resource_access?.['realm-management']?.roles?.some(
@@ -61,7 +63,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         role: isAdmin ? UserRole.ADMIN : UserRole.ANNOTATOR,
       };
     })
-    .addCase(acknowledgePage, (state, action) => {
+    .addCase(actions.acknowledgePage, (state, action) => {
       if (action.payload.page === 'INFO') {
         state!.acknowledgedInfoPage = true;
       } else if (action.payload.page === 'FINISHED') {
@@ -70,10 +72,7 @@ const reducer = createReducer(INITIAL_STATE, (builder) =>
         assertUnreachable(action.payload.page);
       }
     })
-    .addCase(logout, () => {
+    .addCase(actions.logout, () => {
       return INITIAL_STATE;
     }),
 );
-
-export const actions = { authenticate, acknowledgePage, logout };
-export default reducer;

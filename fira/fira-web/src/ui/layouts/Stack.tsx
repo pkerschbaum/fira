@@ -6,7 +6,7 @@ import { styles } from './Stack.styles';
 import { commonStyles } from '../Common.styles';
 
 type StackProps = {
-  direction?: 'row' | 'column';
+  direction?: 'row' | 'column' | 'row-reverse' | 'column-reverse';
   disableContainerStretch?: boolean;
   justifyContent?: Property.JustifyContent;
   alignItems?: Property.AlignItems;

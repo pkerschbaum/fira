@@ -26,9 +26,8 @@ export const useAnnotationState = () => {
     state.annotation.judgementPairs.filter((pair) => pair.status === JudgementPairStatus.TO_JUDGE),
   );
   const currentJudgementPair = useSelector((state: RootState) =>
-    state.annotation.judgementPairs.find(
-      (pair) => pair.id === state.annotation.currentJudgementPairId,
-    ),
+    // select first pair which neither gets currently sent to the server nor was already sent to the server
+    state.annotation.judgementPairs.find((pair) => pair.status === JudgementPairStatus.TO_JUDGE),
   );
   const pairsJudged = pairsSuccessfullySent.concat(pairsCurrentlySending);
 

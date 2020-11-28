@@ -17,8 +17,8 @@ const relevanceLevelSchema = z.nativeEnum(RelevanceLevel);
 
 export const preloadJudgementSchema = z.object({
   id: z.number(),
-  docAnnotationParts: z.array(z.string()),
   queryText: z.string(),
+  docAnnotationParts: z.array(z.string()),
   mode: judgementModeSchema,
 });
 export type PreloadJudgement = z.infer<typeof preloadJudgementSchema>;
@@ -32,6 +32,18 @@ const preloadJudgementResponseSchema = z.object({
   countOfNotPreloadedPairs: z.number(),
 });
 export type PreloadJudgementResponse = z.infer<typeof preloadJudgementResponseSchema>;
+
+const loadJudgementsOfUserResponseSchema = z.object({
+  judgements: z.array(z.object({ id: z.number(), nr: z.number() })),
+});
+export type LoadJugementsOfUserResponse = z.infer<typeof loadJudgementsOfUserResponseSchema>;
+
+const loadJudgementResponseSchema = preloadJudgementSchema.extend({
+  documentText: z.string(),
+  relevanceLevel: relevanceLevelSchema,
+  relevancePositions: z.array(z.number()),
+});
+export type LoadJudgementResponse = z.infer<typeof loadJudgementResponseSchema>;
 
 export const saveJudgementSchema = z.object({
   relevanceLevel: relevanceLevelSchema,

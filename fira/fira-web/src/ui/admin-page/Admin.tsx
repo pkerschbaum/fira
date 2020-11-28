@@ -73,7 +73,7 @@ const Admin: React.FC = () => {
         {({ isSubmitting }) => (
           <Form>
             <Stack direction="row" justifyContent="space-between">
-              <Stack alignItems="stretch" css={commonStyles.flex.shrinkAndFit}>
+              <Stack alignItems="stretch" css={commonStyles.flex.shrinkAndFitHorizontal}>
                 <SelectInput
                   name="judgementMode"
                   label="Judgement Mode"
