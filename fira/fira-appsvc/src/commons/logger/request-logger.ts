@@ -55,12 +55,4 @@ export class RequestLogger {
       ...logContext,
     });
   }
-
-  public clone(): RequestLogger {
-    const clonedLogger = new RequestLogger(this.transientLogger, this.requestProperties);
-    if (this.logContext.component !== undefined) {
-      clonedLogger.setComponent(this.logContext.component);
-    }
-    return clonedLogger;
-  }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable */
 // based on: https://github.com/nestjs/nest/blob/master/packages/common/services/logger.service.ts
 import * as clc from 'cli-color';
 import * as moment from 'moment';

@@ -31,10 +31,4 @@ export class TransientLogger {
   ): void {
     baseLogger.error(message, error, messageContext, { component: this.component, ...logContext });
   }
-
-  public clone(): TransientLogger {
-    const clonedLogger = new TransientLogger();
-    clonedLogger.component = this.component;
-    return clonedLogger;
-  }
 }
