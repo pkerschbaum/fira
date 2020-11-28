@@ -1,7 +1,7 @@
 import { createLogger } from '../../commons/logger';
 import { RootStore } from '../store';
 import { judgementStories } from '../../stories/judgement.stories';
-import { actions as annotationActions, JudgementPairStatus } from '../annotation/annotation.slice';
+import { JudgementPairStatus } from '../annotation/annotation.slice';
 import { UserRole } from '../../typings/enums';
 import { annotationComputations } from './annotation.hooks';
 

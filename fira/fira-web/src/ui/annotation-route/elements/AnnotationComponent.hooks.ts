@@ -35,11 +35,16 @@ type DeleteRangeAction = {
   };
 };
 
-type StartJudgementAction = {
-  type: 'JUDGEMENT_STARTED';
+type InitializeJudgementAction = {
+  type: 'JUDGEMENT_INITIALIZED';
+  payload: {
+    initialRelevanceLevel?: judgementsSchema.RelevanceLevel;
+    initialAnnotatedRanges?: Array<{ start: number; end: number }>;
+  };
 };
 
 type AnnotationState = {
+  initialized: boolean;
   relevanceLevel?: judgementsSchema.RelevanceLevel;
   annotatedRanges: Array<{ start: number; end: number }>;
   annotatedRangesExistedWhenRated: boolean;
@@ -49,7 +54,7 @@ type AnnotationState = {
 
 const annotationStateReducer: Reducer<
   AnnotationState,
-  RateJudgementPairAction | SelectRangeAction | DeleteRangeAction | StartJudgementAction
+  RateJudgementPairAction | SelectRangeAction | DeleteRangeAction | InitializeJudgementAction
 > = (state, action) => {
   switch (action.type) {
     case 'JUDGEMENT_PAIR_RATED': {
@@ -142,8 +147,15 @@ const annotationStateReducer: Reducer<
       break;
     }
 
-    case 'JUDGEMENT_STARTED': {
-      state.judgementStartedMs = Date.now();
+    case 'JUDGEMENT_INITIALIZED': {
+      if (!state.initialized) {
+        state.initialized = true;
+        state.judgementStartedMs = Date.now();
+        state.relevanceLevel = action.payload.initialRelevanceLevel;
+        if (action.payload.initialAnnotatedRanges !== undefined) {
+          state.annotatedRanges = action.payload.initialAnnotatedRanges;
+        }
+      }
       break;
     }
 
@@ -154,6 +166,7 @@ const annotationStateReducer: Reducer<
 
 export const useAnnotationState = () => {
   const [state, dispatch] = useImmerReducer(annotationStateReducer, {
+    initialized: false,
     annotatedRanges: [],
     annotatedRangesExistedWhenRated: false,
   });
@@ -168,8 +181,8 @@ export const useAnnotationState = () => {
       deleteRange: (payload: DeleteRangeAction['payload']) => {
         dispatch({ type: 'RANGE_DELETED', payload });
       },
-      startJudgement: () => {
-        dispatch({ type: 'JUDGEMENT_STARTED' });
+      initializeJudgement: (payload: InitializeJudgementAction['payload']) => {
+        dispatch({ type: 'JUDGEMENT_INITIALIZED', payload });
       },
     }),
     [dispatch],

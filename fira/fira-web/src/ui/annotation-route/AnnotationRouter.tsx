@@ -3,6 +3,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 
 import Annotation from './annotate-page/Annotation';
 import AnnotationHistory from './history-page/AnnotationHistory';
+import EditAnnotation from './edit-annotation-page/EditAnnotation';
 import AnnotationInfo from './info-page/AnnotationInfo';
 import AnnotationFeedback from './feedback-page/AnnotationFeedback';
 import AnnotationFinished from './finished-page/AnnotationFinished';
@@ -61,6 +62,9 @@ const AnnotationRouter: React.FC = () => {
       </Route>
       <Route path={routes.ANNOTATION.history}>
         <AnnotationHistory />
+      </Route>
+      <Route path={routes.ANNOTATION.edit(':id')}>
+        <EditAnnotation />
       </Route>
       <Route path={routes.ANNOTATION.info}>
         <AnnotationInfo />

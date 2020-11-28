@@ -17,8 +17,8 @@ const relevanceLevelSchema = z.nativeEnum(RelevanceLevel);
 
 export const preloadJudgementSchema = z.object({
   id: z.number(),
-  docAnnotationParts: z.array(z.string()),
   queryText: z.string(),
+  docAnnotationParts: z.array(z.string()),
   mode: judgementModeSchema,
 });
 export type PreloadJudgement = z.infer<typeof preloadJudgementSchema>;
@@ -38,11 +38,10 @@ const loadJudgementsOfUserResponseSchema = z.object({
 });
 export type LoadJugementsOfUserResponse = z.infer<typeof loadJudgementsOfUserResponseSchema>;
 
-const loadJudgementResponseSchema = z.object({
-  id: z.number(),
-  queryText: z.string(),
+const loadJudgementResponseSchema = preloadJudgementSchema.extend({
   documentText: z.string(),
   relevanceLevel: relevanceLevelSchema,
+  relevancePositions: z.array(z.number()),
 });
 export type LoadJudgementResponse = z.infer<typeof loadJudgementResponseSchema>;
 

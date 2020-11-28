@@ -40,6 +40,10 @@ export const styles = {
     }
   `,
 
+  activeLevel: css`
+    border-width: var(--border-large);
+  `,
+
   rateLevelStyles: {
     notRelevant: css`
       --bg-color: var(--color-ratelevel-not-relevant);

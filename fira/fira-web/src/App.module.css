@@ -51,6 +51,7 @@ body {
 
   /* ### BORDERS ### */
   --border-medium: 0.125rem;
+  --border-large: 0.25rem;
   --border-radius-xsmall: 0.25rem;
   --border-radius-normal: 0.5rem;
 

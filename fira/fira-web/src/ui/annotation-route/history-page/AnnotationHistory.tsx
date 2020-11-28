@@ -12,7 +12,7 @@ import {
 import { useQuery } from 'react-query';
 import ResizeObserver from 'resize-observer-polyfill';
 
-import CancelIcon from '@material-ui/icons/Cancel';
+import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
@@ -109,7 +109,7 @@ const AnnotationHistory: React.FC = () => {
     <Stack alignItems="stretch" css={commonStyles.fullHeight}>
       <Stack direction="row-reverse" disableContainerStretch justifyContent="space-between">
         <IconButton onClick={handleCloseHistory}>
-          <CancelIcon style={{ width: 32, height: 32 }} />
+          <CloseIcon style={{ width: 32, height: 32 }} />
         </IconButton>
       </Stack>
       <Stack
@@ -156,6 +156,7 @@ const AnnotationHistory: React.FC = () => {
 };
 
 const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) => {
+  const { route } = useRouting();
   const query = useQuery(
     ['judgement', judgementId],
     () => judgementStories.loadJudgementById(judgementId),
@@ -163,8 +164,9 @@ const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) 
   );
 
   function handleEntryClick() {
-    // TODO implement
-    console.log(judgementId);
+    if (query.data !== undefined) {
+      route.annotation.toEditPage(query.data.id);
+    }
   }
 
   return (

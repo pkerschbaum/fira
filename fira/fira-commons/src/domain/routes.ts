@@ -10,6 +10,7 @@ const routesConfig = {
     routes: {
       ANNOTATION: { path: 'annotate' },
       HISTORY: { path: 'history' },
+      EDIT: { path: 'edit' },
       INFO: { path: 'info' },
       FEEDBACK: { path: 'feedback' },
       FINISHED: { path: 'finished' },
@@ -36,6 +37,12 @@ export const routes = {
       routesConfig.ANNOTATION.routes.ANNOTATION.path,
     ),
     history: createRoute(routesConfig.ANNOTATION.path, routesConfig.ANNOTATION.routes.HISTORY.path),
+    edit: (judgementId: string | number) =>
+      createRoute(
+        routesConfig.ANNOTATION.path,
+        routesConfig.ANNOTATION.routes.EDIT.path,
+        `${judgementId}`,
+      ),
     info: createRoute(routesConfig.ANNOTATION.path, routesConfig.ANNOTATION.routes.INFO.path),
     feedback: createRoute(
       routesConfig.ANNOTATION.path,

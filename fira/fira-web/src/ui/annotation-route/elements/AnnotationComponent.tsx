@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Divider, Skeleton } from '@material-ui/core';
+import { useMutation, useQueryCache } from 'react-query';
 
-import Button from '../../elements/Button';
 import TextBox from '../../elements/TextBox';
+import Button from '../../elements/Button';
 import Stack from '../../layouts/Stack';
 import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
@@ -26,35 +27,45 @@ export type SubmitPayload = {
 };
 
 const AnnotationComponent: React.FC<{
-  judgementPair?: judgementsSchema.PreloadJudgement;
+  mode: 'NEW_JUDGEMENT' | 'EDIT_JUDGEMENT';
+  judgementPair?: judgementsSchema.PreloadJudgement & {
+    relevanceLevel?: judgementsSchema.RelevanceLevel;
+    annotatedRanges?: Array<{ start: number; end: number }>;
+  };
   finishedFraction: number;
-  menuComponents: React.ReactNode;
-  submitJudgement: (data: SubmitPayload) => void;
-  autoSubmit: boolean;
-}> = ({ judgementPair, finishedFraction, menuComponents, submitJudgement, autoSubmit }) => {
+  headlineComponents:
+    | React.ReactNode
+    | ((args: { handleSubmitJudgement: undefined | (() => Promise<void>) }) => React.ReactNode);
+  submitJudgement: (data: SubmitPayload) => Promise<void>;
+}> = ({ judgementPair, finishedFraction, headlineComponents, submitJudgement, mode }) => {
   const {
     state,
     rateJudgementPair,
     selectRange,
     deleteRange,
-    startJudgement,
+    initializeJudgement,
   } = useAnnotationState();
   const [popoverAnnotatePartIndex, setPopoverAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
+  const queryCache = useQueryCache();
+  const [mutate] = useMutation(submitJudgement);
 
-  // once a judgement pair is given to the component, or the judgement pair changes, reset judgementStartedMs
+  // once a judgement pair is given to the component, initialize judgement
   useEffect(() => {
     if (judgementPair !== undefined) {
-      startJudgement();
+      initializeJudgement({
+        initialRelevanceLevel: judgementPair.relevanceLevel,
+        initialAnnotatedRanges: judgementPair.annotatedRanges,
+      });
     }
-  }, [judgementPair, startJudgement]);
+  }, [judgementPair, initializeJudgement]);
 
-  // if autoSubmit is enabled and submission of judgement pair is possible, do that
+  // auto submit judgement if mode is NEW JUDGEMENT and submission of judgement pair is possible
   useEffect(() => {
     if (
-      autoSubmit &&
+      mode === 'NEW_JUDGEMENT' &&
       judgementPair !== undefined &&
       state.relevanceLevel !== undefined &&
       state.judgementStartedMs !== undefined
@@ -73,7 +84,7 @@ const AnnotationComponent: React.FC<{
       }
     }
   }, [
-    autoSubmit,
+    mode,
     judgementPair,
     state.relevanceLevel,
     state.judgementStartedMs,
@@ -103,14 +114,16 @@ const AnnotationComponent: React.FC<{
     state.relevanceLevel === undefined ? undefined : RateLevels[state.relevanceLevel];
 
   // compute some boolean variables needed to guide the user throw the annotation process
-  const ratingRequired = !currentRateLevel;
-  const currentSelectionNotFinished = state.currentAnnotationStart !== undefined;
+  const currentSelectionFinished = state.currentAnnotationStart === undefined;
   const annotationIsAllowedInGeneral =
     judgementPair.mode === judgementsSchema.JudgementMode.SCORING_AND_SELECT_SPANS;
   const annotationIsRequired =
     annotationIsAllowedInGeneral &&
     !!currentRateLevel?.annotationRequired &&
     state.annotatedRanges.length === 0;
+  const ratingPossible =
+    !currentRateLevel ||
+    (mode === 'EDIT_JUDGEMENT' && currentSelectionFinished && !annotationIsRequired);
   const annotationStatus =
     currentRateLevel?.relevanceLevel === judgementsSchema.RelevanceLevel.MISLEADING_ANSWER
       ? annotationIsRequired
@@ -186,6 +199,29 @@ const AnnotationComponent: React.FC<{
     });
   }
 
+  const handleSubmitJudgement =
+    judgementPair === undefined ||
+    state.relevanceLevel === undefined ||
+    state.judgementStartedMs === undefined ||
+    !currentSelectionFinished ||
+    annotationIsRequired
+      ? undefined
+      : async () => {
+          await mutate(
+            {
+              id: judgementPair.id,
+              relevanceLevel: state.relevanceLevel!,
+              annotatedRanges: state.annotatedRanges,
+              judgementStartedMs: state.judgementStartedMs!,
+            },
+            {
+              onSuccess: () => {
+                queryCache.removeQueries(['judgement', judgementPair.id]);
+              },
+            },
+          );
+        };
+
   return (
     <AnnotationShell
       finishedFraction={finishedFraction}
@@ -195,7 +231,9 @@ const AnnotationComponent: React.FC<{
       queryComponent={
         <>
           <TextBox bold>{judgementPair.queryText}</TextBox>
-          {menuComponents}
+          {typeof headlineComponents === 'function'
+            ? headlineComponents({ handleSubmitJudgement })
+            : headlineComponents}
         </>
       }
       documentComponentRef={documentComponentRef}
@@ -270,7 +308,7 @@ const AnnotationComponent: React.FC<{
         />
       }
       guideComponent={
-        ratingRequired ? (
+        ratingPossible ? (
           Object.values(RateLevels)
             .filter((rateLevel) => rateLevel.enabled)
             .map((rateLevel) => (
@@ -279,6 +317,7 @@ const AnnotationComponent: React.FC<{
                 css={styles.rateButton}
                 relevanceLevel={rateLevel.relevanceLevel}
                 keyboardKeyToShow={rateLevel.keyboardKey.toShow}
+                active={state.relevanceLevel === rateLevel.relevanceLevel}
                 onClick={() =>
                   rateJudgementPair({
                     relevanceLevel: rateLevel.relevanceLevel,
@@ -289,9 +328,10 @@ const AnnotationComponent: React.FC<{
         ) : (
           <>
             <TextBox
+              textAlign={mode === 'NEW_JUDGEMENT' ? 'start' : 'center'}
               css={[commonStyles.flex.shrinkAndFitHorizontal, commonStyles.grid.verticalCenter]}
             >
-              {currentSelectionNotFinished ? (
+              {!currentSelectionFinished ? (
                 <>Finish your selection</>
               ) : annotationStatus === 'RELEVANT_REGION_REQUIRED' ? (
                 <>Please select the relevant regions of the document.</>
@@ -303,32 +343,25 @@ const AnnotationComponent: React.FC<{
                 <>Feel free to add more misleading regions or go to the next judgement pair.</>
               )}
             </TextBox>
-            <Button
-              variant="contained"
-              css={styles.nextButton}
-              disabled={currentSelectionNotFinished || annotationIsRequired}
-              onClick={() => {
-                if (
-                  judgementPair === undefined ||
-                  state.relevanceLevel === undefined ||
-                  state.judgementStartedMs === undefined
-                ) {
-                  throw new CustomError(
-                    `judgemenPair cannot be submitted, current annotation state is`,
-                    { judgementPair, state },
-                  );
-                }
+            {mode === 'NEW_JUDGEMENT' && (
+              <Button
+                variant="contained"
+                css={styles.nextButton}
+                disabled={!currentSelectionFinished || annotationIsRequired}
+                onClick={() => {
+                  if (handleSubmitJudgement === undefined) {
+                    throw new CustomError(
+                      `judgemenPair cannot be submitted, current annotation state is`,
+                      { judgementPair, state },
+                    );
+                  }
 
-                submitJudgement({
-                  id: judgementPair.id,
-                  relevanceLevel: state.relevanceLevel,
-                  annotatedRanges: state.annotatedRanges,
-                  judgementStartedMs: state.judgementStartedMs,
-                });
-              }}
-            >
-              Next
-            </Button>
+                  handleSubmitJudgement();
+                }}
+              >
+                Next
+              </Button>
+            )}
           </>
         )
       }
@@ -394,7 +427,7 @@ const AnnotationShell: React.FC<{
           />
         )}
       </Stack>
-      <Box css={styles.footer}>{guideComponent}</Box>
+      <Box css={(theme) => [styles.footer(theme), commonStyles.fullWidth]}>{guideComponent}</Box>
     </Stack>
   </>
 );

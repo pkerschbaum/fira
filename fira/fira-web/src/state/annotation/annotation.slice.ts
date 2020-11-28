@@ -80,7 +80,9 @@ export const reducer = createReducer(INITIAL_STATE, (builder) =>
     })
     .addCase(actions.setJudgementStatus, (state, action) => {
       const judgementPair = state.judgementPairs.find((pair) => pair.id === action.payload.id);
-      judgementPair!.status = action.payload.status;
+      if (judgementPair !== undefined) {
+        judgementPair.status = action.payload.status;
+      }
     })
     .addCase(userActions.logout, () => {
       // on logout, erase annotation state

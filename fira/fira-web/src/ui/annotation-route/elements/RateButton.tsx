@@ -37,6 +37,7 @@ const RATE_LEVEL_DATA = {
 const RateButton: React.FC<{
   relevanceLevel: judgementsSchema.RelevanceLevel;
   keyboardKeyToShow?: string;
+  active?: boolean;
   onClick?: () => void;
   className?: string;
 }> = (props) => {
@@ -51,15 +52,19 @@ const RateButton: React.FC<{
 export const RateBadge: React.FC<{
   relevanceLevel: judgementsSchema.RelevanceLevel | 'LOADING';
   keyboardKeyToShow?: string;
+  active?: boolean;
   className?: string;
-}> = ({ relevanceLevel, keyboardKeyToShow, className }) => (
-  <Box css={[styles.badge, RATE_LEVEL_DATA[relevanceLevel].style]} className={className}>
+}> = ({ relevanceLevel, keyboardKeyToShow, active, className }) => (
+  <Box
+    css={[styles.badge, RATE_LEVEL_DATA[relevanceLevel].style, active && styles.activeLevel]}
+    className={className}
+  >
     {keyboardKeyToShow && (
       <TextBox fontSize="sm" css={styles.hotkey}>
         {keyboardKeyToShow}
       </TextBox>
     )}
-    <TextBox fontSize="sm" component="span" css={commonStyles.text.noTransform}>
+    <TextBox fontSize="sm" bold={active} component="span" css={commonStyles.text.noTransform}>
       {RATE_LEVEL_DATA[relevanceLevel].text}
     </TextBox>
   </Box>

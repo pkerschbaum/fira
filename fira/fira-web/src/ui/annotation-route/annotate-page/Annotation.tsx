@@ -33,16 +33,16 @@ const Annotation: React.FC = () => {
   return (
     <AnnotationComponent
       key={currentJudgementPair?.id}
+      mode="NEW_JUDGEMENT"
       judgementPair={currentJudgementPair}
       finishedFraction={finishedFraction}
-      menuComponents={
+      headlineComponents={
         alreadyFinished !== undefined &&
         remainingToFinish !== undefined && (
           <AnnotationMenu alreadyFinished={alreadyFinished} remainingToFinish={remainingToFinish} />
         )
       }
       submitJudgement={judgementStories.submitJudgement}
-      autoSubmit
     />
   );
 };

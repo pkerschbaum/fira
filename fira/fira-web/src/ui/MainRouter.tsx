@@ -29,6 +29,8 @@ export function useRouting() {
       annotation: {
         toAnnotatePage: () => routeUsingHistory(routes.ANNOTATION.annotate),
         toHistoryPage: () => routeUsingHistory(routes.ANNOTATION.history),
+        toEditPage: (judgementId: string | number) =>
+          routeUsingHistory(routes.ANNOTATION.edit(judgementId)),
         toInfoPage: () => routeUsingHistory(routes.ANNOTATION.info),
       },
     },
