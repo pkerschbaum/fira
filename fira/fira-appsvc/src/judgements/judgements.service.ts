@@ -341,7 +341,7 @@ export class JudgementsService {
       );
     }
     if (dbJudgement.status !== JudgementStatus.JUDGED) {
-      throw new NotFoundException(
+      throw new BadRequestException(
         `only judged judgements are allowed to get loaded! judgemendId=${judgementId}, userId=${userId}`,
       );
     }
