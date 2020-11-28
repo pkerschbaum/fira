@@ -35,16 +35,7 @@ type DeleteRangeAction = {
   };
 };
 
-type InitializeJudgementAction = {
-  type: 'JUDGEMENT_INITIALIZED';
-  payload: {
-    initialRelevanceLevel?: judgementsSchema.RelevanceLevel;
-    initialAnnotatedRanges?: Array<{ start: number; end: number }>;
-  };
-};
-
 type AnnotationState = {
-  initialized: boolean;
   relevanceLevel?: judgementsSchema.RelevanceLevel;
   annotatedRanges: Array<{ start: number; end: number }>;
   annotatedRangesExistedWhenRated: boolean;
@@ -54,7 +45,7 @@ type AnnotationState = {
 
 const annotationStateReducer: Reducer<
   AnnotationState,
-  RateJudgementPairAction | SelectRangeAction | DeleteRangeAction | InitializeJudgementAction
+  RateJudgementPairAction | SelectRangeAction | DeleteRangeAction
 > = (state, action) => {
   switch (action.type) {
     case 'JUDGEMENT_PAIR_RATED': {
@@ -147,28 +138,20 @@ const annotationStateReducer: Reducer<
       break;
     }
 
-    case 'JUDGEMENT_INITIALIZED': {
-      if (!state.initialized) {
-        state.initialized = true;
-        state.judgementStartedMs = Date.now();
-        state.relevanceLevel = action.payload.initialRelevanceLevel;
-        if (action.payload.initialAnnotatedRanges !== undefined) {
-          state.annotatedRanges = action.payload.initialAnnotatedRanges;
-        }
-      }
-      break;
-    }
-
     default:
       assertUnreachable(action);
   }
 };
 
-export const useAnnotationState = () => {
+export const useAnnotationState = (initialState: {
+  initialRelevanceLevel?: judgementsSchema.RelevanceLevel;
+  initialAnnotatedRanges?: Array<{ start: number; end: number }>;
+}) => {
   const [state, dispatch] = useImmerReducer(annotationStateReducer, {
-    initialized: false,
-    annotatedRanges: [],
+    annotatedRanges: initialState.initialAnnotatedRanges ?? [],
     annotatedRangesExistedWhenRated: false,
+    judgementStartedMs: Date.now(),
+    relevanceLevel: initialState.initialRelevanceLevel,
   });
   const actions = useMemo(
     () => ({
@@ -180,9 +163,6 @@ export const useAnnotationState = () => {
       },
       deleteRange: (payload: DeleteRangeAction['payload']) => {
         dispatch({ type: 'RANGE_DELETED', payload });
-      },
-      initializeJudgement: (payload: InitializeJudgementAction['payload']) => {
-        dispatch({ type: 'JUDGEMENT_INITIALIZED', payload });
       },
     }),
     [dispatch],

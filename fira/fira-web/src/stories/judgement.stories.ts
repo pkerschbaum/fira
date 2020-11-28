@@ -7,7 +7,14 @@ import {
   actions as annotationActions,
   JudgementPairStatus,
 } from '../state/annotation/annotation.slice';
-import { SubmitPayload } from '../ui/annotation-route/elements/AnnotationComponent';
+import { judgementsSchema } from '../../../fira-commons';
+
+type SubmitPayload = {
+  id: number;
+  relevanceLevel: judgementsSchema.RelevanceLevel;
+  annotatedRanges: Array<{ start: number; end: number }>;
+  judgementStartedMs: number;
+};
 
 const logger = createLogger('judgements.service');
 

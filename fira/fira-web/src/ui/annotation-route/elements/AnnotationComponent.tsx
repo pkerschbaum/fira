@@ -19,52 +19,49 @@ import { commonStyles } from '../../Common.styles';
 
 const WHITESPACE = ' ';
 
-export type SubmitPayload = {
-  id: number;
-  relevanceLevel: judgementsSchema.RelevanceLevel;
-  annotatedRanges: Array<{ start: number; end: number }>;
-  judgementStartedMs: number;
-};
-
-const AnnotationComponent: React.FC<{
+type Props = {
   mode: 'NEW_JUDGEMENT' | 'EDIT_JUDGEMENT';
-  judgementPair?: judgementsSchema.PreloadJudgement & {
-    relevanceLevel?: judgementsSchema.RelevanceLevel;
-    annotatedRanges?: Array<{ start: number; end: number }>;
-  };
   finishedFraction: number;
   headlineComponents:
     | React.ReactNode
     | ((args: { handleSubmitJudgement: undefined | (() => Promise<void>) }) => React.ReactNode);
-}> = ({ judgementPair, finishedFraction, headlineComponents, mode }) => {
-  const {
-    state,
-    rateJudgementPair,
-    selectRange,
-    deleteRange,
-    initializeJudgement,
-  } = useAnnotationState();
+};
+type JudgementPair = judgementsSchema.PreloadJudgement & {
+  relevanceLevel?: judgementsSchema.RelevanceLevel;
+  annotatedRanges?: Array<{ start: number; end: number }>;
+};
+
+const AnnotationComponent: React.FC<Props & { judgementPair?: JudgementPair }> = (props) => {
+  const { judgementPair, finishedFraction } = props;
+  if (!judgementPair) {
+    // judgement pair is currently getting loaded from server --> show annotation shell in loading state
+    return <AnnotationShell finishedFraction={finishedFraction} />;
+  }
+
+  // judgement pair available --> render with state and actions
+  return <AnnotateJudgement {...props} judgementPair={judgementPair} />;
+};
+
+const AnnotateJudgement: React.FC<Props & { judgementPair: JudgementPair }> = ({
+  judgementPair,
+  finishedFraction,
+  headlineComponents,
+  mode,
+}) => {
+  const { state, rateJudgementPair, selectRange, deleteRange } = useAnnotationState({
+    initialRelevanceLevel: judgementPair.relevanceLevel,
+    initialAnnotatedRanges: judgementPair.annotatedRanges,
+  });
   const [popoverAnnotatePartIndex, setPopoverAnnotatePartIndex] = useState<number | undefined>(
     undefined,
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
   const mutateJudgement = useMutateJudgement();
 
-  // once a judgement pair is given to the component, initialize judgement
-  useEffect(() => {
-    if (judgementPair !== undefined) {
-      initializeJudgement({
-        initialRelevanceLevel: judgementPair.relevanceLevel,
-        initialAnnotatedRanges: judgementPair.annotatedRanges,
-      });
-    }
-  }, [judgementPair, initializeJudgement]);
-
   // auto submit judgement if mode is NEW JUDGEMENT and submission of judgement pair is possible
   useEffect(() => {
     if (
       mode === 'NEW_JUDGEMENT' &&
-      judgementPair !== undefined &&
       state.relevanceLevel !== undefined &&
       state.judgementStartedMs !== undefined
     ) {
@@ -101,12 +98,7 @@ const AnnotationComponent: React.FC<{
         });
     }
   }
-  useKeyupHandler(!judgementPair ? {} : keyupMap);
-
-  if (!judgementPair) {
-    // judgement pair is currently getting loaded from server --> show annotation shell in loading state
-    return <AnnotationShell finishedFraction={finishedFraction} />;
-  }
+  useKeyupHandler(keyupMap);
 
   const currentRateLevel =
     state.relevanceLevel === undefined ? undefined : RateLevels[state.relevanceLevel];
@@ -198,7 +190,6 @@ const AnnotationComponent: React.FC<{
   }
 
   const handleSubmitJudgement =
-    judgementPair === undefined ||
     state.relevanceLevel === undefined ||
     state.judgementStartedMs === undefined ||
     !currentSelectionFinished ||
@@ -237,6 +228,7 @@ const AnnotationComponent: React.FC<{
               (range) => range.start <= partIdx && range.end >= partIdx,
             );
             const isInAnnotatedRange = !!correspondingAnnotatedRange;
+
             /*
              * annotation of a part is allowed if
              * - the corresponding judgement mode is set,
