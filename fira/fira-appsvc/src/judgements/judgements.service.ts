@@ -374,16 +374,13 @@ export class JudgementsService {
     judgementId: number,
     judgementData: judgementsSchema.SaveJudgement,
   ): Promise<void> => {
-    const dbJudgement = await this.judgementsDAO.findOne({
-      where: { id: judgementId },
-      include: { document_version_document_versionTojudgement: true },
-    });
+    const dbJudgement = httpUtils.throw404IfNullish(
+      await this.judgementsDAO.findOne({
+        where: { id: judgementId },
+        include: { document_version_document_versionTojudgement: true },
+      }),
+    );
 
-    if (!dbJudgement) {
-      throw new NotFoundException(
-        `judgement could not be found! judgemendId=${judgementId}, userId=${userId}`,
-      );
-    }
     if (dbJudgement.user_id !== userId) {
       throw new NotFoundException(
         `the judgement does not belong to the given user id! judgemendId=${judgementId}, userId=${userId}`,
