@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Divider, Skeleton } from '@material-ui/core';
-import { useMutation, useQueryCache } from 'react-query';
 
 import TextBox from '../../elements/TextBox';
 import Button from '../../elements/Button';
@@ -9,6 +8,7 @@ import JustifiedText from '../../layouts/JustifiedText';
 import RateButton from './RateButton';
 import AnnotationPart from './AnnotationPart';
 import { useAnnotationState } from './AnnotationComponent.hooks';
+import { useMutateJudgement } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
 import { RateLevels } from '../../../typings/enums';
 import { CustomError } from '../../../commons/custom-error';
@@ -36,8 +36,7 @@ const AnnotationComponent: React.FC<{
   headlineComponents:
     | React.ReactNode
     | ((args: { handleSubmitJudgement: undefined | (() => Promise<void>) }) => React.ReactNode);
-  submitJudgement: (data: SubmitPayload) => Promise<void>;
-}> = ({ judgementPair, finishedFraction, headlineComponents, submitJudgement, mode }) => {
+}> = ({ judgementPair, finishedFraction, headlineComponents, mode }) => {
   const {
     state,
     rateJudgementPair,
@@ -49,8 +48,7 @@ const AnnotationComponent: React.FC<{
     undefined,
   );
   const documentComponentRef = useRef<HTMLDivElement>(null);
-  const queryCache = useQueryCache();
-  const [mutate] = useMutation(submitJudgement);
+  const mutateJudgement = useMutateJudgement();
 
   // once a judgement pair is given to the component, initialize judgement
   useEffect(() => {
@@ -75,7 +73,7 @@ const AnnotationComponent: React.FC<{
       // if the chosen rate level does not require annotation, or it does and regions were
       // annotated already when the pair was rated, immediately submit judgement
       if (!currentRateLevel.annotationRequired || state.annotatedRangesExistedWhenRated) {
-        submitJudgement({
+        mutateJudgement({
           id: judgementPair.id,
           relevanceLevel: state.relevanceLevel,
           annotatedRanges: state.annotatedRanges,
@@ -90,7 +88,7 @@ const AnnotationComponent: React.FC<{
     state.judgementStartedMs,
     state.annotatedRanges,
     state.annotatedRangesExistedWhenRated,
-    submitJudgement,
+    mutateJudgement,
   ]);
 
   // create map which is used to rate judgement pairs with keyboard keys
@@ -206,21 +204,13 @@ const AnnotationComponent: React.FC<{
     !currentSelectionFinished ||
     annotationIsRequired
       ? undefined
-      : async () => {
-          await mutate(
-            {
-              id: judgementPair.id,
-              relevanceLevel: state.relevanceLevel!,
-              annotatedRanges: state.annotatedRanges,
-              judgementStartedMs: state.judgementStartedMs!,
-            },
-            {
-              onSuccess: () => {
-                queryCache.removeQueries(['judgement', judgementPair.id]);
-              },
-            },
-          );
-        };
+      : () =>
+          mutateJudgement({
+            id: judgementPair.id,
+            relevanceLevel: state.relevanceLevel!,
+            annotatedRanges: state.annotatedRanges,
+            judgementStartedMs: state.judgementStartedMs!,
+          });
 
   return (
     <AnnotationShell

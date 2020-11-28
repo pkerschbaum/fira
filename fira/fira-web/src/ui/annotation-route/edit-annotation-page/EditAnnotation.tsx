@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconButton } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
 
 import DoneIcon from '@material-ui/icons/Done';
 import CloseIcon from '@material-ui/icons/Close';
@@ -9,16 +8,12 @@ import CloseIcon from '@material-ui/icons/Close';
 import Stack from '../../layouts/Stack';
 import AnnotationComponent from '../elements/AnnotationComponent';
 import { useRouting } from '../../MainRouter';
-import { judgementStories } from '../../../stories/judgement.stories';
+import { useQueryJudgement } from '../../../stories/judgement.stories';
 
 const EditAnnotation: React.FC = () => {
   const { route } = useRouting();
   const { id: judgementId } = useParams<{ id: string }>();
-  const query = useQuery(
-    ['judgement', judgementId],
-    () => judgementStories.loadJudgementById(Number(judgementId)),
-    { retry: false, refetchInterval: false, cacheTime: 0 },
-  );
+  const query = useQueryJudgement(Number(judgementId), { cacheTime: 0 });
 
   const annotatedRanges: Array<{ start: number; end: number }> = [];
   if (query.data !== undefined && query.data.relevancePositions.length > 0) {
@@ -63,7 +58,6 @@ const EditAnnotation: React.FC = () => {
           </IconButton>
         </Stack>
       )}
-      submitJudgement={judgementStories.submitJudgement}
     />
   );
 };

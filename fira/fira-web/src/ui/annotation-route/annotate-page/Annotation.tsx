@@ -9,7 +9,6 @@ import Menu from '../../elements/Menu';
 import Stack from '../../layouts/Stack';
 import AnnotationComponent from '../elements/AnnotationComponent';
 import { useRouting } from '../../MainRouter';
-import { judgementStories } from '../../../stories/judgement.stories';
 import { useAnnotationState } from '../../../state/annotation/annotation.hooks';
 
 const Annotation: React.FC = () => {
@@ -42,7 +41,6 @@ const Annotation: React.FC = () => {
           <AnnotationMenu alreadyFinished={alreadyFinished} remainingToFinish={remainingToFinish} />
         )
       }
-      submitJudgement={judgementStories.submitJudgement}
     />
   );
 };

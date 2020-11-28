@@ -1,3 +1,5 @@
+import { useMutation, useQuery, useQueryCache } from 'react-query';
+
 import { createLogger } from '../commons/logger';
 import { judgementsClient } from '../http/judgements.client';
 import { store } from '../state/store';
@@ -83,4 +85,39 @@ export const judgementStories = {
 
     logger.info(`submit judgement succeeded!`);
   },
+};
+
+export const useQueryJudgements = () => {
+  return useQuery(
+    'judgements-of-user',
+    async () => {
+      const response = await judgementStories.loadJudgementsOfUser();
+      response.judgements.sort((a, b) => b.nr - a.nr); // descending by number
+      return response;
+    },
+    {
+      retry: false,
+      refetchInterval: false,
+    },
+  );
+};
+
+export const useQueryJudgement = (judgementId: number, queryOptions?: { cacheTime: number }) => {
+  return useQuery(
+    ['judgement', judgementId],
+    () => judgementStories.loadJudgementById(judgementId),
+    { retry: false, refetchInterval: false, ...queryOptions },
+  );
+};
+
+export const useMutateJudgement = () => {
+  const queryCache = useQueryCache();
+  const [mutate] = useMutation(judgementStories.submitJudgement);
+  return function mutateJudgement(...args: Parameters<typeof judgementStories.submitJudgement>) {
+    return mutate(...args, {
+      onSuccess: () => {
+        queryCache.removeQueries(['judgement', args[0].id]);
+      },
+    });
+  };
 };

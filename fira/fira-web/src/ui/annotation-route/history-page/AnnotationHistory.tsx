@@ -9,7 +9,6 @@ import {
   Skeleton,
   Theme,
 } from '@material-ui/core';
-import { useQuery } from 'react-query';
 import ResizeObserver from 'resize-observer-polyfill';
 
 import CloseIcon from '@material-ui/icons/Close';
@@ -21,7 +20,7 @@ import TextBox from '../../elements/TextBox';
 import Stack from '../../layouts/Stack';
 import { RateBadge } from '../elements/RateButton';
 import { useRouting } from '../../MainRouter';
-import { judgementStories } from '../../../stories/judgement.stories';
+import { useQueryJudgement, useQueryJudgements } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
 
 import { styles } from './AnnotationHistory.styles';
@@ -58,18 +57,7 @@ const AnnotationHistory: React.FC = () => {
     [listContainerRef],
   );
 
-  const query = useQuery(
-    'judgements-of-user',
-    async () => {
-      const response = await judgementStories.loadJudgementsOfUser();
-      response.judgements.sort((a, b) => b.nr - a.nr); // descending by number
-      return response;
-    },
-    {
-      retry: false,
-      refetchInterval: false,
-    },
-  );
+  const query = useQueryJudgements();
 
   useKeyupHandler({
     [KEYCODE_LEFT_ARROW]: { handler: handlePagingBack },
@@ -157,11 +145,7 @@ const AnnotationHistory: React.FC = () => {
 
 const HistoryEntry: React.FC<HistoryDataEntry> = ({ judgementNr, judgementId }) => {
   const { route } = useRouting();
-  const query = useQuery(
-    ['judgement', judgementId],
-    () => judgementStories.loadJudgementById(judgementId),
-    { retry: false, refetchInterval: false },
-  );
+  const query = useQueryJudgement(judgementId);
 
   function handleEntryClick() {
     if (query.data !== undefined) {
