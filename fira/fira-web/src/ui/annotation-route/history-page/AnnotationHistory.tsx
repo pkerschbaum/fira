@@ -22,6 +22,7 @@ import { RateBadge } from '../elements/RateButton';
 import { useRouting } from '../../MainRouter';
 import { useQueryJudgement, useQueryJudgements } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
+import { useQueryParams } from '../../util/routing.hooks';
 
 import { styles } from './AnnotationHistory.styles';
 import { commonStyles } from '../../Common.styles';
@@ -37,10 +38,11 @@ const HEIGHT_OF_HISTORY_ELEMENT = 100; // px
 
 const AnnotationHistory: React.FC = () => {
   const { route } = useRouting();
-
-  const [skip, setSkip] = useState(0);
+  const skipQueryParam = useQueryParams().skip;
   const [pageSize, setPageSize] = useState<undefined | number>(undefined);
   const listContainerRef = useRef<HTMLElement | null>(null);
+
+  const skip = Number(skipQueryParam ?? 0);
 
   useEffect(
     function computePageSizeBasedOnAvailableSpace() {
@@ -69,28 +71,22 @@ const AnnotationHistory: React.FC = () => {
   }
 
   function handlePagingBack() {
-    setSkip((oldVal) => {
-      if (pageSize === undefined) {
-        return oldVal;
-      }
+    if (pageSize === undefined || query.data === undefined) {
+      return;
+    }
 
-      const newSkip = oldVal + pageSize;
-      if (query.data === undefined) {
-        return newSkip;
-      } else {
-        return Math.min(oldVal + pageSize, query.data.judgements.length - 1);
-      }
+    const newSkip = skip + pageSize;
+    route.annotation.toHistoryPage({
+      skip: Math.min(newSkip, query.data.judgements.length - 1),
     });
   }
 
   function handlePagingForward() {
-    setSkip((oldVal) => {
-      if (pageSize === undefined) {
-        return oldVal;
-      }
+    if (pageSize === undefined) {
+      return;
+    }
 
-      return Math.max(oldVal - pageSize, 0);
-    });
+    route.annotation.toHistoryPage({ skip: Math.max(skip - pageSize, 0) });
   }
 
   return (

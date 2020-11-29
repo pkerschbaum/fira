@@ -60,7 +60,7 @@ const AnnotationRouter: React.FC = () => {
           assertUnreachable(pageToShow)
         )}
       </Route>
-      <Route path={routes.ANNOTATION.history}>
+      <Route path={routes.ANNOTATION.history()}>
         <AnnotationHistory />
       </Route>
       <Route path={routes.ANNOTATION.edit(':id')}>

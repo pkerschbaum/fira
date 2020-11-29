@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Switch, Route, Redirect, useLocation, useHistory } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, Redirect, useHistory } from 'react-router-dom';
 
 import * as config from '../config';
 import Dialog from './elements/Dialog';
@@ -9,6 +9,7 @@ import AnnotationRouter from './annotation-route/AnnotationRouter';
 import RoleRoute from './RoleRoute';
 import { useUserState } from '../state/user/user.hooks';
 import { useKeyupHandler } from './util/events.hooks';
+import { useQueryParams } from './util/routing.hooks';
 import { browserStorage } from '../browser-storage/browser-storage';
 import { UserRole } from '../typings/enums';
 import { assertUnreachable, routes } from '../../../fira-commons';
@@ -28,7 +29,8 @@ export function useRouting() {
     route: {
       annotation: {
         toAnnotatePage: () => routeUsingHistory(routes.ANNOTATION.annotate),
-        toHistoryPage: () => routeUsingHistory(routes.ANNOTATION.history),
+        toHistoryPage: (queryParams?: { skip: number }) =>
+          routeUsingHistory(routes.ANNOTATION.history(queryParams)),
         toEditPage: (judgementId: string | number) =>
           routeUsingHistory(routes.ANNOTATION.edit(judgementId)),
         toInfoPage: () => routeUsingHistory(routes.ANNOTATION.info),
@@ -52,7 +54,7 @@ const RedirectDependingOnUserRole: React.FC = () => {
 };
 
 const MainSwitch: React.FC = () => {
-  const showClientId = new URLSearchParams(useLocation().search).get('showClientId') === 'true';
+  const showClientId = useQueryParams().showClientId === 'true';
   const [dialogOpen, setDialogOpen] = useState(showClientId);
 
   useKeyupHandler({

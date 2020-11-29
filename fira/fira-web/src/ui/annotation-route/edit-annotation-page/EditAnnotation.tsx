@@ -1,17 +1,16 @@
 import React from 'react';
 import { IconButton } from '@material-ui/core';
-import { useParams } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import DoneIcon from '@material-ui/icons/Done';
 import CloseIcon from '@material-ui/icons/Close';
 
 import Stack from '../../layouts/Stack';
 import AnnotationComponent from '../elements/AnnotationComponent';
-import { useRouting } from '../../MainRouter';
 import { useQueryJudgement } from '../../../stories/judgement.stories';
 
 const EditAnnotation: React.FC = () => {
-  const { route } = useRouting();
+  const history = useHistory();
   const { id: judgementId } = useParams<{ id: string }>();
   const query = useQueryJudgement(Number(judgementId), { cacheTime: 0 });
 
@@ -47,13 +46,13 @@ const EditAnnotation: React.FC = () => {
             onClick={async () => {
               if (handleSubmitJudgement !== undefined) {
                 await handleSubmitJudgement();
-                route.annotation.toHistoryPage();
+                history.goBack();
               }
             }}
           >
             <DoneIcon style={{ width: 28, height: 28 }} />
           </IconButton>
-          <IconButton onClick={route.annotation.toHistoryPage}>
+          <IconButton onClick={() => history.goBack()}>
             <CloseIcon style={{ width: 28, height: 28 }} />
           </IconButton>
         </Stack>

@@ -1,3 +1,5 @@
+import { ObjectLiteral } from '../util/types.util';
+
 const routesConfig = {
   LOGIN: {
     path: 'login',
@@ -36,7 +38,9 @@ export const routes = {
       routesConfig.ANNOTATION.path,
       routesConfig.ANNOTATION.routes.ANNOTATION.path,
     ),
-    history: createRoute(routesConfig.ANNOTATION.path, routesConfig.ANNOTATION.routes.HISTORY.path),
+    history: (queryParams?: { skip: number }) =>
+      createRoute(routesConfig.ANNOTATION.path, routesConfig.ANNOTATION.routes.HISTORY.path) +
+      (queryParams === undefined ? '' : `?${queryParamsToString(queryParams)}`),
     edit: (judgementId: string | number) =>
       createRoute(
         routesConfig.ANNOTATION.path,
@@ -58,3 +62,11 @@ export const routes = {
     ),
   },
 } as const;
+
+function queryParamsToString(queryParams: ObjectLiteral): string {
+  const params = [];
+  for (const key of Object.keys(queryParams)) {
+    params.push(`${key}=${queryParams[key]}`);
+  }
+  return params.join('&');
+}
