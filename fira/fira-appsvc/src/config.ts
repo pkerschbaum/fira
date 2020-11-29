@@ -9,7 +9,7 @@ dotenv.config();
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
 export const application = {
-  version: '1.7.0',
+  version: '1.7.1',
   port: 80,
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,

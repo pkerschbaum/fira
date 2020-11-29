@@ -1,6 +1,6 @@
 {
   "name": "fira-web",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "dependencies": {
     "@emotion/babel-preset-css-prop": "^10.0.27",
