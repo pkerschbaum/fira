@@ -33,7 +33,7 @@ const Menu: React.FC<{ additionalMenuEntries?: MenuEntry[] }> = ({ additionalMen
   };
 
   const menuItems: MenuEntry[] = [
-    ...additionalMenuEntries,
+    ...(additionalMenuEntries ?? []),
     {
       component: 'MenuItem',
       children: (
