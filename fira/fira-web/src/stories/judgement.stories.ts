@@ -9,13 +9,6 @@ import {
 } from '../state/annotation/annotation.slice';
 import { judgementsSchema } from '../../../fira-commons';
 
-type SubmitPayload = {
-  id: number;
-  relevanceLevel: judgementsSchema.RelevanceLevel;
-  annotatedRanges: Array<{ start: number; end: number }>;
-  judgementStartedMs: number;
-};
-
 const logger = createLogger('judgements.service');
 
 export const judgementStories = {
@@ -27,26 +20,52 @@ export const judgementStories = {
     logger.info(`preload judgements succeeded! dispatching preload judgements...`, { response });
     store.dispatch(annotationActions.preloadJudgements(response));
   },
+};
 
-  loadJudgementsOfUser: async () => {
-    logger.info(`executing load judgements of user...`);
+export const useQueryJudgements = () => {
+  return useQuery(
+    'judgements-of-user',
+    async () => {
+      logger.info(`executing load judgements of user...`);
 
-    const response = await judgementsClient.loadJugementsOfUser();
+      const response = await judgementsClient.loadJugementsOfUser();
 
-    logger.info(`load judgements of user succeeded!`, { response });
-    return response;
-  },
+      logger.info(`load judgements of user succeeded!`, { response });
+      response.judgements.sort((a, b) => b.nr - a.nr); // descending by number
+      return response;
+    },
+    {
+      retry: false,
+      refetchInterval: false,
+    },
+  );
+};
 
-  loadJudgementById: async (judgementId: number) => {
-    logger.info(`executing load judgement by id...`, { judgementId });
+export const useQueryJudgement = (judgementId: number, queryOptions?: { cacheTime: number }) => {
+  return useQuery(
+    ['judgement', judgementId],
+    async () => {
+      logger.info(`executing load judgement by id...`, { judgementId });
 
-    const response = await judgementsClient.loadJugementById(judgementId);
+      const response = await judgementsClient.loadJugementById(judgementId);
 
-    logger.info(`load judgement by id succeeded!`, { response });
-    return response;
-  },
+      logger.info(`load judgement by id succeeded!`, { response });
+      return response;
+    },
+    { retry: false, refetchInterval: false, ...queryOptions },
+  );
+};
 
-  submitJudgement: async (data: SubmitPayload) => {
+type SubmitPayload = {
+  id: number;
+  relevanceLevel: judgementsSchema.RelevanceLevel;
+  annotatedRanges: Array<{ start: number; end: number }>;
+  judgementStartedMs: number;
+};
+export const useMutateJudgement = () => {
+  const queryCache = useQueryCache();
+
+  const [mutate] = useMutation(async function submitJudgement(data: SubmitPayload) {
     logger.info(`executing submit judgement...`, { data });
 
     const relevancePositions: number[] = [];
@@ -91,39 +110,12 @@ export const judgementStories = {
     );
 
     logger.info(`submit judgement succeeded!`);
-  },
-};
+  });
 
-export const useQueryJudgements = () => {
-  return useQuery(
-    'judgements-of-user',
-    async () => {
-      const response = await judgementStories.loadJudgementsOfUser();
-      response.judgements.sort((a, b) => b.nr - a.nr); // descending by number
-      return response;
-    },
-    {
-      retry: false,
-      refetchInterval: false,
-    },
-  );
-};
-
-export const useQueryJudgement = (judgementId: number, queryOptions?: { cacheTime: number }) => {
-  return useQuery(
-    ['judgement', judgementId],
-    () => judgementStories.loadJudgementById(judgementId),
-    { retry: false, refetchInterval: false, ...queryOptions },
-  );
-};
-
-export const useMutateJudgement = () => {
-  const queryCache = useQueryCache();
-  const [mutate] = useMutation(judgementStories.submitJudgement);
-  return function mutateJudgement(...args: Parameters<typeof judgementStories.submitJudgement>) {
-    return mutate(...args, {
+  return function mutateJudgement(args: Exclude<Parameters<typeof mutate>[0], undefined>) {
+    return mutate(args, {
       onSuccess: () => {
-        queryCache.removeQueries(['judgement', args[0].id]);
+        queryCache.removeQueries(['judgement', args.id]);
       },
     });
   };
