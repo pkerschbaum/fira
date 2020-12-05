@@ -12,7 +12,6 @@ export enum JudgementPairStatus {
 
 export type JudgementPair = judgementsSchema.PreloadJudgement & {
   readonly relevanceLevel?: judgementsSchema.RelevanceLevel;
-  readonly currentAnnotationStart?: number;
   readonly annotatedRanges: Array<{ start: number; end: number }>;
   readonly status: JudgementPairStatus;
 };

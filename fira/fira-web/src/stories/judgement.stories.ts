@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useMutation, useQuery, useQueryCache } from 'react-query';
 
 import { createLogger } from '../commons/logger';
@@ -112,11 +113,14 @@ export const useMutateJudgement = () => {
     logger.info(`submit judgement succeeded!`);
   });
 
-  return function mutateJudgement(args: Exclude<Parameters<typeof mutate>[0], undefined>) {
-    return mutate(args, {
-      onSuccess: () => {
-        queryCache.removeQueries(['judgement', args.id]);
-      },
-    });
-  };
+  return useCallback(
+    function mutateJudgement(args: Exclude<Parameters<typeof mutate>[0], undefined>) {
+      return mutate(args, {
+        onSuccess: () => {
+          queryCache.removeQueries(['judgement', args.id]);
+        },
+      });
+    },
+    [mutate, queryCache],
+  );
 };
