@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BaseDAO } from '../base.dao';
 import { failIfNull } from '../persistence.util';
-import { PrismaClient } from '../../../../fira-commons/database/prisma';
+import { PrismaClient } from '@fira-commons/database/prisma';
 
 type ENTITY = 'query';
 const ENTITY = 'query';

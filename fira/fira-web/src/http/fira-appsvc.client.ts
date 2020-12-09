@@ -6,7 +6,7 @@ import * as config from '../config';
 import { httpClient, Request, RequestConfig } from './http.client';
 import { browserStorage } from '../browser-storage/browser-storage';
 import { store } from '../state/store';
-import { HEADER_CLIENT_ID, HEADER_REQUEST_ID, uniqueIdGenerator } from '../../../fira-commons';
+import { HEADER_CLIENT_ID, HEADER_REQUEST_ID, uniqueIdGenerator } from '@fira-commons';
 
 const appsvcBaseUrl = `${config.application.homepage}/api`;
 const appsvcTimeout = config.http.timeout;

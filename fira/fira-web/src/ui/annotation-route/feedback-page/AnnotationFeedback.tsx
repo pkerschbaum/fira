@@ -6,7 +6,7 @@ import Form from '../../elements/forms/Form';
 import Stack from '../../layouts/Stack';
 import { annotatorStories } from '../../../stories/annotator.stories';
 import { judgementStories } from '../../../stories/judgement.stories';
-import { feedbackSchema } from '../../../../../fira-commons';
+import { feedbackSchema } from '@fira-commons';
 
 import { styles } from './AnnotationFeedback.styles';
 

@@ -5,6 +5,7 @@ const {
   removeModuleScopePlugin,
   addBabelPreset,
   addBabelPlugin,
+  addWebpackAlias,
 } = require('customize-cra');
 const path = require('path');
 
@@ -32,6 +33,7 @@ module.exports = override(
     camel2DashComponentName: false,
   }),
 
+  addWebpackAlias({ '@fira-commons': path.resolve(process.cwd(), '../fira-commons') }),
   addCommon,
   removeModuleScopePlugin(),
 

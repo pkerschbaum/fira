@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { BaseDAO } from '../base.dao';
 import { JudgementStatus } from '../../typings/enums';
 import { transactional } from '../persistence.util';
-import { judgement, PrismaClient } from '../../../../fira-commons/database/prisma';
+import { judgement, PrismaClient } from '@fira-commons/database/prisma';
 
 type ENTITY = 'judgement';
 const ENTITY = 'judgement';

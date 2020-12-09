@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useImmerReducer, Reducer } from 'use-immer';
 
 import { RateLevels } from '../../../typings/enums';
-import { judgementsSchema, assertUnreachable } from '../../../../../fira-commons';
+import { judgementsSchema, assertUnreachable } from '@fira-commons';
 
 type RateJudgementPairAction = {
   type: 'JUDGEMENT_PAIR_RATED';

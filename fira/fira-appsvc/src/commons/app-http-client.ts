@@ -3,7 +3,7 @@ import { AxiosRequestConfig } from 'axios';
 
 import { TransientLogger } from './logger/transient-logger';
 import { RequestLogger } from './logger/request-logger';
-import { uniqueIdGenerator, strings } from '../../../fira-commons';
+import { uniqueIdGenerator, strings } from '@fira-commons';
 
 /* method mandatory */
 export type RequestConfig = AxiosRequestConfig & { method: Pick<AxiosRequestConfig, 'method'> };

@@ -1,5 +1,5 @@
 import { HttpStatus } from './http-status.enum';
-import { http } from '../../../fira-commons';
+import { http } from '@fira-commons';
 
 export class HttpException<StatusCode extends HttpStatus = never> extends Error {
   public readonly status: HttpStatus;

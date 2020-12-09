@@ -4,7 +4,7 @@ import { RootState } from '../store';
 import { actions } from './user.slice';
 import { useActionsWithDispatch } from '../util/actions.util';
 import { UserRole } from '../../typings/enums';
-import { assertUnreachable } from '../../../../fira-commons';
+import { assertUnreachable } from '@fira-commons';
 
 export function useUserState() {
   const userRole = useSelector((state: RootState) => {

@@ -1,6 +1,6 @@
 import { createLogger } from '../commons/logger';
 import { browserStorage } from '../browser-storage/browser-storage';
-import { uniqueIdGenerator, strings } from '../../../fira-commons';
+import { uniqueIdGenerator, strings } from '@fira-commons';
 
 const logger = createLogger('create-client-id');
 

@@ -1,6 +1,6 @@
 import { createLogger } from '../commons/logger';
 import { adminClient } from '../http/admin.client';
-import { adminSchema } from '../../../fira-commons';
+import { adminSchema } from '@fira-commons';
 
 const logger = createLogger('admin.service');
 

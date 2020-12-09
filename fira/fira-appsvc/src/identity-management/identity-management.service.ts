@@ -7,7 +7,7 @@ import { RequestLogger } from '../commons/logger/request-logger';
 import { KeycloakClient } from './keycloak.client';
 import { UsersDAO } from '../persistence/daos/users.dao';
 import { convertKey } from '../utils/keys.util';
-import { adminSchema, authSchema, uniqueIdGenerator } from '../../../fira-commons';
+import { adminSchema, authSchema, uniqueIdGenerator } from '@fira-commons';
 
 type Cache = {
   publicKey: {

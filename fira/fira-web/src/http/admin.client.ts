@@ -5,7 +5,7 @@ import {
   AdminReqResp,
   ExceptionHandler,
   UpdateConfig,
-} from '../../../fira-commons/src/rest-api';
+} from '@fira-commons/src/rest-api';
 
 const request: AdminRequestor = async (
   request: AdminReqResp['request'],

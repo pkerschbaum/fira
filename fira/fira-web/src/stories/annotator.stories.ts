@@ -2,7 +2,7 @@ import { createLogger } from '../commons/logger';
 import { feedbackClient } from '../http/feedback.client';
 import { store } from '../state/store';
 import { actions as userActions } from '../state/user/user.slice';
-import { feedbackSchema } from '../../../fira-commons';
+import { feedbackSchema } from '@fira-commons';
 
 const logger = createLogger('annotators.service');
 

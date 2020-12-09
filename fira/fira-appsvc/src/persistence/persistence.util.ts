@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import { ObjectLiteral } from '../../../fira-commons';
+import { ObjectLiteral } from '@fira-commons';
 
 export function failIfUndefined<T, U extends any[]>(cb: (...args: U) => Promise<T | undefined>) {
   return async function f(this: any, ...args: U) {

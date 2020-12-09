@@ -1,7 +1,7 @@
 import { Injectable, Scope } from '@nestjs/common';
 
 import { baseLogger, LogContext } from './base-logger';
-import { ObjectLiteral } from '../../../../fira-commons';
+import { ObjectLiteral } from '@fira-commons';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class TransientLogger {

@@ -1,4 +1,4 @@
-import { judgementsSchema } from '../../../fira-commons';
+import { judgementsSchema } from '@fira-commons';
 
 // fira-web exclusive enums
 export enum UserRole {

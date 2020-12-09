@@ -1,10 +1,5 @@
 import { appsvcHttpClient } from './fira-appsvc.client';
-import {
-  basePaths,
-  MgmtRequestor,
-  MgmtReqRes,
-  ExceptionHandler,
-} from '../../../fira-commons/src/rest-api';
+import { basePaths, MgmtRequestor, MgmtReqRes, ExceptionHandler } from '@fira-commons/src/rest-api';
 
 const request: MgmtRequestor = async (
   request: MgmtReqRes['request'],

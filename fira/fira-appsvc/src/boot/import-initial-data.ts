@@ -7,7 +7,7 @@ import * as config from '../config';
 import { TransientLogger } from '../commons/logger/transient-logger';
 import { AdminService } from '../admin/admin.service';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import { adminSchema, judgementsSchema, strings } from '../../../fira-commons';
+import { adminSchema, judgementsSchema, strings } from '@fira-commons';
 
 const COLUMN_USER_ID = 'user_id';
 const COLUMN_DOCUMENT_ID = 'doc_id';

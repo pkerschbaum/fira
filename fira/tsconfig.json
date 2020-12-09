@@ -3,7 +3,13 @@
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react"
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@fira-commons": ["./fira-commons"],
+      "@fira-commons/src/*": ["./fira-commons/src/*"],
+      "@fira-commons/database/*": ["./fira-commons/database/*"]
+    }
   },
   "references": [
     {

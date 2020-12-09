@@ -2,7 +2,7 @@ import * as moment from 'moment';
 
 import * as config from '../../config';
 import { LogContext } from './base-logger';
-import { ObjectLiteral } from '../../../../fira-commons';
+import { ObjectLiteral } from '@fira-commons';
 
 export const JsonLogger = {
   log(message: string, messageContext?: ObjectLiteral, logContext?: LogContext) {

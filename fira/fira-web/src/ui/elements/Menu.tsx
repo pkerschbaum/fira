@@ -7,7 +7,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import TextBox from './TextBox';
 import Stack from '../layouts/Stack';
 import { useUserActions } from '../../state/user/user.hooks';
-import { assertUnreachable } from '../../../../fira-commons';
+import { assertUnreachable } from '@fira-commons';
 
 type MenuEntry = {
   component: 'li' | 'MenuItem';

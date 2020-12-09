@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, BoxProps } from '@material-ui/core';
 
-import { assertUnreachable } from '../../../../fira-commons';
+import { assertUnreachable } from '@fira-commons';
 
 import { styles } from './TextBox.styles';
 import { commonStyles } from '../Common.styles';

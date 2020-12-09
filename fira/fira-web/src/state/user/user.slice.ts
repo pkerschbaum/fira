@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 import * as jwt from 'jsonwebtoken';
 
-import { assertUnreachable, JwtPayload } from '../../../../fira-commons';
+import { assertUnreachable, JwtPayload } from '@fira-commons';
 import { UserRole } from '../../typings/enums';
 
 type UserState = null | {

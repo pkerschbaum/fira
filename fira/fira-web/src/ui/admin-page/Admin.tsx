@@ -11,7 +11,7 @@ import SwitchInput from '../elements/forms/SwitchInput';
 import Stack from '../layouts/Stack';
 import { adminStories } from '../../stories/admin.stories';
 import { RootState } from '../../state/store';
-import { adminSchema, judgementsSchema } from '../../../../fira-commons';
+import { adminSchema, judgementsSchema } from '@fira-commons';
 
 import { styles } from './Admin.styles';
 import { commonStyles } from '../Common.styles';

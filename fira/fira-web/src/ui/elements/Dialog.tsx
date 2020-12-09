@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core';
 
 import Stack from '../layouts/Stack';
-import { strings } from '../../../../fira-commons';
+import { strings } from '@fira-commons';
 
 import { commonStyles } from '../Common.styles';
 

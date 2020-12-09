@@ -7,8 +7,8 @@ import { QueriesDAO } from '../persistence/daos/queries.dao';
 import { QueryVersionsDAO } from '../persistence/daos/query-versions.dao';
 import { JudgementPairsDAO } from '../persistence/daos/judgement-pairs.dao';
 import { ConfigsDAO } from '../persistence/daos/configs.dao';
-import { adminSchema, arrays } from '../../../fira-commons';
-import { PrismaClient } from '../../../fira-commons/database/prisma';
+import { adminSchema, arrays } from '@fira-commons';
+import { PrismaClient } from '@fira-commons/database/prisma';
 
 const IMPORT_CHUNK_SIZE = 1000;
 

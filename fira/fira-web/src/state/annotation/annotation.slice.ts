@@ -1,7 +1,7 @@
 import { createAction, createReducer } from '@reduxjs/toolkit';
 
 import { actions as userActions } from '../user/user.slice';
-import { judgementsSchema } from '../../../../fira-commons';
+import { judgementsSchema } from '@fira-commons';
 
 export enum JudgementPairStatus {
   TO_JUDGE = 'TO_JUDGE',

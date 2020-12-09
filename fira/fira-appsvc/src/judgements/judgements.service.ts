@@ -16,8 +16,8 @@ import { ConfigsDAO } from '../persistence/daos/configs.dao';
 import { UsersDAO } from '../persistence/daos/users.dao';
 import { JudgementStatus } from '../typings/enums';
 import { httpUtils } from '../utils/http.utils';
-import { adminSchema, judgementsSchema } from '../../../fira-commons';
-import { judgementGetPayload } from '../../../fira-commons/database/prisma';
+import { adminSchema, judgementsSchema } from '@fira-commons';
+import { judgementGetPayload } from '@fira-commons/database/prisma';
 
 const EXPORT_PAGE_SIZE = 200;
 

@@ -10,7 +10,7 @@ import AnnotationFinished from './finished-page/AnnotationFinished';
 import AnnotationEverythingAnnotated from './everything-annotated-page/AnnotationEverythingAnnotated';
 import { useUserState } from '../../state/user/user.hooks';
 import { useAnnotationState } from '../../state/annotation/annotation.hooks';
-import { assertUnreachable, routes } from '../../../../fira-commons';
+import { assertUnreachable, routes } from '@fira-commons';
 
 const AnnotationRouter: React.FC = () => {
   const { userAcknowledgedInfoPage, userAcknowledgedFinishedPage } = useUserState();

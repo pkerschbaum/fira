@@ -12,7 +12,7 @@ import { useMutateJudgement } from '../../../stories/judgement.stories';
 import { useKeyupHandler } from '../../util/events.hooks';
 import { RateLevels } from '../../../typings/enums';
 import { CustomError } from '../../../commons/custom-error';
-import { functions, judgementsSchema } from '../../../../../fira-commons';
+import { functions, judgementsSchema } from '@fira-commons';
 
 import { styles } from './AnnotationComponent.styles';
 import { commonStyles } from '../../Common.styles';

@@ -2,7 +2,7 @@
 /* tslint:disable no-console */
 
 import { CustomError } from './custom-error';
-import { ObjectLiteral, objects } from '../../../fira-commons';
+import { ObjectLiteral, objects } from '@fira-commons';
 
 export const createLogger = (context: string) => {
   const logWithContext = (

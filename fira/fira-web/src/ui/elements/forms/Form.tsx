@@ -6,7 +6,7 @@ import Button from '../Button';
 import TextBox from '../TextBox';
 import SelectInput from './SelectInput';
 import Stack from '../../layouts/Stack';
-import { assertUnreachable } from '../../../../../fira-commons';
+import { assertUnreachable } from '@fira-commons';
 
 import { styles } from './Form.styles';
 

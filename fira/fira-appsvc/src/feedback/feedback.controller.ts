@@ -5,11 +5,7 @@ import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { AuthGuard } from '../auth.guard';
 import { FeedbackService } from './feedback.service';
 import { extractJwtPayload } from '../utils/jwt.util';
-import {
-  basePaths,
-  submitFeedbackReqSchema,
-  SubmitFeedback,
-} from '../../../fira-commons/src/rest-api';
+import { basePaths, submitFeedbackReqSchema, SubmitFeedback } from '@fira-commons/src/rest-api';
 
 @ApiTags(basePaths.feedback)
 @Controller(basePaths.feedback)

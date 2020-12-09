@@ -3,7 +3,7 @@ import {
   feedback as DbFeedback,
   judgement_pair as DbJudgementPair,
   judgement as DbJudgement,
-} from '../../../../fira-commons/database/prisma';
+} from '@fira-commons/database/prisma';
 
 declare module 'knex/types/tables' {
   interface Tables {

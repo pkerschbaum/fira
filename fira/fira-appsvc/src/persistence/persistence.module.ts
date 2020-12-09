@@ -5,7 +5,7 @@ import * as config from '../config';
 import { TransientLogger } from '../commons/logger/transient-logger';
 import { KnexClient, KNEX_CLIENT } from './persistence.constants';
 import { PersistenceService } from './persistence.service';
-import { PrismaClient, PrismaClientOptions } from '../../../fira-commons/database/prisma';
+import { PrismaClient, PrismaClientOptions } from '@fira-commons/database/prisma';
 
 import { ConfigsDAO } from './daos/configs.dao';
 import { UsersDAO } from './daos/users.dao';

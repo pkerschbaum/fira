@@ -5,7 +5,7 @@ import {
   FeedbackReqRes,
   ExceptionHandler,
   SubmitFeedback,
-} from '../../../fira-commons/src/rest-api';
+} from '@fira-commons/src/rest-api';
 
 const request: FeedbackRequestor = async (
   request: FeedbackReqRes['request'],

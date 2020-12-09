@@ -25,7 +25,7 @@ import {
   preloadJudgementsSchema,
   SubmitJudgement,
   submitJudgementSchema,
-} from '../../../fira-commons/src/rest-api';
+} from '@fira-commons/src/rest-api';
 
 const judgementIdPathParam = 'judgementId' as const;
 

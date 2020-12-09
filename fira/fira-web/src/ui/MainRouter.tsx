@@ -12,7 +12,7 @@ import { useKeyupHandler } from './util/events.hooks';
 import { useQueryParams } from './util/routing.hooks';
 import { browserStorage } from '../browser-storage/browser-storage';
 import { UserRole } from '../typings/enums';
-import { assertUnreachable, routes } from '../../../fira-commons';
+import { assertUnreachable, routes } from '@fira-commons';
 
 // URL_REGEX taken from https://stackoverflow.com/a/26766402/1700319
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;

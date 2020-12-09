@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import d3 = require('d3');
 
 import { FeedbacksDAO } from '../persistence/daos/feedbacks.dao';
-import { feedbackSchema } from '../../../fira-commons';
+import { feedbackSchema } from '@fira-commons';
 
 @Injectable()
 export class FeedbackService {

@@ -8,7 +8,7 @@ import {
   actions as annotationActions,
   JudgementPairStatus,
 } from '../state/annotation/annotation.slice';
-import { judgementsSchema } from '../../../fira-commons';
+import { judgementsSchema } from '@fira-commons';
 
 const logger = createLogger('judgements.service');
 

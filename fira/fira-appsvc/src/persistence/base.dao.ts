@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../../fira-commons/database/prisma';
+import { PrismaClient } from '@fira-commons/database/prisma';
 
 export type AvailableEntities =
   | 'config'

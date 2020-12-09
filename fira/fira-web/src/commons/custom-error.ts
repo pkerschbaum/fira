@@ -1,4 +1,4 @@
-import { ObjectLiteral } from '../../../fira-commons';
+import { ObjectLiteral } from '@fira-commons';
 
 // https://stackoverflow.com/a/48342359/1700319
 export class CustomError extends Error {

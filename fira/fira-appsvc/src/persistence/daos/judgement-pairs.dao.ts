@@ -6,8 +6,8 @@ import { BaseDAO } from '../base.dao';
 import { KnexClient } from '../persistence.constants';
 import { transactional } from '../persistence.util';
 import { JudgementStatus } from '../../typings/enums';
-import { arrays } from '../../../../fira-commons';
-import { config, judgement_pair, PrismaClient } from '../../../../fira-commons/database/prisma';
+import { arrays } from '@fira-commons';
+import { config, judgement_pair, PrismaClient } from '@fira-commons/database/prisma';
 
 type ENTITY = 'judgement_pair';
 const ENTITY = 'judgement_pair';

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { BaseDAO } from '../base.dao';
-import { PrismaClient } from '../../../../fira-commons/database/prisma';
+import { PrismaClient } from '@fira-commons/database/prisma';
 
 type ENTITY = 'feedback';
 const ENTITY = 'feedback';

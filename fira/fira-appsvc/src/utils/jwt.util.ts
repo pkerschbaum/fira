@@ -1,7 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
-import { JwtPayload } from '../../../fira-commons';
+import { JwtPayload } from '@fira-commons';
 
 export function extractJwtPayload(authHeader: string): JwtPayload & { preferred_username: string } {
   const accessToken = /Bearer (.+)/.exec(authHeader)?.[1]!; // AuthGuard ensures that the token is present

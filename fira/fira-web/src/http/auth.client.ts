@@ -1,7 +1,7 @@
 import { appsvcHttpClient } from './fira-appsvc.client';
 import { createLogger } from '../commons/logger';
 import { HttpException } from './http.exception';
-import { promises } from '../../../fira-commons';
+import { promises } from '@fira-commons';
 import {
   basePaths,
   AuthRequestor,
@@ -9,7 +9,7 @@ import {
   ExceptionHandler,
   Login,
   Refresh,
-} from '../../../fira-commons/src/rest-api';
+} from '@fira-commons/src/rest-api';
 
 const REFRESH_RETRY_COUNT = 5;
 const REFRESH_RETRY_DELAY = 3 * 1000; // 3 seconds

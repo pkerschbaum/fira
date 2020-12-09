@@ -3,7 +3,7 @@ import * as clc from 'cli-color';
 import * as moment from 'moment';
 
 import { LogContext } from './base-logger';
-import { ObjectLiteral } from '../../../../fira-commons';
+import { ObjectLiteral } from '@fira-commons';
 
 const yellow = clc.xterm(3);
 const orange = clc.xterm(209);

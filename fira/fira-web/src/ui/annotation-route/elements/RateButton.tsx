@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, ButtonBase } from '@material-ui/core';
 
 import TextBox from '../../elements/TextBox';
-import { judgementsSchema } from '../../../../../fira-commons';
+import { judgementsSchema } from '@fira-commons';
 
 import { styles } from './RateButton.styles';
 import { commonStyles } from '../../Common.styles';

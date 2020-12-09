@@ -3,13 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { ZodValidationPipe } from '../commons/zod-schema-validation.pipe';
 import { IdentityManagementService } from '../identity-management/identity-management.service';
-import {
-  basePaths,
-  Login,
-  loginSchema,
-  Refresh,
-  refreshSchema,
-} from '../../../fira-commons/src/rest-api';
+import { basePaths, Login, loginSchema, Refresh, refreshSchema } from '@fira-commons/src/rest-api';
 
 @ApiTags(basePaths.auth)
 @Controller(basePaths.auth)
