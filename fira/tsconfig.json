@@ -10,10 +10,5 @@
       "@fira-commons/src/*": ["./fira-commons/src/*"],
       "@fira-commons/database/*": ["./fira-commons/database/*"]
     }
-  },
-  "references": [
-    {
-      "path": "./fira-commons"
-    }
-  ]
+  }
 }

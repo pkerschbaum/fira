@@ -6,12 +6,10 @@
     "incremental": true,
     "strict": true,
     "rootDir": ".",
-    "composite": true,
     "outDir": "./dist",
     "noErrorTruncation": true,
     "downlevelIteration": true,
     "jsx": "react"
   },
-  "include": ["**/*", "**/*.js"],
-  "references": []
+  "include": ["**/*", "**/*.js"]
 }
