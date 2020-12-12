@@ -11,4 +11,8 @@ export const styles = {
     width: 90%;
     box-shadow: 0px 0px 5px 1px #a5a5a5;
   `,
+
+  button: css`
+    flex-shrink: 0;
+  `,
 };

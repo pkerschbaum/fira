@@ -111,7 +111,7 @@ const AnnotationInfo: React.FC = () => {
           <img key={idx} css={styles.infoImage} src={entry.content} alt={entry.alt} />
         ),
       )}
-      <Button variant="contained" onClick={onAcknowledge}>
+      <Button variant="contained" onClick={onAcknowledge} css={styles.button}>
         Let's get started!
       </Button>
     </Stack>
