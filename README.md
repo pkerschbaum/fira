@@ -33,7 +33,6 @@ The parameter `FIRA_APPSVC_DATA_DIRECTORY` must match the absolute path to the d
 # --- users and credentials ---
 ADMIN_USER=admin
 ADMIN_PASSWORD=admin
-ADMIN_EMAIL=admin@domain.com
 FIRA_PERSISTENT_DB_USER=fira
 FIRA_PERSISTENT_DB_PASSWORD=password
 FIRA_PERSISTENT_DB_DATABASENAME=fira
@@ -42,7 +41,7 @@ KEYCLOAK_DB_USER=keycloak
 KEYCLOAK_DB_PASSWORD=password
 
 # --- variables for connection (externally exposed ports, i.e. ports mapped on host system) ---
-FIRA_APPSVC_PUBLIC_PORT=8080
+FIRA_APPSVC_PUBLIC_PORT=80
 
 # --- docker volumes for backend ---
 FIRA_APPSVC_DATA_DIRECTORY=/c/data/fira-data/
