@@ -151,12 +151,7 @@ const Form: <T extends FormikValues>(p: FormProps<T>) => React.ReactElement<Form
               </li>
             </ul>
           )}
-          <Button
-            variant="contained"
-            type="submit"
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-          >
+          <Button variant="contained" type="submit" isLoading={isSubmitting}>
             Continue
           </Button>
         </Stack>

@@ -83,12 +83,7 @@ const Admin: React.FC = () => {
                 />
                 <SwitchInput name="rotateDocumentText" label="Rotate Document Text" />
               </Stack>
-              <Button
-                variant="outlined"
-                type="submit"
-                disabled={isSubmitting}
-                isLoading={isSubmitting}
-              >
+              <Button variant="outlined" type="submit" isLoading={isSubmitting}>
                 Update Config
               </Button>
             </Stack>

@@ -11,7 +11,7 @@ type ButtonProps = MuiButtonProps & {
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, isLoading, ...props }, ref) => (
-    <MuiButton ref={ref} {...props}>
+    <MuiButton ref={ref} disabled={isLoading} {...props}>
       {!isLoading ? (
         children
       ) : (
