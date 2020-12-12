@@ -1,6 +1,6 @@
 {
   "name": "fira-web",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "private": true,
   "dependencies": {
     "@emotion/babel-preset-css-prop": "^10.0.27",
@@ -56,7 +56,7 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "proxy": "http://localhost",
+  "proxy": "http://localhost:8080",
   "browserslist": {
     "production": [
       ">0.2%",

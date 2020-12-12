@@ -9,7 +9,7 @@ dotenv.config();
 const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
 export const application = {
-  version: '1.7.1',
+  version: '1.7.2',
   port: process.env.FIRA_APPSVC_INTERNAL_PORT ?? 80,
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
