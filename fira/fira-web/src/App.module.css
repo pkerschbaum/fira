@@ -14,6 +14,10 @@
   background-color: white;
 }
 
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* touch devices (primary input is coarse) */
 @media (pointer: coarse) {
   * {
