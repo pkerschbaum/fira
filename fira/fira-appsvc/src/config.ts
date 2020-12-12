@@ -10,7 +10,7 @@ const URL_REGEX = /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/;
 
 export const application = {
   version: '1.7.1',
-  port: 80,
+  port: process.env.FIRA_APPSVC_INTERNAL_PORT ?? 80,
   judgementsPreloadSize: 3,
   splitRegex: /([ .\-,;]+?)/g,
   environment: process.env.NODE_ENV === 'development' ? 'development' : 'production',
