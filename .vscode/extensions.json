@@ -12,7 +12,8 @@
     "stylelint.vscode-stylelint",
     "ms-vscode.vscode-typescript-tslint-plugin",
     "exiasr.hadolint",
-    "jpoissonnier.vscode-styled-components"
+    "jpoissonnier.vscode-styled-components",
+    "prisma.prisma"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []
