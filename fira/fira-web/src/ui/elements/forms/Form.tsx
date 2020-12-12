@@ -47,6 +47,7 @@ const TextareaInput: React.FC<
       {...field}
       variant="outlined"
       multiline
+      minRows={3}
       css={styles.input}
       inputProps={props}
     />
