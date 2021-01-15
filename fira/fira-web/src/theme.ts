@@ -20,6 +20,8 @@ declare module '@material-ui/core/styles/createMuiTheme' {
 }
 
 export const createTheme = (locale: Localization) => {
+  const defaultTheme = createMuiTheme(undefined, locale);
+
   const primaryColor = '#202932';
 
   const theme: ThemeOptions = {
@@ -37,13 +39,13 @@ export const createTheme = (locale: Localization) => {
 
         styleOverrides: {
           tooltip: {
-            backgroundColor: 'black',
-            boxShadow: `0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)`, // theme.shadows[1]
+            backgroundColor: defaultTheme.palette.common.black,
+            boxShadow: defaultTheme.shadows[1],
             fontSize: 11,
           },
 
           arrow: {
-            color: 'black',
+            color: defaultTheme.palette.common.black,
           },
         },
       },

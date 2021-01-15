@@ -16,21 +16,19 @@ import { strings } from '@fira-commons';
 
 import { commonStyles } from '../Common.styles';
 
-export type DialogProps<FormValues extends {}> = {
+export type DialogProps = {
   id: string; // dialog id
   open: boolean;
   title?: string;
   confirmationButtonLabel?: string;
   hideAbortButton?: boolean;
   content?: React.ReactNode;
-  onClose?: (
-    arg: { chosenOption: 'CANCEL' } | { chosenOption: 'OK'; dialogResult: FormValues },
-  ) => void | Promise<void>;
+  onClose?: (arg: { chosenOption: 'CANCEL' } | { chosenOption: 'OK' }) => void | Promise<void>;
   children?: React.ReactNode;
   mDialogProps?: Omit<MDialogProps, 'open'>;
 };
 
-function Dialog<FormValues extends {}>(props: DialogProps<FormValues>) {
+function Dialog(props: DialogProps) {
   const {
     id,
     title,
@@ -45,10 +43,10 @@ function Dialog<FormValues extends {}>(props: DialogProps<FormValues>) {
 
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleOk = async (value: FormValues) => {
+  const handleOk = async () => {
     if (onClose !== undefined) {
       setIsClosing(true);
-      await onClose({ chosenOption: 'OK', dialogResult: value });
+      await onClose({ chosenOption: 'OK' });
       setIsClosing(false);
     }
   };
@@ -89,10 +87,7 @@ function Dialog<FormValues extends {}>(props: DialogProps<FormValues>) {
               </Button>
             )}
             {showConfirmationButton && (
-              <Button
-                autoFocus={hideAbortButton}
-                onClick={() => handleOk((undefined as any) as FormValues)}
-              >
+              <Button autoFocus={hideAbortButton} onClick={() => handleOk()}>
                 {confirmationButtonLabel}
               </Button>
             )}

@@ -1,5 +1,6 @@
 import { JsonCompatible, ObjectLiteral } from './types.util';
 
+// https://stackoverflow.com/a/32108184 (version "Pre-ECMA 5")
 export function isEmpty(obj: ObjectLiteral) {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
