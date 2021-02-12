@@ -100,7 +100,7 @@ const knexProvider = {
               });
             }
           },
-          deprecate: (method, alternative) => logger.debug(`deprecated`, { method, alternative }),
+          deprecate: (method, alternative) => logger.warn(`deprecated`, { method, alternative }),
           warn: (message) => logger.warn(message),
           error: (message) => logger.error(message),
         },

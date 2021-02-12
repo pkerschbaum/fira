@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from '@fira-commons';
 
 export function extractJwtPayload(authHeader: string): JwtPayload & { preferred_username: string } {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
   const accessToken = /Bearer (.+)/.exec(authHeader)?.[1]!; // AuthGuard ensures that the token is present
 
   // extract jwt data
